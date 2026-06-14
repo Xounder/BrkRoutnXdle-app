@@ -1,0 +1,5 @@
+DONE: Created code-validator.plugin.ts using tool.execute.after hook — validates .ts/.tsx (tsc), .js (node --check), .py (py_compile), .json (JSON.parse) after AI write/edit operations.
+WRONG: No TypeScript installed in .opencode/ to verify plugin syntax; npx tsc --noEmit validates entire project (slow, not per-file); no runtime test without live OpenCode.
+IMPROV: Add debouncing for tsc calls; detect tsconfig.json before running; extend validators for .rs, .go, .css, .html.
+LEARN: Bun $ shell handles cross-platform translation; input.args.filePath carries edited path; plugin naming *.plugin.ts with export const is required.
+NEXT: Test plugin in live OpenCode session; add more validators if needed; consider per-file type checking via tsc --isolatedModules.

@@ -1,0 +1,138 @@
+pipeline:
+  name: "<context>"
+  status: "in_progress" # pending | in_progress | completed | failed
+
+  started_at: "<current-date-time>"
+  updated_at: "<current-date-time>"
+
+  current_step: "product-manager"
+  current_agent: "product-manager"
+
+  steps:
+
+    product-manager:
+      status: pending
+      notes: null
+      updated_at: null
+      errors: []
+      concerns: []
+
+    planning-analyst:
+      status: pending
+      notes: null
+      updated_at: null
+      errors: []
+      concerns: []
+
+    tech-lead:
+      status: pending
+      notes: null
+      updated_at: null
+      errors: []
+      concerns: []
+
+    senior-frontend:
+      status: pending
+      notes: null
+      updated_at: null
+      errors: []
+      concerns: []
+
+      tasks: []
+
+    senior-backend:
+      status: pending
+      notes: null
+      updated_at: null
+      errors: []
+      concerns: []
+
+      tasks: []
+
+    qa-frontend:
+      status: pending
+      notes: null
+      updated_at: null
+      errors: []
+      concerns: []
+
+    qa-backend:
+      status: pending
+      notes: null
+      updated_at: null
+      errors: []
+      concerns: []
+
+tasks:
+
+  - id: TASK-01
+    title: Create User Endpoint
+
+    owner: senior-backend
+
+    status: pending
+
+    depends_on: []
+
+    notes: null
+
+    updated_at: null
+
+  - id: TASK-02
+    title: Create User Screen
+
+    owner: senior-frontend
+
+    status: pending
+
+    depends_on:
+      - TASK-01
+
+    notes: API contract defined
+
+    updated_at: null
+
+history:
+
+  - timestamp: "<current-date-time>"
+
+    agent: "product-manager"
+
+    status: "completed"
+
+    summary:
+      changes:
+        - Created 3 epics
+
+      validations:
+        - Epic structure validated
+
+    concerns: []
+
+    errors: []
+
+handoff:
+
+  context: "<context>"
+
+  selected_approach: null
+
+  epic_summary: null
+
+  planning_summary: null
+
+  task_summary: null
+
+  acceptance_criteria: []
+
+  dependencies: []
+
+  additional_context: []
+
+resume:
+
+  last_completed_agent: null
+
+  last_completed_step: null
+
+  recovery_required: false
