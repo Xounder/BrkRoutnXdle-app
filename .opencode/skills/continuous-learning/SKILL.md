@@ -27,7 +27,8 @@ Use this skill after `learning-improvement` in the STOP hook. It is the **second
     - Check if shell restrictions blocked commands — agent docs may need allowed-command documentation
     - Check if the orchestrator violated constraints (fixed code, ran build directly) — SKILL.md may need stronger rules
     - Check if new `.md` files were created in `.opencode/` (excluding `plan/`) — `docs-catalog.md` and `INDEX.md` need updating
-3. **Create change plan** — list files and proposed changes, with justification based on session learnings. **Do NOT edit any files during this step** — planning only.
+ 3. **Create change plan** — list files and proposed changes, with justification based on session learnings. **Do NOT edit any files during this step** — planning only.
+    - **If the evaluation contains WRONG or IMPROV items, you MUST propose at least one doc improvement to prevent recurrence.** Never conclude "no changes needed" when failures exist. Examples: missing convention in AGENTS.md, unclear rule in a SKILL.md, incomplete checklist in an agent doc.
 4. **Present plan to the user** — display clearly in chat using the template format. **Do NOT edit any files during this step** — presentation only:
    ```
    ## Doc update plan
@@ -60,7 +61,7 @@ Use this skill after `learning-improvement` in the STOP hook. It is the **second
 - **ALWAYS present detailed change proposal to user and wait for explicit confirmation before modifying any file**
 - **Change proposal MUST use the <changes> template format**
 - Always justify each proposed change based on the session evaluation
-- If no changes are needed, inform the user and proceed
+- If no changes are needed **and the evaluation has no WRONG or IMPROV items**, inform the user and proceed. If WRONG or IMPROV items exist, you MUST propose a change — do not skip.
 - After applying changes, **do not save session** — this is the responsibility of the `session-save` skill
 - **AFTER analyzing existing docs, CHECK if session learnings indicate need for NEW skill/agent/document creation**
 - **ALWAYS consult .opencode/docs-catalog.md FIRST to verify no existing file covers the need and identify correct location for new file**

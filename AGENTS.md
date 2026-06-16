@@ -59,6 +59,16 @@ When a documentation file exceeds this limit:
 3. Update all references and navigation paths
 4. Preserve the original document as the entry point whenever possible
 
+### Commit Convention
+
+Before making any commit, read:
+
+```text
+.opencode/architecture/commit-pattern.md
+```
+
+All commits must follow the pattern defined there. If a commit fails validation, consult the file again before retrying.
+
 ## Process Handling
 
 Never:
