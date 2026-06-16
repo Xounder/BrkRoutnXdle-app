@@ -1,0 +1,31 @@
+/* BrkRoutnXdle generated events */
+.fc-event.brk-generated {
+  border-radius: 8px;
+  border: none;
+}
+
+.fc-event.brk-generated:hover {
+  filter: brightness(1.1);
+}
+
+/* Preview events (teal/translucent) */
+.fc-event.brk-preview {
+  border-radius: 8px;
+  border: 2px dashed #0d9488;
+  opacity: 0.9;
+}
+
+/* Completed events */
+.fc-event.brk-completed {
+  opacity: 0.7;
+}
+
+.fc-event.brk-completed::after {
+  content: " ✓";
+}
+
+/* External events */
+.fc-event.brk-external {
+  border-radius: 8px;
+  opacity: 0.8;
+}

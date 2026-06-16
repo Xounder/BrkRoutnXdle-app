@@ -8,6 +8,10 @@ After every agent execution:
 4. Save concerns.
 5. Save history entry.
 
+Examples of what to record:
+- **errors**: build failures, runtime crashes, test failures, compilation errors
+- **concerns**: shell restrictions, ambiguous specifications, tool limitations, environment issues
+
 If execution stops unexpectedly:
 
 ```text

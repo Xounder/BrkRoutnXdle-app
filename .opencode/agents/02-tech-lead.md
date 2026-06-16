@@ -233,6 +233,13 @@ See [agent-response-format.md](../skills/delivery-pipeline/references/agent-resp
 
 See [Task Rules](#task-rules) above — all dependency and parallelism rules are defined there.
 
+## Retry Limit (failure escalation)
+
+If the same action fails 3 consecutive times, the subagent MUST NOT retry. Instead, it must return to the orchestrator/agent that created it, reporting:
+1. Which action failed
+2. The error reason observed
+3. That it cannot proceed further
+
 ## Constraints
 
 - Always maximize safe parallelism

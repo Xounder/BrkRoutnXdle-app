@@ -121,13 +121,7 @@ Do not inspect any files before the skill completes.
 
 This requirement applies to every new task, even when the requested file path is already known.
 
-Purpose:
-
-* Build an accurate understanding of project structure
-* Identify relevant modules, folders, and dependencies
-* Reduce unnecessary file reads
-* Improve navigation accuracy
-* Use tree-sitter indexing before investigation
+> **Exception:** Pipeline subagents (Senior Frontend, Senior Backend, QA Frontend, QA Backend) dispatched by the delivery-pipeline orchestrator MUST NOT run `codebase-analysis`. The orchestrator provides all required context (file paths, code snippets, dependency info). Running the skill again is wasteful and may interfere with the pipeline flow.
 
 ### Codebase Analysis Mode
 
@@ -183,6 +177,9 @@ The `codebase-analysis` skill is always the first discovery step.
 
 Only after the skill completes may the agent inspect specific files, documentation, or implementation details.
 
+## External files restriction
+
+Never open, read, write, or request files outside this project directory. All operations must stay within the project root.
 
 ## Agent rules
 
@@ -204,6 +201,20 @@ The shell environment rejects the following patterns:
 - **Node/tsx execution**: scripts must be inside the project directory with `.ts`, `.js`, or `.tsx` extension; the script path is resolved from the project root (not from any `workdir` override); flags like `-e`, `--eval`, `--require` are blocked
 - **File operations**: all file paths must resolve inside the project root
 - **Curl**: only allowed to `localhost` URLs
+
+### Standard Response Format
+All subagents MUST return results using the [standard agent response format](.opencode/skills/delivery-pipeline/references/agent-response-format.md):
+- `summary.changes` — files created or modified
+- `summary.validations` — build/lint/test results
+- `concerns` — any issues, blockers, or deviations
+- `errors` — failures encountered
+
+If a subagent does not follow this format, the orchestrator must re-call it specifying the required format.
+
+### Retry Limit (failure escalation)
+All subagents dispatched by the orchestrator implement a **3-attempt retry limit**. If the same action fails 3 consecutive times, the subagent must stop and report to the orchestrator which action failed, the error reason, and that it cannot proceed.
+
+The orchestrator must then re-dispatch the subagent with appropriate error context — never attempt to resolve the failure directly.
 
 ## References
 

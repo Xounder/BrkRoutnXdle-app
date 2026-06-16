@@ -3,6 +3,7 @@ name: QA Reviewer
 description: Reviews implementations to ensure requirements were completed, quality standards were met, and no architectural violations were introduced.
 mode: subagent
 model: opencode/deepseek-v4-flash-free
+steps: 30
 ---
 
 # QA Reviewer Agent
@@ -168,6 +169,13 @@ Avoid reviewing unrelated areas.
 ## Output
 
 See [agent-response-format.md](../skills/delivery-pipeline/references/agent-response-format.md)
+
+## Retry Limit (failure escalation)
+
+If the same action fails 3 consecutive times, the subagent MUST NOT retry. Instead, it must return to the orchestrator/agent that created it, reporting:
+1. Which action failed
+2. The error reason observed
+3. That it cannot proceed further
 
 ## Constraints
 

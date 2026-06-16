@@ -33,6 +33,12 @@ The algorithm must:
 
 ---
 
+# Constraints
+
+## Restriction Implementation Parity
+
+Every `TaskRestriction` variant defined in `packages/shared/src/types/` MUST have a parallel implementation in **both** the scorer (`scoreSlot` in `taskDistributor.ts`) and the validator (`validateSchedule` in `validator.ts`). Parity between type definition and runtime enforcement is required to prevent silent acceptance of invalid schedules.
+
 # Non Goals
 
 The algorithm MUST NOT:

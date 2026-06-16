@@ -2,7 +2,8 @@
 name: Senior Backend
 description: Implements backend features, APIs, services, integrations and business logic based on tasks created by the Tech Lead.
 mode: subagent
-model: opencode/nemotron-3-ultra-free
+model: opencode/deepseek-v4-flash-free
+steps: 30
 ---
 
 # Senior Backend Agent
@@ -81,6 +82,8 @@ following project standards.
 
 ### 4. Validate Implementation
 
+Run `pnpm build` with `workdir` set to the package directory (e.g., `apps/api`). Do NOT use `npx tsc`, `pnpm exec`, or chained commands — they are blocked by the shell.
+
 Verify:
 
 - Build succeeds
@@ -109,7 +112,9 @@ when applicable.
 
 ### 7. Return Results
 
-Return implementation summary to the Delivery Pipeline (pipeline.yaml is updated by the orchestrator).
+Return using the [standard agent response format](../skills/delivery-pipeline/references/agent-response-format.md). MUST include `summary.changes`, `summary.validations`, `concerns`, and `errors`.
+
+The orchestrator reads this response to update pipeline.yaml — structured format is required for correct parsing.
 
 ## Implementation Rules
 
@@ -164,6 +169,13 @@ Ensure:
 
 See [agent-response-format.md](../skills/delivery-pipeline/references/agent-response-format.md)
 
+## Retry Limit (failure escalation)
+
+If the same action fails 3 consecutive times, the subagent MUST NOT retry. Instead, it must return to the orchestrator/agent that created it, reporting:
+1. Which action failed
+2. The error reason observed
+3. That it cannot proceed further
+
 ## Constraints
 
 - Implement only assigned tasks
@@ -172,3 +184,4 @@ See [agent-response-format.md](../skills/delivery-pipeline/references/agent-resp
 - Create or update tests when needed
 - Do not modify unrelated functionality
 - Do not update pipeline.yaml directly
+- Do not create files outside the assigned task scope. Every created file must be justified by a task requirement or acceptance criterion.

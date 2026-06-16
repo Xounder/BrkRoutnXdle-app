@@ -88,6 +88,23 @@ Responsible for:
 * Maintaining execution history
 * Supporting workflow recovery
 
+### Orchestrator Must Never Do Agent Work
+
+The orchestrator must **never** implement, write, or modify source code directly. Its sole responsibility is dispatching agents, managing state, and passing context.
+
+If an agent:
+- Returns an error → re-call the same agent with the error context
+- Returns a partial result → re-call to complete the remaining work
+- Returns non-standard format → re-call with format requirements
+- Asks a question → respond to the agent directly (do not resolve it yourself)
+- Times out → verify output dir; if files were created, mark done; otherwise re-call with higher timeout
+
+**Never fix agent output yourself.** If an agent's code has a bug or build error, re-call the agent with the error details. Do not edit the agent's files, run build commands, or patch the code manually.
+
+**Never run validation commands yourself.** Build, lint, and typecheck commands are the responsibility of subagents and QA. The orchestrator only dispatches agents and updates pipeline state.
+
+If the orchestrator needs to make any code change, it must dispatch an agent to do it.
+
 ### Information Handoff
 
 The orchestrator must provide agents with all available context whenever possible.
@@ -213,16 +230,20 @@ The orchestrator must maximize parallel execution whenever dependencies allow.
 
 ### Parallel Execution Phase
 
-Dispatch one or more Senior Frontend/Backend agents when independent frontend/backend tasks are available.
+Dispatch **multiple** Senior Frontend/Backend agents simultaneously when independent tasks are available. Do not limit to one agent per role — if 3 frontend tasks are independent, create 3 Senior Frontend agents in parallel. Each agent receives exactly one task.
 
 Pass:
 
-* Assigned tasks
+* Assigned task (one per agent)
 * Acceptance criteria
 * Relevant context
 * Dependency information
+* Task file path for exact step-by-step code
+* Standard response format requirement — instruct the agent to return using the [standard agent response format](references/agent-response-format.md)
 
 Update pipeline after every completed task.
+
+**Important: one agent per task** — never assign multiple tasks to a single agent if they can run in parallel.
 
 ### QA Phase
 
@@ -300,6 +321,17 @@ Examples:
 [ ] TASK-01 Create User Endpoint
 [X] TASK-02 Create User Screen
 
+Errors and concerns examples:
+
+```
+errors:
+  - "Build failed (TS error: info.event.revert() possibly undefined)"
+  - "Subagent created files outside task scope (test helper script)"
+concerns:
+  - "Shell blocked npx tsc — subagent used pnpm build workdir instead"
+  - "Subagent could not verify lint (no lint script configured)"
+```
+
 ## Standard Agent Response Format
 
 See [references/agent-response-format.md](references/agent-response-format.md)
@@ -320,3 +352,10 @@ See [references/task-tracking.md](references/task-tracking.md)
 * QA must validate implementation against task requirements and git diff.
 * Respect project boundaries and conventions.
 * Never access files outside the project root.
+* **Never do agent work** — the orchestrator must not write, edit, or implement source code. Only dispatch agents.
+* **One task per agent dispatch** — never assign multiple tasks to a single agent instance. Create N agents for N independent tasks.
+* **On error, re-call the agent** — never attempt to fix agent work manually. Re-dispatch with error context.
+* **Record subagent concerns** — every error, concern, and deviation returned by a subagent must be recorded in the pipeline state under the appropriate step's `errors` or `concerns` array.
+* **Enforce standard response format** — if a subagent does not follow the [standard agent response format](references/agent-response-format.md), re-call it with the format requirement. Do not parse ad-hoc responses.
+* **Never run validation or build** — the orchestrator does not execute build, lint, typecheck, or test commands. That is the exclusive responsibility of subagents and QA.
+* **Never create test/support files** — subagents must not create auxiliary files outside their task scope. Every file must be justified by a task requirement.

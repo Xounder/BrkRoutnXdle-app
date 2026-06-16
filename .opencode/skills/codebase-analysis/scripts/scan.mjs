@@ -14,10 +14,12 @@ const SCAN_MODES = {
   implementation: {
     label: 'Implementation',
     includeDirs: [
-      'apps/frontend/src',
-      'apps/backend/src',
-      'packages/types/src',
-      'packages/utils/src',
+      'apps/web/src',
+      'apps/api/src',
+      'packages/shared/src',
+      'packages/domain/src',
+      'packages/calendar/src',
+      'packages/ui/src',
     ],
     extensions: ['.ts', '.tsx'],
     excludePatterns: [
@@ -578,8 +580,7 @@ function buildImplementationReport(allFiles) {
     }
 
     const parts = file.relPath.split('/');
-    const pkg = parts[1] === 'frontend' ? 'frontend'
-      : parts[1] === 'backend' ? 'backend'
+    const pkg = parts[0] === 'apps' ? `apps/${parts[1]}`
       : parts[0] === 'packages' ? `packages/${parts[1]}`
       : 'other';
 
