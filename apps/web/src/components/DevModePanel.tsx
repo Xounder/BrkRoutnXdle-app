@@ -1,26 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 
 interface DevModePanelProps {
   isOpen: boolean;
   onClose: () => void;
+  enabled: boolean;
+  token: string | null;
+  onToggleEnabled: (enabled: boolean) => void;
+  onUpdateToken: (token: string) => void;
 }
 
-export function DevModePanel({ isOpen, onClose }: DevModePanelProps) {
-  const [token, setToken] = useState(() =>
-    sessionStorage.getItem("brkroutnxdle:devToken") ?? "",
-  );
-  const [enabled, setEnabled] = useState(() =>
-    sessionStorage.getItem("brkroutnxdle:devMode") === "true",
-  );
-
-  useEffect(() => {
-    if (enabled && token) {
-      sessionStorage.setItem("brkroutnxdle:devToken", token);
-    } else {
-      sessionStorage.removeItem("brkroutnxdle:devToken");
-    }
-    sessionStorage.setItem("brkroutnxdle:devMode", String(enabled));
-  }, [enabled, token]);
+export function DevModePanel({ isOpen, onClose, enabled, token, onToggleEnabled, onUpdateToken }: DevModePanelProps) {
+  const [draft, setDraft] = useState(token ?? "");
 
   if (!isOpen) return null;
 
@@ -58,7 +48,7 @@ export function DevModePanel({ isOpen, onClose }: DevModePanelProps) {
         <input
           type="checkbox"
           checked={enabled}
-          onChange={(e) => setEnabled(e.target.checked)}
+          onChange={(e) => onToggleEnabled(e.target.checked)}
         />
         <span>Enable Dev Mode Bypass</span>
       </label>
@@ -69,8 +59,11 @@ export function DevModePanel({ isOpen, onClose }: DevModePanelProps) {
             OAuth Playground Token
           </label>
           <textarea
-            value={token}
-            onChange={(e) => setToken(e.target.value)}
+            value={draft}
+            onChange={(e) => {
+              setDraft(e.target.value);
+              e.target.value && onUpdateToken(e.target.value);
+            }}
             placeholder="Paste your Google OAuth Playground token here..."
             rows={3}
             style={{
@@ -83,9 +76,24 @@ export function DevModePanel({ isOpen, onClose }: DevModePanelProps) {
               resize: "none",
             }}
           />
-          <p style={{ fontSize: "12px", color: "#888", marginTop: "8px" }}>
-            Token is stored in sessionStorage and sent as X-Dev-Access-Token header.
-          </p>
+          <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
+            <button
+              onClick={() => location.reload()}
+              style={{
+                flex: 1,
+                padding: "8px 16px",
+                fontSize: "13px",
+                fontWeight: 700,
+                background: "#2BA8A2",
+                border: "none",
+                borderRadius: "8px",
+                color: "#fff",
+                cursor: "pointer",
+              }}
+            >
+              Recarregar e aplicar
+            </button>
+          </div>
         </div>
       )}
     </div>

@@ -40,6 +40,20 @@ authRouter.get("/google/callback", async (req, res: Response) => {
 });
 
 authRouter.get("/me", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+  // Dev mode bypass
+  if (req.userId === "dev-user") {
+    res.json({
+      success: true,
+      data: {
+        id: "dev-user",
+        email: "dev@localhost",
+        name: "Dev User",
+        picture: undefined,
+      },
+    });
+    return;
+  }
+
   const token = req.cookies?.session_token;
   const session = getSession(token);
 

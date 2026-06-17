@@ -115,6 +115,10 @@ This starts everything in parallel:
 
 Uses a token from [Google OAuth Playground](https://developers.google.com/oauthplayground) to skip the full OAuth flow. Useful for frontend-only development.
 
+No Playground, para o bypass, basta selecionar apenas:
+- https://www.googleapis.com/auth/calendar
+- https://www.googleapis.com/auth/calendar.events
+
 **Steps:**
 
 1. Open [Google OAuth Playground](https://developers.google.com/oauthplayground)

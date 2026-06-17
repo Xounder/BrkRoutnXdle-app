@@ -1,6 +1,6 @@
 ---
 name: workflow-router
-description: Classifies incoming requests and selects the appropriate workflow entry point (Product Manager, Planning Analyst, or Tech Lead) based on codebase presence, requirement clarity, complexity, scope, and planning needs.
+description: Classifies incoming requests and selects the appropriate workflow entry point (Solution Designer, Planning Analyst, or Tech Lead) based on codebase presence, requirement clarity, complexity, scope, and planning needs.
 ---
 
 # Workflow Router Skill
@@ -20,34 +20,38 @@ flowchart LR
 
 A[User Request] --> B{Codebase Exists?}
 
-B -->|No| PM[Product Manager]
+B -->|No| SD[Solution Designer]
 
 B -->|Yes| C{Request Type}
 
-C -->|Idea / Undefined Requirements| PM
+C -->|Idea / Undefined Requirements| SD
 
-C -->|Medium or Large Change| PA[Planning Analyst]
+C -->|Implementation Analysis| PA[Planning Analyst]
 
 C -->|Small Well Defined Change| TL[Tech Lead]
 ```
 
 ## Routing Rules
 
-### Route to Product Manager
+### Route to Solution Designer
 
 Use when:
 
 - No codebase exists
 - Requirements are unclear
 - User provides only a high-level idea
-- MVP definition is required
-- Epics need to be created
+- Design exploration is needed
+- Multiple approaches need evaluation
+
+When a codebase exists, the pipeline automatically chains Planning Analyst after Solution Designer
+to validate design decisions against the actual code.
 
 Examples:
 
 - "I want to build a school system"
 - "I have an idea for an app"
-- "Help me define what should be built"
+- "Help me design the approach for X"
+- "What are the options for implementing Y?"
 
 ### Route to Planning Analyst
 
@@ -58,7 +62,7 @@ Use when:
 - User requests feasibility evaluation
 - User requests architectural guidance
 - User requests medium or large changes
-- Multiple implementation approaches exist
+- Implementation approach is known and only feasibility/impact analysis is needed
 
 Examples:
 
@@ -131,7 +135,7 @@ Planning Analyst
 Return:
 
 ```yaml
-route: product-manager | planning-analyst | tech-lead
+route: solution-designer | planning-analyst | tech-lead
 
 reason: "<why the route was selected>"
 
@@ -143,10 +147,10 @@ complexity: small | medium | large
 - Never create files
 - Never modify source code
 - Never execute implementation tasks
-- Never generate epics
+- Never generate design documents
 - Never generate planning documents
 - Never generate technical tasks
 - Only classify and route requests
 - Prefer Tech Lead when planning is unnecessary
-- Prefer Planning Analyst when multiple viable approaches exist
-- Prefer Product Manager when requirements are incomplete
+- Prefer Planning Analyst when the implementation goal is clear and only feasibility/impact analysis is needed
+- Prefer Solution Designer when requirements are incomplete, design exploration is needed, or no codebase exists

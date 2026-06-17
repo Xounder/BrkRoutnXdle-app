@@ -6,7 +6,7 @@ pipeline:
   current_step: completed
   current_agent: null
   steps:
-    product-manager:
+     solution-designer:
       status: completed
       notes: "Analisou 20 features V1 e criou 7 epics. Análise completa disponível em plan/documentation-analysis/epics/index.md"
       updated_at: "2026-06-13T22:36:00-03:00"
@@ -80,7 +80,7 @@ pipeline:
     - TASK-10
     - TASK-11
   history:
-    - step: product-manager
+    - step: solution-designer
       status: completed
       timestamp: "2026-06-13T22:36:00-03:00"
       summary: "7 epics criados: Auth, Tasks, Navigation, Generation, Save/Edit, Sync/Conflict, Polish"
@@ -162,7 +162,7 @@ pipeline:
       summary: "Corrigido: pipeline.yaml atualizado com concerns/errors dos subagents. SKILL.md e AGENTS.md atualizados: orchestrator nunca deve corrigir código de subagent, nunca rodar validação diretamente, subagents devem seguir formato de resposta padrão."
     context: "documentation-analysis"
     selected_approach: "Implementar 7 epics sequencialmente: EPIC-01 (Auth + Dev Bypass) → EPIC-02 (Tasks) → EPIC-03 (Navigation) → EPIC-04 (Generation) → EPIC-05 (Save/Edit) → EPIC-06 (Sync) → EPIC-07 (Polish)"
-    epic_summary: "7 epics criados cobrindo 21 features V1 (incluindo Dev Mode Bypass adicionado pelo usuário)"
+    design_summary: "7 epics criados cobrindo 21 features V1 (incluindo Dev Mode Bypass adicionado pelo usuário)"
     planning_summary: null
     task_summary: null
     acceptance_criteria: []

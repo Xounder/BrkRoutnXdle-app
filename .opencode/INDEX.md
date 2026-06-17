@@ -46,7 +46,7 @@ Read in this order:
 # Agents
 
 - agents/00-planning-agent.md — Planning Analyst
-- agents/01-product-manager.md — Product Manager
+- agents/01-solution-designer.md — Solution Designer
 - agents/02-tech-lead.md — Tech Lead
 - agents/03-senior-frontend.md — Senior Frontend
 - agents/04-senior-backend.md — Senior Backend
@@ -65,7 +65,7 @@ Read in this order:
 
 # Templates
 
-- template/epic-template.md
+- template/design-template.md
 - template/task-template.md
 - template/planning-template.md
 - template/pipeline-template.yaml
@@ -85,11 +85,20 @@ Read in this order:
 - plugins/session-load-autoloader.plugin.ts — Auto-load previous session context
 - plugins/sound-alert.plugin.ts — Audible alerts on permission/idle events
 
+# Tools
+
+- tools/create-folder-structure.ts — Create `design-docs/`, `planning/`, `tasks/` for a pipeline context
+- tools/get-git-diff.ts — Return git diff between two refs with optional path filter
+- tools/read-pipeline-state.ts — Read fields from `pipeline.yaml` via dot-separated paths
+- tools/resolve-template.ts — Render a template by resolving `[VARIABLES]` from variables.md
+- tools/run-package-command.ts — Run `build/lint/typecheck/test` in a workspace subpackage
+- tools/save-session.ts — Save session evaluation with 2-file retention policy
+
 # Planning
 
 Generated artifacts:
 
-- plan/<context>/epics/
+- plan/<context>/design-docs/
 - plan/<context>/tasks/
 
 ---

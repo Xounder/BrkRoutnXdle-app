@@ -1,0 +1,5 @@
+DONE: Modified 01-solution-designer.md — relaxed source code restrictions to allow targeted reads, added requirement to run codebase-analysis (docs/implementation mode) before reading files unless already run, updated Responsibilities and Constraints.
+WRONG: None.
+IMPROV: Responsibilities initially still said "docs mode only" after main edits — caught and fixed during review.
+LEARN: Solution Designer can now leverage codebase-analysis implementation mode reports instead of raw source code. Both modes are now documented.
+NEXT: Consider applying similar codebase-analysis guard to other agents if missing. Session-level flag to track whether analysis has been run could be useful.

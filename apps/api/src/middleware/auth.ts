@@ -7,8 +7,14 @@ export interface AuthenticatedRequest extends Request {
 }
 
 export function requireAuth(req: AuthenticatedRequest, res: Response, next: NextFunction): void {
-  const token = req.cookies?.session_token;
-  if (!token) {
+  // Dev mode bypass — user set by devModeMiddleware
+  if (req.userId && req.accessToken) {
+    next();
+    return;
+  }
+
+  const cookieToken = req.cookies?.session_token;
+  if (!cookieToken) {
     res.status(401).json({
       success: false,
       error: { code: "AUTH_REQUIRED", message: "Authentication required" },
@@ -16,7 +22,7 @@ export function requireAuth(req: AuthenticatedRequest, res: Response, next: Next
     return;
   }
 
-  const session = getSession(token);
+  const session = getSession(cookieToken);
   if (!session) {
     res.clearCookie("session_token");
     res.status(401).json({

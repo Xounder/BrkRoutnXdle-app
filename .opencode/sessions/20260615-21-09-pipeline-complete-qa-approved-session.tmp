@@ -1,9 +1,0 @@
-DONE: Pipeline resumed and completed all 11 tasks. TASK-07 verified on disk. TASK-05/06/08/09/10/11 implemented by dispatched Senior Frontend agents. AGENTS.md updated with subagent exception for codebase-analysis. Generation algorithm doc updated with restriction parity constraint. Both QA reviews approved after corrections.
-
-WRONG: TASK-05 CalendarView was not controlled (view prop ignored). TASK-07 taskDistributor had weekdays-only as no-op and missing morning-only/afternoon-only. QA caught issues requiring re-dispatch and re-review.
-
-IMPROV: QA should be dispatched after each major task pair, not at end of all tasks. Always verify controlled components accept and react to props. Always test restriction enum variants against scorer and validator for parity.
-
-LEARN: FullCalendar v6 view prop must be synced via ref API (changeView/gotoDate), not declaratively. Task restrictions in shared types need parallel implementation in both scorer and validator. Pipeline "one task per agent" rule works well when file conflicts are managed sequentially.
-
-NEXT: Run application for manual validation if needed. Consider writing unit tests for domain algorithm (edge cases, restriction types, shuffle determinism).

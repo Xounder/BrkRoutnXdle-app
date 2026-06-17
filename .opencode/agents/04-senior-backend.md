@@ -24,7 +24,7 @@ Possible inputs:
 - Acceptance criteria
 - Relevant architecture context
 - Relevant planning context
-- Relevant epic context
+- Relevant design context
 - Dependency information
 
 ## Responsibilities
@@ -48,6 +48,7 @@ Review:
 - Assigned tasks
 - Acceptance criteria
 - Dependency information
+- Relevant design context (design decisions, architecture notes)
 
 Identify:
 
@@ -80,9 +81,13 @@ Implement:
 
 following project standards.
 
-### 4. Validate Implementation
+### 4. Review Changes
 
-Run `pnpm build` with `workdir` set to the package directory (e.g., `apps/api`). Do NOT use `npx tsc`, `pnpm exec`, or chained commands — they are blocked by the shell.
+Call `get-git-diff` to review the scope of your changes. Verify that only files relevant to your assigned tasks were modified. If unrelated files appear, revert or report as a concern.
+
+### 5. Validate Implementation
+
+Call `run-package-command` with `command: 'build'` and `package: 'apps/api'`. If build succeeds, also call it for `lint` and `test`. If the build output shows errors, report them in your summary — do not attempt to fix build errors from unrelated files.
 
 Verify:
 
@@ -90,7 +95,7 @@ Verify:
 - Lint succeeds
 - Tests succeed
 
-### 5. Validate Endpoints
+### 6. Validate Endpoints
 
 When APIs are modified:
 
@@ -100,7 +105,7 @@ When APIs are modified:
 - Verify response contracts
 - Stop the application after validation
 
-### 6. Create or Update Tests
+### 7. Create or Update Tests
 
 Create or update:
 
@@ -110,7 +115,7 @@ Create or update:
 
 when applicable.
 
-### 7. Return Results
+### 8. Return Results
 
 Return using the [standard agent response format](../skills/delivery-pipeline/references/agent-response-format.md). MUST include `summary.changes`, `summary.validations`, `concerns`, and `errors`.
 

@@ -18,7 +18,7 @@ Catalog of all `.md` files in `.opencode/` with content description and when to 
 | File | Content | When to modify |
 |---|---|---|
 | `agents/00-planning-agent.md` | Planning Analyst — feasibility, risk, impact analysis, on-demand planning docs for PM | New analysis types; planning output format changes |
-| `agents/01-product-manager.md` | PM instructions — mandatory questions, folder-per-epic output, plan .md to epics, pipeline.yaml | PM flow changes; new artifact types |
+| `agents/01-solution-designer.md` | Solution Designer instructions — collaborative design analysis, trade-off evaluation, web research, design document creation in design-docs/ | SD flow changes; new artifact types |
 | `agents/02-tech-lead.md` | TL instructions — decomposition, folder-per-task output, one .md per task, pipeline.yaml | Task format changes; allocation changes |
 | `agents/03-senior-frontend.md` | Frontend agent instructions | Frontend conventions change |
 | `agents/04-senior-backend.md` | Backend agent instructions | Backend conventions change |
@@ -51,7 +51,7 @@ Catalog of all `.md` files in `.opencode/` with content description and when to 
 
 | File | Content | When to modify |
 |---|---|---|
-| `template/epic-template.md` | Epic artifact template | Epic format changes |
+| `template/design-template.md` | Design document template — options, trade-offs, decision, impact, risks | Design template format changes |
 | `template/task-template.md` | Task artifact template | Task format changes |
 | `template/planning-template.md` | Planning document template | Planning format changes |
 | `template/variables.md` | Shared template variables | Variable set changes |
@@ -132,6 +132,11 @@ Catalog of all `.md` files in `.opencode/` with content description and when to 
 | File | Content | When to modify |
 |---|---|---|
 | `OPENCODE_PLUGINS.md` | Plugin development guide for OpenCode | Plugin patterns or API changes |
-| `tools/save-session.ts` | Session save custom tool — creates session file, keeps 2 most recent (runs via Bun/Node) | Tool logic changes; retention policy changes |
+| `tools/save-session.ts` | Session save custom tool — creates session file, keeps 2 most recent | Tool logic changes; retention policy changes |
+| `tools/create-folder-structure.ts` | Folder creation tool — creates `design-docs/`, `planning/`, `tasks/` for a pipeline context | Folder structure changes; new pipeline contexts |
+| `tools/get-git-diff.ts` | Git diff tool — returns diff between two refs with optional path filter | Diff logic changes |
+| `tools/read-pipeline-state.ts` | Pipeline state reader — reads `pipeline.yaml` fields via dot-separated paths | Pipeline YAML structure changes |
+| `tools/resolve-template.ts` | Template renderer — resolves `[VARIABLES]` from variables.md with pipeline context | Variable definitions or template paths change |
+| `tools/run-package-command.ts` | Package command runner — runs build/lint/typecheck/test in a workspace subpackage | New commands added |
 | `project-structure.md` | Project structure map | Important folders/files change |
 | `docs-catalog.md` | This file — doc catalog | New .md file created in .opencode/ |

@@ -59,6 +59,8 @@ When a documentation file exceeds this limit:
 3. Update all references and navigation paths
 4. Preserve the original document as the entry point whenever possible
 
+Exception: `.opencode/plan/` files are not subject to this limit. Generated planning, design, and task artifacts may exceed 400 lines.
+
 ### Commit Convention
 
 Before making any commit, read:
@@ -68,6 +70,10 @@ Before making any commit, read:
 ```
 
 All commits must follow the pattern defined there. If a commit fails validation, consult the file again before retrying.
+
+### Standalone Agent Invocation
+
+When the user initiates a design discussion, feature exploration, planning analysis, or open-ended request in direct conversation, invoke the corresponding agent directly (Solution Designer, Planning Analyst, etc.) as a standalone agent — do not route through the delivery-pipeline skill.
 
 ## Process Handling
 
@@ -203,6 +209,9 @@ Never open, read, write, or request files outside this project directory. All op
 
 ### Tool preference for file operations
 Prefer the **dedicated tools** (`grep`, `glob`, `read`, `edit`, `write`) for file searching and content operations over `bash`/PowerShell. Use `bash` only as a last resort when the dedicated tools cannot accomplish the task.
+
+### Custom tools
+See [INDEX.md](.opencode/INDEX.md#tools) for the full list of custom tools in `tools/`. Agents should use these tools directly instead of implementing equivalent logic via bash.
 
 ### Bash command restrictions
 The shell environment rejects the following patterns:

@@ -13,7 +13,20 @@ This skill is the single entry point for project execution and is responsible fo
 
 ## Templates
 
-All templates are stored in `.opencode\template` and template variables are inside `.opencode\template\variables.md` 
+All templates are stored in `.opencode\template` and template variables are inside `.opencode\template\variables.md`
+
+### Variable Resolution
+
+Before dispatching any agent, the orchestrator MUST:
+1. Read `variables.md` to load all variable definitions
+2. Resolve `[PLAN_FOLDER_LOCATION]` by substituting `<context>` with `pipeline.yaml.name`
+3. Resolve all dependent variables (`[DESIGN_FOLDER_LOCATION]`, `[TASKS_FOLDER_LOCATION]`, etc.)
+4. Pass the resolved values to the agent as part of the execution context
+
+Example:
+- `pipeline.yaml.name = "documentation-analysis"`
+- `[PLAN_FOLDER_LOCATION]` resolves to `.opencode/plan/documentation-analysis`
+- `[DESIGN_FOLDER_LOCATION]` resolves to `.opencode/plan/documentation-analysis/design-docs`
 
 ## Commands
 
@@ -28,7 +41,7 @@ Starts a new delivery workflow.
 Responsibilities:
 
 1. Generate a context name.
-2. Create the planning folder structure if needed.
+2. Create the planning folder structure using the `create-folder-structure` tool.
 3. Create [PIPELINE_FILE] using [PIPELINE_TEMPLATE_FILE].
 4. Invoke the Workflow Router skill.
 5. Execute the selected workflow.
@@ -67,7 +80,7 @@ It must be updated after every agent execution by the orchestrator.
 Responsible for:
 
 * Invoking Workflow Router
-* Invoking Product Manager
+* Invoking Solution Designer
 * Invoking Planning Analyst
 * Invoking Tech Lead
 * Invoking Senior Frontend agents
@@ -116,7 +129,7 @@ Agents should not need to locate, search, or aggregate project context on their 
 Agents should not need to read:
 
 ```text
-epics/
+design-docs/
 tasks/
 planning/
 pipeline.yaml
@@ -127,9 +140,10 @@ unless their role explicitly requires it.
 The orchestrator should consolidate and pass:
 
 * User request
+* Pipeline context name
 * Selected approach
 * Approved planning artifacts
-* Epic summaries
+* Design summaries (passed from SD to PA when chained)
 * Task summaries
 * Acceptance criteria
 * Relevant dependencies
@@ -143,14 +157,17 @@ flowchart TD
 A[User Request]
 --> B[Workflow Router]
 
-B -->|No Codebase or vague ideia| PM[Product Manager]
-B -->|Medium/Large Change| PA[Planning Analyst]
+B -->|Design Needed| SD[Solution Designer]
+B -->|Implementation Analysis| PA[Planning Analyst]
 B -->|Simple Change| TL[Tech Lead]
 
-PM --> PM_APPROVAL{Approved?}
+SD --> SD_APPROVAL{Design Approved?}
 
-PM_APPROVAL -->|No| PM
-PM_APPROVAL -->|Yes| TL
+SD_APPROVAL -->|No| SD
+SD_APPROVAL -->|Yes| CB{Codebase Exists?}
+
+CB -->|Yes| PA
+CB -->|No| TL
 
 PA --> PA_APPROVAL{Approved?}
 
@@ -180,18 +197,35 @@ workflow-router
 
 The router determines whether the request should be handled by:
 
-* Product Manager
+* Solution Designer
 * Planning Analyst
 * Tech Lead
 
-### Product Manager Flow
+### Solution Designer Flow
 
-When Product Manager is selected:
+When Solution Designer is selected:
 
-1. Execute Product Manager.
-2. Wait for epic creation.
-3. Update pipeline.
-4. Execute Tech Lead.
+1. Execute Solution Designer.
+2. Present approaches to the user.
+3. Wait for semantic approval.
+4. Repeat design loop until approved.
+5. Generate design documents.
+6. Update pipeline.
+
+If a codebase exists:
+  7. Execute Planning Analyst (pass design_summary and design-docs/ path as context).
+  8. Present planning analysis to the user.
+  9. Wait for semantic approval.
+  10. Repeat planning loop until approved.
+  11. Generate planning documents.
+  12. Update pipeline.
+  13. Execute Tech Lead.
+
+If no codebase exists:
+  7. Execute Tech Lead directly.
+
+Design documents must not be created before approval.
+Planning documents must not be created before approval.
 
 ### Planning Flow
 
@@ -348,6 +382,7 @@ See [references/task-tracking.md](references/task-tracking.md)
 * Never recreate completed work during resume.
 * Always maximize safe parallelism.
 * Always preserve task dependency order.
+* Design approval is mandatory before design document generation.
 * Planning approval is mandatory before plan generation.
 * QA must validate implementation against task requirements and git diff.
 * Respect project boundaries and conventions.

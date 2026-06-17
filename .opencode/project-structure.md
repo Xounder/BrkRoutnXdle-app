@@ -16,7 +16,7 @@ BrkRoutnXdle/
     │
     ├── agents/                # Agent instruction files
     │   ├── 00-planning-agent.md
-    │   ├── 01-product-manager.md
+    │   ├── 01-solution-designer.md
     │   ├── 02-tech-lead.md
     │   ├── 03-senior-frontend.md
     │   ├── 04-senior-backend.md
@@ -82,7 +82,7 @@ BrkRoutnXdle/
     │           └── docs-report.md
     │
     ├── template/              # Artifact templates
-    │   ├── epic-template.md
+    │   ├── design-template.md
     │   ├── task-template.md
     │   ├── planning-template.md
     │   ├── pipeline-template.yaml
@@ -90,7 +90,7 @@ BrkRoutnXdle/
     │
     ├── plan/                  # Generated planning artifacts
     │   └── <context>/
-    │       ├── epics/
+    │       ├── design-docs/
     │       └── tasks/
     │
     ├── plugins/               # OpenCode plugins (auto-loaded)
@@ -99,6 +99,12 @@ BrkRoutnXdle/
     │   ├── session-load-autoloader.plugin.ts
     │   └── sound-alert.plugin.ts
     ├── sessions/              # Saved session evaluations
-    ├── tools/                 # Custom tools (e.g. save-session.ts)
+    ├── tools/                 # Custom tools
+    │   ├── create-folder-structure.ts
+    │   ├── get-git-diff.ts
+    │   ├── read-pipeline-state.ts
+    │   ├── resolve-template.ts
+    │   ├── run-package-command.ts
+    │   └── save-session.ts
     └── node_modules/          # Dependencies
 ```

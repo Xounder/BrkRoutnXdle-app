@@ -29,7 +29,7 @@ Possible inputs:
 - Acceptance criteria
 - Relevant architecture context
 - Relevant planning context
-- Relevant epic context
+- Relevant design context
 - Git diff of modified files
 - Implementation summary
 
@@ -53,6 +53,7 @@ Review:
 - Assigned tasks
 - Acceptance criteria
 - Dependency information
+- Relevant design context (design decisions, architecture notes)
 
 Identify:
 
@@ -61,6 +62,8 @@ Identify:
 - Expected validations
 
 ### 2. Review Git Diff
+
+If the git diff was not provided in your input context, call `get-git-diff` to retrieve it.
 
 Review only files modified by the implementation.
 
@@ -96,6 +99,8 @@ Verify:
 - No obvious design violations
 
 ### 5. Review Quality
+
+Call `run-package-command` sequentially for `build`, `lint`, and `test` with the appropriate package directory from your assigned area. Stop at the first failure.
 
 Verify:
 

@@ -1,9 +1,0 @@
-DONE: Pipeline resumed with detailed task code. TASK-01/02/03/04 implemented. Pipeline skill updated with orchestrator rules (never do agent work, multiple agents per role). Secure-access plugin fixed for @brkroutnxdle/*. Retry Limit section added to AGENTS.md.
-
-WRONG: Senior Backend cancelled by timeout despite having created all files. Pipeline dispatches only one agent per role when multiple could run.
-
-IMPROV: Before cancelling a timed-out agent, verify output directory. Dispatch N agents for N independent tasks. Keep orchestrator as pure dispatcher — never implement directly.
-
-LEARN: secure-access.plugin.ts regex patterns need updating per project. Pipeline skill is the right place for orchestrator rules. AGENTS.md should reference subagent conventions generically.
-
-NEXT: Dispatch TASK-07 (backend algorithm) in parallel with TASK-05 (frontend nav) + TASK-06 (frontend tasks) — all deps satisfied.

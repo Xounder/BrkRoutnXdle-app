@@ -25,21 +25,25 @@ export default function App() {
   }
 
   if (!authenticated) {
-    return <LoginPage />;
+    return (
+      <>
+        <LoginPage />
+        {import.meta.env.DEV && (
+          <>
+            <DevModeBadge enabled={devMode.enabled} onClick={devMode.togglePanel} />
+            <DevModePanel
+              isOpen={devMode.panelOpen}
+              onClose={() => devMode.togglePanel()}
+              enabled={devMode.enabled}
+              token={devMode.token}
+              onToggleEnabled={devMode.toggleEnabled}
+              onUpdateToken={devMode.updateToken}
+            />
+          </>
+        )}
+      </>
+    );
   }
 
-  return (
-    <>
-      <DashboardPage />
-      {import.meta.env.DEV && (
-        <>
-          <DevModeBadge enabled={devMode.enabled} onClick={devMode.togglePanel} />
-          <DevModePanel
-            isOpen={devMode.panelOpen}
-            onClose={() => devMode.togglePanel()}
-          />
-        </>
-      )}
-    </>
-  );
+  return <DashboardPage />;
 }

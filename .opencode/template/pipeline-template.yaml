@@ -6,7 +6,7 @@ pipeline:
   current_step: null
   current_agent: null
   steps:
-    product-manager:
+     solution-designer:
       status: pending
       notes: null
       updated_at: null
@@ -55,7 +55,7 @@ pipeline:
   handoff:
     context: null
     selected_approach: null
-    epic_summary: null
+    design_summary: null
     planning_summary: null
     task_summary: null
     acceptance_criteria: []
