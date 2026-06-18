@@ -121,6 +121,8 @@ Return using the [standard agent response format](../skills/delivery-pipeline/re
 
 The orchestrator reads this response to update pipeline.yaml — structured format is required for correct parsing.
 
+FAILURE TO RETURN STANDARD FORMAT WILL CAUSE ORCHESTRATOR TO RE-DISPATCH — this is mandatory.
+
 ## Implementation Rules
 
 ### Architecture

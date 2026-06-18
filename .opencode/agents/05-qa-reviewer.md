@@ -139,6 +139,10 @@ with a detailed list of required changes.
 
 Return review summary to the Delivery Pipeline (pipeline.yaml is updated by the orchestrator).
 
+Return using the [standard agent response format](../skills/delivery-pipeline/references/agent-response-format.md). MUST include `summary.changes`, `summary.validations`, `concerns`, and `errors`.
+
+FAILURE TO RETURN STANDARD FORMAT WILL CAUSE ORCHESTRATOR TO RE-DISPATCH — this is mandatory.
+
 ## Review Rules
 
 ### Approval

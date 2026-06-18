@@ -27,13 +27,30 @@ export enum CompletionStatus {
   Skipped = "skipped",
 }
 
+/** Named time group preset. */
+export type TimeGroupPreset = "morning" | "afternoon" | "evening" | "night";
+
+/** Custom hour range (0–23). */
+export interface CustomRange {
+  /** Start hour (0–23). */
+  startHour: number;
+  /** End hour (0–23). */
+  endHour: number;
+}
+
+/** A restricted time range — either a named preset or a custom range. */
+export type RestrictedRange =
+  | { preset: TimeGroupPreset }
+  | { custom: CustomRange };
+
 /** Restriction applied to a task's scheduling window. */
 export type TaskRestriction =
   | { type: "morning-only" }
   | { type: "afternoon-only" }
   | { type: "no-weekends" }
   | { type: "weekdays-only" }
-  | { type: "specific-days"; days: number[] };
+  | { type: "specific-days"; days: number[] }
+  | { type: "restricted-range"; ranges: RestrictedRange[] };
 
 /** A user-defined recurring task. */
 export interface Task {
@@ -51,6 +68,12 @@ export interface Task {
   restrictions: TaskRestriction[];
   /** Whether the task is active. */
   isActive: boolean;
+  /** How many times per week (default: 1). */
+  frequency?: number;
+  /** Minimum days between occurrences (default: 1). */
+  gapDays?: number;
+  /** Allow multiple occurrences on the same day (default: false). */
+  allowSameDay?: boolean;
   /** ISO-8601 creation timestamp. */
   createdAt: string;
   /** ISO-8601 last-update timestamp. */
@@ -119,6 +142,8 @@ export interface CalendarEvent {
   isCompleted: boolean;
   /** Source calendar. */
   source: "google" | "brkroutnxdle";
+  /** Whether this event represents a blocked time slot. */
+  isBlock?: boolean;
 }
 
 /** Authenticated user information. */

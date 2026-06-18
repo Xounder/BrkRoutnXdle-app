@@ -6,16 +6,18 @@ import { useBlocks } from "../../hooks/useBlocks";
 interface BlockModalProps {
   block: BlockedSlot | null;
   onClose: () => void;
+  defaultStartDate?: string; // pre-filled start date when creating (block is null)
+  defaultEndDate?: string; // pre-filled end date when creating (block is null)
 }
 
-export function BlockModal({ block, onClose }: BlockModalProps) {
+export function BlockModal({ block, onClose, defaultStartDate, defaultEndDate }: BlockModalProps) {
   const { createBlock, updateBlock } = useBlocks();
   const isEditing = block !== null;
 
   const [blockType, setBlockType] = useState<BlockType>(block?.blockType ?? BlockTypeEnum.SingleDay);
   const [title, setTitle] = useState(block?.title ?? "");
-  const [startDate, setStartDate] = useState(block?.startDate ?? "");
-  const [endDate, setEndDate] = useState(block?.endDate ?? "");
+  const [startDate, setStartDate] = useState(block?.startDate ?? defaultStartDate ?? "");
+  const [endDate, setEndDate] = useState(block?.endDate ?? defaultEndDate ?? "");
   const [startTime, setStartTime] = useState(block?.startTime ?? "09:00");
   const [endTime, setEndTime] = useState(block?.endTime ?? "10:00");
   const [daysOfWeek, setDaysOfWeek] = useState<number[]>(block?.daysOfWeek ?? [1, 3, 5]);

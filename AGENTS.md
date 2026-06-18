@@ -219,7 +219,13 @@ The shell environment rejects the following patterns:
 - **Unrecognized commands**: only the commands documented in this file (pnpm, git, docker, curl, ls, cat, etc.) and a few utility commands are accepted
 - **Node/tsx execution**: scripts must be inside the project directory with `.ts`, `.js`, or `.tsx` extension; the script path is resolved from the project root (not from any `workdir` override); flags like `-e`, `--eval`, `--require` are blocked
 - **File operations**: all file paths must resolve inside the project root
+- **pnpm**: flags/filters (e.g., `--filter`, `--exec`) blocked — use `run-package-command` tool for `build`, `lint`, `typecheck`, `test`
 - **Curl**: only allowed to `localhost` URLs
+
+### Build validation
+- `pnpm` with flags/filters (e.g., `--filter`, `--exec`) is blocked — use `run-package-command` tool for `build`, `lint`, `typecheck`, `test`
+- Subagents MUST run build validation via `run-package-command` before returning
+- Include results in `summary.validations` in standard response format
 
 ### Standard Response Format
 All subagents MUST return results using the [standard agent response format](.opencode/skills/delivery-pipeline/references/agent-response-format.md):

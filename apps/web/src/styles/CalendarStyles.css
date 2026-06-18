@@ -29,3 +29,24 @@
   border-radius: 8px;
   opacity: 0.8;
 }
+
+/* Blocked slots — gray with diagonal stripe pattern */
+.fc-event.brk-block {
+  background: repeating-linear-gradient(
+    45deg,
+    #e8e8e8,
+    #e8e8e8 4px,
+    #d4d4d4 4px,
+    #d4d4d4 8px
+  ) !important;
+  border: 1px solid #b0b0b0 !important;
+  border-radius: 4px !important;
+  color: #666 !important;
+  font-size: 12px !important;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.fc-event.brk-block .fc-event-title {
+  font-weight: 500;
+}

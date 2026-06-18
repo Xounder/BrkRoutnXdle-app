@@ -19,15 +19,29 @@ import { DeleteEventDialog } from "../features/preview/DeleteEventDialog";
 import { RefreshButton } from "../features/completion/RefreshButton";
 import { ConflictDialog } from "../features/completion/ConflictDialog";
 import { useUnsavedChanges } from "../hooks/useUnsavedChanges";
-import type { ViewType, CalendarEvent } from "@brkroutnxdle/shared";
+import { useBlockContext } from "../contexts/BlockContext";
+import { CreateActionModal } from "../features/shared/CreateActionModal";
+import { TaskModal } from "../features/tasks/TaskModal";
+import { BlockModal } from "../features/blocks/BlockModal";
+import type { ViewType, CalendarEvent, Task, BlockedSlot } from "@brkroutnxdle/shared";
 
 export function DashboardPage() {
   const { user, logout } = useAuth();
   const { settings } = useSettings();
   const { tasks } = useTaskContext();
+  const { blocks } = useBlockContext();
   const { generateWeek, generateAgain, discard, isGenerating } = useScheduleGeneration();
   const { isPreviewActive, previewEvents, allocationFailures } = usePreview();
-  const editing = useScheduleEditing();
+  const handleExternalEventChange = useCallback(
+    (id: string, startStr: string, endStr: string) => {
+      setEvents((prev) =>
+        prev.map((e) => (e.id === id ? { ...e, start: startStr, end: endStr } : e)),
+      );
+    },
+    [],
+  );
+
+  const editing = useScheduleEditing(handleExternalEventChange);
   const { saveState, save, resetSaveState } = useSaveSchedule();
   const [currentView, setCurrentView] = useState<ViewType>("week" as ViewType);
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -40,17 +54,82 @@ export function DashboardPage() {
     changedEvents: string[];
   }>({ hasConflicts: false, changedEvents: [] });
 
+  // Modal state for empty-slot creation
+  const [selectedSlot, setSelectedSlot] = useState<{
+    start: string;
+    end: string;
+  } | null>(null);
+
+  // Modal state for editing existing items
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [editingBlock, setEditingBlock] = useState<BlockedSlot | null>(null);
+
+  // State for creating a block from a slot click (pre-filled values)
+  const [creatingBlockPrefill, setCreatingBlockPrefill] = useState<{
+    startDate: string;
+    endDate: string;
+  } | null>(null);
+
+  // State for creating a task from a slot click (pre-filled duration)
+  const [creatingTaskDuration, setCreatingTaskDuration] = useState<number | null>(null);
+
   const { toggleCompletion } = useCompletion();
   const calendarRefresh = useCalendarRefresh();
   const { clearPreview } = usePreview();
 
   useUnsavedChanges(isPreviewActive);
 
+  // Handle empty slot selection — show CreateActionModal
+  const handleSelect = useCallback(
+    (info: { start: string; end: string }) => {
+      setSelectedSlot(info);
+    },
+    [],
+  );
+
+  // Handle click on existing event — open edit modal
   const handleEventClick = useCallback(
     (event: CalendarEvent) => {
-      if (event.isGenerated) toggleCompletion(event.id, event.isCompleted);
+      if (event.isBlock) {
+        // Block event: extract block id from "block-{id}" prefix
+        const blockId = event.id.replace(/^block-/, "");
+        const block = blocks.find((b) => b.id === blockId);
+        if (block) {
+          setEditingBlock(block);
+        }
+      } else if (event.isGenerated) {
+        // Task event: find task by id
+        const task = tasks.find((t) => t.id === event.id);
+        if (task) {
+          setEditingTask(task);
+        }
+      }
     },
-    [toggleCompletion],
+    [blocks, tasks],
+  );
+
+  // CreateActionModal: user chose to create a Block
+  const handleCreateBlockFromSlot = useCallback(
+    (start: string, end: string) => {
+      setSelectedSlot(null);
+      // Extract date portion (YYYY-MM-DD) from ISO strings
+      const startDate = start.substring(0, 10);
+      const endDate = end.substring(0, 10);
+      setCreatingBlockPrefill({ startDate, endDate });
+    },
+    [],
+  );
+
+  // CreateActionModal: user chose to create a Task
+  const handleCreateTaskFromSlot = useCallback(
+    (start: string, end: string) => {
+      setSelectedSlot(null);
+      const durationMin = Math.round(
+        (new Date(end).getTime() - new Date(start).getTime()) / 60000,
+      );
+      setCreatingTaskDuration(durationMin);
+    },
+    [],
   );
 
   const handleRefresh = useCallback(async () => {
@@ -217,17 +296,73 @@ export function DashboardPage() {
         <CalendarView
           events={events}
           previewEvents={mappedPreviewEvents}
+          blocks={blocks}
           currentView={currentView}
           currentDate={currentDate}
           onViewChange={setCurrentView}
           onDateChange={setCurrentDate}
-          editable={isPreviewActive}
           onEventDrop={editing.handleEventDrop}
           onEventResize={editing.handleEventResize}
           onDeleteRequest={editing.requestDelete}
           onEventClick={handleEventClick}
+          onSelect={handleSelect}
+          onEventDragStart={editing.handleEventDragStart}
+          onEventDragStop={editing.handleEventDragStop}
+          validateDrop={(startStr, endStr) =>
+            editing.canDropAt(startStr, endStr)
+          }
+          scrollTime={`${String(settings.workStartHour).padStart(2, "0")}:00:00`}
+          slotMinTime={`${String(settings.workStartHour).padStart(2, "0")}:00:00`}
+          slotMaxTime={`${String(settings.workEndHour).padStart(2, "0")}:00:00`}
         />
       </MainLayout>
+
+      {/* CreateActionModal: appears when an empty calendar slot is selected */}
+      {selectedSlot && (
+        <CreateActionModal
+          start={selectedSlot.start}
+          end={selectedSlot.end}
+          onCreateBlock={handleCreateBlockFromSlot}
+          onCreateTask={handleCreateTaskFromSlot}
+          onClose={() => setSelectedSlot(null)}
+        />
+      )}
+
+      {/* TaskModal: creating a task from a slot click */}
+      {creatingTaskDuration !== null && (
+        <TaskModal
+          task={null}
+          defaultDuration={creatingTaskDuration}
+          onClose={() => setCreatingTaskDuration(null)}
+        />
+      )}
+
+      {/* BlockModal: creating a block from a slot click */}
+      {creatingBlockPrefill !== null && (
+        <BlockModal
+          block={null}
+          defaultStartDate={creatingBlockPrefill.startDate}
+          defaultEndDate={creatingBlockPrefill.endDate}
+          onClose={() => setCreatingBlockPrefill(null)}
+        />
+      )}
+
+      {/* TaskModal: editing an existing task */}
+      {editingTask && (
+        <TaskModal
+          task={editingTask}
+          onClose={() => setEditingTask(null)}
+        />
+      )}
+
+      {/* BlockModal: editing an existing block */}
+      {editingBlock && (
+        <BlockModal
+          block={editingBlock}
+          onClose={() => setEditingBlock(null)}
+        />
+      )}
+
       <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
 
       <DeleteEventDialog

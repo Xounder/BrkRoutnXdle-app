@@ -1,5 +1,0 @@
-DONE: Analyzed existing FullCalendar integration — 3 views, drag-and-drop, resize, delete all implemented. Identified backend Google Calendar API as missing piece. Added "Standalone Agent Invocation" rule to AGENTS.md.
-WRONG: Process — Started implementation directly instead of invoking Solution Designer as standalone agent for feature discussion.
-IMPROV: Process — For design/feature/planning discussions in direct conversation, invoke the corresponding agent directly, not through delivery-pipeline.
-LEARN: FullCalendar v6.1 + interaction plugin provides full calendar UI out of the box. User expects standalone agent invocation for design discussions.
-NEXT: Wire backend Google Calendar API endpoints to frontend. Verify packages/calendar ↔ apps/api integration.

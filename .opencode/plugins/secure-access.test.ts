@@ -112,6 +112,9 @@ const commandRules: CommandRule[] = [
   { pattern: /^pnpm --filter (frontend|backend|@jobfindr\/types|@jobfindr\/utils)\s+(dev|build|start|lint|typecheck|test|preview|clean)$/i, type: "pnpm-filter" },
   { pattern: /^pnpm --filter backend exec tsx \.\.\/frontend\/playwright-check\.ts$/i, type: "pnpm-pw-check" },
   { pattern: /^pnpm install$/i, type: "pnpm-install" },
+  { pattern: /^pnpm typecheck$/i, type: "pnpm-typecheck" },
+  { pattern: /^pnpm lint$/i, type: "pnpm-lint" },
+  { pattern: /^pnpm run\s+\S+(\s+.*)?$/i, type: "pnpm-run" },
   { pattern: /^pnpm test$/i, type: "pnpm-test" },
   { pattern: /^docker compose (up|down|build)$/i, type: "docker-compose" },
   { pattern: /^npx playwright .+$/i, type: "npx-playwright" },
@@ -277,6 +280,10 @@ describe("parseCommand", () => {
       it(cmd, () => expect(parseCommand(cmd)?.type).toBe(expectedType))
 
     ok("pnpm install", "pnpm-install")
+    ok("pnpm typecheck", "pnpm-typecheck")
+    ok("pnpm lint", "pnpm-lint")
+    ok("pnpm run dev", "pnpm-run")
+    ok("pnpm run typecheck", "pnpm-run")
     ok("pnpm --filter frontend dev", "pnpm-filter")
     ok("pnpm --filter backend build", "pnpm-filter")
     ok("docker compose up", "docker-compose")

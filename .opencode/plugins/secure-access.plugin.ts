@@ -128,13 +128,16 @@ const gitHandlers: Record<string, (classified: ClassifiedArg[]) => boolean> = {
 
 const commandRules: CommandRule[] = [
   { pattern: /^pnpm --filter (frontend|backend|@jobfindr\/types|@jobfindr\/utils)\s+(dev|build|start|lint|typecheck|test|preview|clean)$/i, type: "pnpm-filter" },
-  { pattern: /^pnpm --filter @brkroutnxdle\/(shared|domain|calendar|ui|api|web)\s+(build|dev|start|test)$/i, type: "pnpm-filter" },
+  { pattern: /^pnpm --filter @brkroutnxdle\/(shared|domain|calendar|ui|api|web)\s+(build|dev|start|test|typecheck|lint)$/i, type: "pnpm-filter" },
   { pattern: /^pnpm --filter @brkroutnxdle\/api exec tsx\s+\S+\.ts$/i, type: "pnpm-exec" },
   { pattern: /^pnpm --filter backend exec tsx \.\.\/frontend\/playwright-check\.ts$/i, type: "pnpm-pw-check" },
   { pattern: /^pnpm install$/i, type: "pnpm-install" },
   { pattern: /^pnpm test$/i, type: "pnpm-test" },
   { pattern: /^pnpm build$/i, type: "pnpm-build" },
   { pattern: /^pnpm dev$/i, type: "pnpm-dev" },
+  { pattern: /^pnpm typecheck$/i, type: "pnpm-typecheck" },
+  { pattern: /^pnpm lint$/i, type: "pnpm-lint" },
+  { pattern: /^pnpm run\s+\S+(\s+.*)?$/i, type: "pnpm-run" },
   { pattern: /^docker compose (up|down|build)$/i, type: "docker-compose" },
   { pattern: /^npx playwright .+$/i, type: "npx-playwright" },
   { pattern: /^(?:\.\\node_modules\\.bin\\)?vitest(?:\.(?:CMD|ps1))? run(?:\s+.*)?$/i, type: "vitest-run" },

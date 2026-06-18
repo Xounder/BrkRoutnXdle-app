@@ -8,8 +8,16 @@ export default tool({
     headRef: tool.schema.string().optional().default("HEAD").describe("Head branch or ref"),
     path: tool.schema.string().optional().describe("Filter by file path"),
   },
-  async execute({ baseRef, headRef, path }, ctx) {
+  async execute({ baseRef = "main", headRef = "HEAD", path }, ctx) {
     const filter = path ? ` -- "${path}"` : ""
-    return execSync(`git diff ${baseRef}..${headRef}${filter}`, { cwd: ctx.worktree, encoding: "utf-8" })
+    try {
+      const stdout = execSync(`git diff ${baseRef}..${headRef}${filter}`, { cwd: ctx.worktree, encoding: "utf-8", stdio: "pipe" })
+      return stdout || "(no output)"
+    } catch (e: any) {
+      const stderr = (e.stderr || "").toString().trim()
+      const stdout = (e.stdout || "").toString().trim()
+      const details = [stderr, stdout].filter(Boolean).join("\n--- stdout ---\n")
+      return `Error (exit ${e.status ?? "?"}): ${details || e.message}`
+    }
   },
 })

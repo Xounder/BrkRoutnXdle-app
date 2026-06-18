@@ -15,9 +15,13 @@ export default tool({
       return `Error: No package.json found at ${dir}`
     }
     try {
-      return execSync(`pnpm ${command}`, { cwd: dir, encoding: "utf-8", stdio: "pipe" })
+      const stdout = execSync(`pnpm ${command}`, { cwd: dir, encoding: "utf-8", stdio: "pipe" })
+      return stdout || "(no output)"
     } catch (e: any) {
-      return `Error: ${e.stderr || e.message}`
+      const stderr = (e.stderr || "").toString().trim()
+      const stdout = (e.stdout || "").toString().trim()
+      const details = [stderr, stdout].filter(Boolean).join("\n--- stdout ---\n")
+      return `Error (exit ${e.status ?? "?"}): ${details || e.message}`
     }
   },
 })

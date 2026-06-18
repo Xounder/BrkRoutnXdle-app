@@ -5,9 +5,10 @@ import { BlockPanel } from "../features/blocks/BlockPanel";
 interface SidebarProps {
   isCollapsed: boolean;
   onToggle: () => void;
+  onSettingsClick: () => void;
 }
 
-export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
+export function Sidebar({ isCollapsed, onToggle, onSettingsClick }: SidebarProps) {
   const [openSection, setOpenSection] = useState<string | null>(null);
 
   const sections = [
@@ -24,7 +25,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
     {
       id: "settings",
       label: "Settings",
-      content: <p>Settings panel (will redirect to Settings modal)</p>,
+      content: null,
     },
   ];
 
@@ -62,9 +63,13 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
         {sections.map((section) => (
           <div key={section.id} style={{ marginBottom: "8px" }}>
             <button
-              onClick={() =>
-                setOpenSection(openSection === section.id ? null : section.id)
-              }
+              onClick={() => {
+                if (section.id === "settings") {
+                  onSettingsClick();
+                } else {
+                  setOpenSection(openSection === section.id ? null : section.id);
+                }
+              }}
               style={{
                 width: "100%",
                 padding: "10px 16px",

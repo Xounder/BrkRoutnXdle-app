@@ -52,6 +52,8 @@ Review the provided context and identify:
 
 Read approved design documents from `[DESIGN_FOLDER_LOCATION]` and/or planning documents from `[PLAN_FOLDER_LOCATION]` when available.
 
+Before creating tasks: validate current build state via `run-package-command` with `build` on affected packages; record concerns if failing.
+
 ### 2. Identify Work Units
 
 Break the work into implementation units.

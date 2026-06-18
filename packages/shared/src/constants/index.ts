@@ -1,4 +1,4 @@
-import type { Settings } from "../types";
+import type { CustomRange, Settings, TimeGroupPreset } from "../types";
 
 /** Base duration of a single time slot in minutes. */
 export const SLOT_DURATION_MINUTES = 30;
@@ -36,4 +36,12 @@ export const DEFAULT_SETTINGS: Settings = {
   timezone: "UTC",
   shuffleEnabled: false,
   weekStartDay: 1,
+};
+
+/** Mapping of named time group presets to their hour ranges. */
+export const TIME_GROUP_PRESETS: Record<TimeGroupPreset, CustomRange> = {
+  morning: { startHour: 6, endHour: 12 },
+  afternoon: { startHour: 12, endHour: 18 },
+  evening: { startHour: 18, endHour: 0 },
+  night: { startHour: 0, endHour: 6 },
 };

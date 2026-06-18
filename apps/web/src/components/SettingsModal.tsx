@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useSettings } from "../contexts/SettingsContext";
 import { DEFAULT_SETTINGS } from "@brkroutnxdle/shared";
 import type { Settings } from "@brkroutnxdle/shared";
@@ -10,6 +10,30 @@ interface SettingsModalProps {
 
 export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const { settings, updateSettings, resetSettings } = useSettings();
+
+  const timezoneOptions = useMemo(() => {
+    try {
+      return Intl.supportedValuesOf("timeZone");
+    } catch {
+      // Fallback for older browsers that don't support Intl.supportedValuesOf
+      return [
+        "UTC",
+        "America/New_York",
+        "America/Chicago",
+        "America/Denver",
+        "America/Los_Angeles",
+        "Europe/London",
+        "Europe/Paris",
+        "Europe/Berlin",
+        "Europe/Moscow",
+        "Asia/Tokyo",
+        "Asia/Shanghai",
+        "Asia/Kolkata",
+        "Australia/Sydney",
+        "Pacific/Auckland",
+      ];
+    }
+  }, []);
 
   if (!isOpen) return null;
 
@@ -121,13 +145,17 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           {/* Timezone */}
           <label style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
             <span style={{ fontSize: "14px", fontWeight: 600, color: "#333" }}>Timezone</span>
-            <input
-              type="text"
+            <select
               value={settings.timezone}
               onChange={(e) => updateSettings({ timezone: e.target.value })}
               style={inputStyle}
-              placeholder="UTC"
-            />
+            >
+              {timezoneOptions.map((tz) => (
+                <option key={tz} value={tz}>
+                  {tz}
+                </option>
+              ))}
+            </select>
           </label>
 
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: "16px" }}>

@@ -279,6 +279,10 @@ Update pipeline after every completed task.
 
 **Important: one agent per task** — never assign multiple tasks to a single agent if they can run in parallel.
 
+### Concurrent File Modification Prevention
+
+When multiple tasks modify the same file, assign them sequentially or use a merge strategy. Review task file lists for overlaps before parallel dispatch. If overlap is detected, either sequence the tasks or ensure proper merge handling.
+
 ### QA Phase
 
 Execute:
@@ -366,9 +370,35 @@ concerns:
   - "Subagent could not verify lint (no lint script configured)"
 ```
 
+### YAML Formatting
+
+YAML strings containing colons must be quoted to avoid parse errors in `read-pipeline-state`. Example:
+
+```yaml
+# Wrong (causes YAML parse error):
+title: Calendar: 24h View
+
+# Correct:
+title: "Calendar: 24h View"
+```
+
+### Pipeline Completion
+
+When all steps are completed (all tasks approved by QA):
+1. Update `pipeline.status` to `completed`
+2. Invoke the STOP chain: `learning-improvement` → `continuous-learning` → `session-save`
+
 ## Standard Agent Response Format
 
 See [references/agent-response-format.md](references/agent-response-format.md)
+
+### Validation Gate
+
+After every subagent execution, orchestrator MUST run `run-package-command` with `build` (or `typecheck`) on affected packages before marking step complete. Subagents must include `validations` array in response with build result — orchestrator re-calls if missing.
+
+### Step Limit Consideration
+
+Ensure subagent step limits allow build/lint/typecheck validation. Pre-validate build before parallel dispatch via `run-package-command`.
 
 ## Task Tracking
 

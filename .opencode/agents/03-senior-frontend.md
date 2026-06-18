@@ -104,11 +104,17 @@ Create or update:
 
 when applicable.
 
-### 7. Return Results
+### 7. Run Build Validation (Mandatory)
+
+Call `run-package-command` with `command: 'build'` and `package: 'apps/web'`. Include results in `summary.validations` in response. If build fails, report errors — do not proceed to return without validation.
+
+### 8. Return Results
 
 Return using the [standard agent response format](../skills/delivery-pipeline/references/agent-response-format.md). MUST include `summary.changes`, `summary.validations`, `concerns`, and `errors`.
 
 The orchestrator reads this response to update pipeline.yaml — structured format is required for correct parsing.
+
+FAILURE TO RETURN STANDARD FORMAT WILL CAUSE ORCHESTRATOR TO RE-DISPATCH — this is mandatory.
 
 ## Implementation Rules
 
