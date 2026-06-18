@@ -1,20 +1,20 @@
 {
-  "generatedAt": "2026-06-16T00:30:26.303Z",
+  "generatedAt": "2026-06-18T01:50:57.267Z",
   "mode": "implementation",
   "parser": "regex",
   "summary": {
-    "totalFiles": 84,
+    "totalFiles": 85,
     "totalTsFiles": 47,
-    "totalTsxFiles": 37,
-    "totalImports": 249,
-    "totalExports": 153,
-    "totalFunctions": 119,
+    "totalTsxFiles": 38,
+    "totalImports": 255,
+    "totalExports": 158,
+    "totalFunctions": 130,
     "totalClasses": 4,
-    "totalInterfaces": 66,
-    "totalTypes": 3,
-    "totalArrowFunctions": 13,
+    "totalInterfaces": 68,
+    "totalTypes": 5,
+    "totalArrowFunctions": 20,
     "totalReactComponents": 3,
-    "totalHookOrUtilities": 10
+    "totalHookOrUtilities": 17
   },
   "files": {
     "apps/web/src/App.tsx": {
@@ -84,7 +84,8 @@
           "defaultName": "React",
           "named": [
             "useRef",
-            "useEffect"
+            "useEffect",
+            "useMemo"
           ]
         },
         {
@@ -115,7 +116,8 @@
           "source": "@brkroutnxdle/shared",
           "default": false,
           "named": [
-            "ViewType"
+            "ViewType",
+            "BlockType"
           ]
         },
         {
@@ -123,7 +125,8 @@
           "default": true,
           "defaultName": "type",
           "named": [
-            "CalendarEvent"
+            "CalendarEvent",
+            "BlockedSlot"
           ]
         }
       ],
@@ -148,7 +151,25 @@
         },
         {
           "kind": "arrow-function",
+          "name": "handleSelect",
+          "exported": false,
+          "async": false
+        },
+        {
+          "kind": "arrow-function",
           "name": "handleDatesSet",
+          "exported": false,
+          "async": false
+        },
+        {
+          "kind": "arrow-function",
+          "name": "handleEventDragStart",
+          "exported": false,
+          "async": false
+        },
+        {
+          "kind": "arrow-function",
+          "name": "handleEventDragStop",
           "exported": false,
           "async": false
         },
@@ -201,8 +222,7 @@
           "default": true,
           "defaultName": "React",
           "named": [
-            "useState",
-            "useEffect"
+            "useState"
           ]
         }
       ],
@@ -414,7 +434,9 @@
           "source": "react",
           "default": true,
           "defaultName": "React",
-          "named": []
+          "named": [
+            "useMemo"
+          ]
         },
         {
           "source": "../contexts/SettingsContext",
@@ -1322,6 +1344,47 @@
         }
       ]
     },
+    "apps/web/src/features/shared/CreateActionModal.tsx": {
+      "imports": [
+        {
+          "source": "react",
+          "default": true,
+          "defaultName": "React",
+          "named": []
+        }
+      ],
+      "exports": [
+        {
+          "type": "named",
+          "name": "CreateActionModal"
+        }
+      ],
+      "declarations": [
+        {
+          "kind": "function",
+          "name": "formatTimeDisplay",
+          "exported": false,
+          "async": false
+        },
+        {
+          "kind": "function",
+          "name": "formatDateDisplay",
+          "exported": false,
+          "async": false
+        },
+        {
+          "kind": "function",
+          "name": "CreateActionModal",
+          "exported": false,
+          "async": false
+        },
+        {
+          "kind": "interface",
+          "name": "CreateActionModalProps",
+          "exported": false
+        }
+      ]
+    },
     "apps/web/src/features/tasks/TaskCard.tsx": {
       "imports": [
         {
@@ -1376,14 +1439,19 @@
           "defaultName": "type",
           "named": [
             "Task",
-            "Priority"
+            "Priority",
+            "CustomRange",
+            "TimeGroupPreset",
+            "RestrictedRange",
+            "TaskRestriction"
           ]
         },
         {
           "source": "@brkroutnxdle/shared",
           "default": false,
           "named": [
-            "Priority"
+            "Priority",
+            "TIME_GROUP_PRESETS"
           ]
         },
         {
@@ -1403,7 +1471,49 @@
       "declarations": [
         {
           "kind": "function",
+          "name": "extractTimeGroups",
+          "exported": false,
+          "async": false
+        },
+        {
+          "kind": "function",
+          "name": "extractCustomRanges",
+          "exported": false,
+          "async": false
+        },
+        {
+          "kind": "function",
+          "name": "formatPresetLabel",
+          "exported": false,
+          "async": false
+        },
+        {
+          "kind": "function",
           "name": "TaskModal",
+          "exported": false,
+          "async": false
+        },
+        {
+          "kind": "arrow-function",
+          "name": "handleTimeGroupToggle",
+          "exported": false,
+          "async": false
+        },
+        {
+          "kind": "arrow-function",
+          "name": "handleAddCustomRange",
+          "exported": false,
+          "async": false
+        },
+        {
+          "kind": "arrow-function",
+          "name": "handleRemoveCustomRange",
+          "exported": false,
+          "async": false
+        },
+        {
+          "kind": "arrow-function",
+          "name": "handleCustomRangeChange",
           "exported": false,
           "async": false
         },
@@ -1815,11 +1925,17 @@
           ]
         },
         {
-          "source": "@brkroutnxdle/shared",
-          "default": true,
-          "defaultName": "type",
+          "source": "../contexts/BlockContext",
+          "default": false,
           "named": [
-            "CalendarEvent"
+            "useBlockContext"
+          ]
+        },
+        {
+          "source": "@brkroutnxdle/shared",
+          "default": false,
+          "named": [
+            "BlockType"
           ]
         }
       ],
@@ -1830,6 +1946,18 @@
         }
       ],
       "declarations": [
+        {
+          "kind": "function",
+          "name": "extractTime",
+          "exported": false,
+          "async": false
+        },
+        {
+          "kind": "function",
+          "name": "timeToMinutes",
+          "exported": false,
+          "async": false
+        },
         {
           "kind": "function",
           "name": "useScheduleEditing",
@@ -2246,12 +2374,42 @@
           ]
         },
         {
+          "source": "../contexts/BlockContext",
+          "default": false,
+          "named": [
+            "useBlockContext"
+          ]
+        },
+        {
+          "source": "../features/shared/CreateActionModal",
+          "default": false,
+          "named": [
+            "CreateActionModal"
+          ]
+        },
+        {
+          "source": "../features/tasks/TaskModal",
+          "default": false,
+          "named": [
+            "TaskModal"
+          ]
+        },
+        {
+          "source": "../features/blocks/BlockModal",
+          "default": false,
+          "named": [
+            "BlockModal"
+          ]
+        },
+        {
           "source": "@brkroutnxdle/shared",
           "default": true,
           "defaultName": "type",
           "named": [
             "ViewType",
-            "CalendarEvent"
+            "CalendarEvent",
+            "Task",
+            "BlockedSlot"
           ]
         }
       ],
@@ -3119,7 +3277,9 @@
           "default": true,
           "defaultName": "type",
           "named": [
-            "Settings"
+            "CustomRange",
+            "Settings",
+            "TimeGroupPreset"
           ]
         }
       ],
@@ -3139,6 +3299,10 @@
         {
           "type": "named",
           "name": "DEFAULT_SETTINGS"
+        },
+        {
+          "type": "named",
+          "name": "TIME_GROUP_PRESETS"
         }
       ],
       "declarations": []
@@ -3178,6 +3342,18 @@
         },
         {
           "type": "named",
+          "name": "TimeGroupPreset"
+        },
+        {
+          "type": "named",
+          "name": "CustomRange"
+        },
+        {
+          "type": "named",
+          "name": "RestrictedRange"
+        },
+        {
+          "type": "named",
           "name": "TaskRestriction"
         },
         {
@@ -3212,6 +3388,11 @@
       "declarations": [
         {
           "kind": "interface",
+          "name": "CustomRange",
+          "exported": false
+        },
+        {
+          "kind": "interface",
           "name": "Task",
           "exported": false
         },
@@ -3243,6 +3424,16 @@
         {
           "kind": "interface",
           "name": "ApiError",
+          "exported": false
+        },
+        {
+          "kind": "type",
+          "name": "TimeGroupPreset",
+          "exported": false
+        },
+        {
+          "kind": "type",
+          "name": "RestrictedRange",
           "exported": false
         },
         {
@@ -3514,14 +3705,16 @@
           "defaultName": "type",
           "named": [
             "Task",
-            "Settings"
+            "Settings",
+            "RestrictedRange"
           ]
         },
         {
           "source": "@brkroutnxdle/shared",
           "default": false,
           "named": [
-            "SLOT_DURATION_MINUTES"
+            "SLOT_DURATION_MINUTES",
+            "TIME_GROUP_PRESETS"
           ]
         },
         {
@@ -3566,6 +3759,24 @@
         {
           "kind": "function",
           "name": "scoreSlot",
+          "exported": false,
+          "async": false
+        },
+        {
+          "kind": "function",
+          "name": "isInRestrictedRange",
+          "exported": false,
+          "async": false
+        },
+        {
+          "kind": "function",
+          "name": "getDayKey",
+          "exported": false,
+          "async": false
+        },
+        {
+          "kind": "function",
+          "name": "isGapSatisfied",
           "exported": false,
           "async": false
         },
@@ -4325,7 +4536,7 @@
   },
   "errors": [],
   "dependencyCount": {
-    "react": 44,
+    "react": 45,
     "./contexts/AuthContext": 2,
     "./pages/LoginPage": 1,
     "./pages/DashboardPage": 1,
@@ -4354,7 +4565,7 @@
     "../../hooks/useTasks": 2,
     "./TaskCard": 1,
     "./TaskModal": 1,
-    "../contexts/BlockContext": 2,
+    "../contexts/BlockContext": 4,
     "@tanstack/react-query": 5,
     "../contexts/CalendarContext": 6,
     "../contexts/PreviewContext": 5,
@@ -4389,6 +4600,9 @@
     "../features/completion/RefreshButton": 1,
     "../features/completion/ConflictDialog": 1,
     "../hooks/useUnsavedChanges": 1,
+    "../features/shared/CreateActionModal": 1,
+    "../features/tasks/TaskModal": 1,
+    "../features/blocks/BlockModal": 1,
     "express": 10,
     "cors": 1,
     "cookie-parser": 1,
@@ -4423,10 +4637,10 @@
   },
   "perPackage": {
     "apps/web": {
-      "files": 48,
-      "imports": 167,
-      "exports": 58,
-      "declarations": 109
+      "files": 49,
+      "imports": 173,
+      "exports": 59,
+      "declarations": 125
     },
     "apps/api": {
       "files": 11,
@@ -4437,14 +4651,14 @@
     "packages/shared": {
       "files": 3,
       "imports": 1,
-      "exports": 18,
-      "declarations": 8
+      "exports": 22,
+      "declarations": 11
     },
     "packages/domain": {
       "files": 11,
       "imports": 25,
       "exports": 27,
-      "declarations": 33
+      "declarations": 36
     },
     "packages/calendar": {
       "files": 6,

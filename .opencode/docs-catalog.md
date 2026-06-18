@@ -36,6 +36,7 @@ Catalog of all `.md` files in `.opencode/` with content description and when to 
 | `skills/delivery-pipeline/references/failure-recovery.md` | Failure recovery and state persistence rules | Recovery logic changes |
 | `skills/delivery-pipeline/references/task-tracking.md` | Task tracking in pipeline state | Tracking format changes |
 | `skills/delivery-pipeline/references/agent-response-format.md` | Standard agent response format | Response format changes |
+| `skills/delivery-pipeline/references/constraints.md` | Pipeline constraint list | Constraint rules change |
 | `skills/workflow-router/SKILL.md` | Request classification and workflow routing | Classification logic or routing changes |
 | `skills/learning-improvement/SKILL.md` | Session evaluation (step 1/3 of STOP) | Evaluation format changes; chaining enforcement |
 | `skills/continuous-learning/SKILL.md` | Doc update proposal (step 2/3 of STOP) | Scope of analyzed docs changes |

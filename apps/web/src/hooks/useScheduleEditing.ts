@@ -52,7 +52,7 @@ export function useScheduleEditing(
       const endHour = new Date(endStr).getUTCHours();
 
       // Must be within available hours
-      if (startHour < settings.workStartHour || endHour > settings.workEndHour) {
+      if (startHour < settings.workStartHour || endHour > settings.workEndHour + 1) {
         return false;
       }
 

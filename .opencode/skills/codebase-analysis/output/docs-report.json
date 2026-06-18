@@ -1,20 +1,20 @@
 {
-  "generatedAt": "2026-06-14T01:08:30.669Z",
+  "generatedAt": "2026-06-18T02:07:10.353Z",
   "mode": "docs",
   "summary": {
     "totalFiles": 102,
-    "totalMdFiles": 94,
-    "totalJsonFiles": 4,
+    "totalMdFiles": 93,
+    "totalJsonFiles": 5,
     "totalYamlFiles": 4,
     "totalTxtFiles": 0,
-    "totalHeadings": 1821,
-    "totalCodeBlocks": 583,
-    "totalListItems": 1583
+    "totalHeadings": 1835,
+    "totalCodeBlocks": 587,
+    "totalListItems": 1678
   },
   "files": {
     ".opencode/agents/00-planning-agent.md": {
-      "size": 3802,
-      "lines": 195,
+      "size": 6480,
+      "lines": 229,
       "type": "markdown",
       "headings": [
         {
@@ -43,35 +43,39 @@
         },
         {
           "level": 3,
-          "text": "2. Explore the Codebase"
+          "text": "2. Review Design Documents (if chained after Solution Designer)"
         },
         {
           "level": 3,
-          "text": "3. Analyze Feasibility"
+          "text": "3. Explore the Codebase"
         },
         {
           "level": 3,
-          "text": "4. Analyze Impact"
+          "text": "4. Analyze Feasibility"
         },
         {
           "level": 3,
-          "text": "5. Analyze Risks"
+          "text": "5. Analyze Impact"
         },
         {
           "level": 3,
-          "text": "6. Compare Approaches"
+          "text": "6. Analyze Risks"
         },
         {
           "level": 3,
-          "text": "7. Approval Loop"
+          "text": "7. Compare Approaches (independent flow only)"
         },
         {
           "level": 3,
-          "text": "8. Create Planning Documents"
+          "text": "8. Approval Loop"
         },
         {
           "level": 3,
-          "text": "9. Update Pipeline"
+          "text": "9. Create Planning Documents"
+        },
+        {
+          "level": 3,
+          "text": "10. Update Pipeline"
         },
         {
           "level": 2,
@@ -86,10 +90,10 @@
           "text": "Constraints"
         }
       ],
-      "totalHeadings": 17,
+      "totalHeadings": 18,
       "totalCodeBlocks": 0,
       "codeBlocks": [],
-      "totalListItems": 66,
+      "totalListItems": 77,
       "sections": [
         "Planning Analyst Agent",
         "Role",
@@ -97,27 +101,28 @@
         "Responsibilities",
         "Workflow",
         "1. Analyze Request",
-        "2. Explore the Codebase",
-        "3. Analyze Feasibility",
-        "4. Analyze Impact",
-        "5. Analyze Risks",
-        "6. Compare Approaches",
-        "7. Approval Loop",
-        "8. Create Planning Documents",
-        "9. Update Pipeline",
+        "2. Review Design Documents (if chained after Solution Designer)",
+        "3. Explore the Codebase",
+        "4. Analyze Feasibility",
+        "5. Analyze Impact",
+        "6. Analyze Risks",
+        "7. Compare Approaches (independent flow only)",
+        "8. Approval Loop",
+        "9. Create Planning Documents",
+        "10. Update Pipeline",
         "Planning Rules",
         "Return Format",
         "Constraints"
       ]
     },
-    ".opencode/agents/01-product-manager.md": {
-      "size": 3145,
-      "lines": 174,
+    ".opencode/agents/01-solution-designer.md": {
+      "size": 7022,
+      "lines": 224,
       "type": "markdown",
       "headings": [
         {
           "level": 1,
-          "text": "Product Manager Agent"
+          "text": "Solution Designer Agent"
         },
         {
           "level": 2,
@@ -129,6 +134,10 @@
         },
         {
           "level": 2,
+          "text": "Prohibited Inputs"
+        },
+        {
+          "level": 2,
           "text": "Responsibilities"
         },
         {
@@ -137,31 +146,31 @@
         },
         {
           "level": 3,
-          "text": "1. Determine If Discovery Is Required"
+          "text": "1. Understand the Request"
         },
         {
           "level": 3,
-          "text": "2. Analyze Request"
+          "text": "2. Map Relevant Documentation"
         },
         {
           "level": 3,
-          "text": "3. Validate Scope"
+          "text": "3. Research Approaches"
         },
         {
           "level": 3,
-          "text": "4. Create Epics"
+          "text": "4. Present Options"
         },
         {
           "level": 3,
-          "text": "5. Prioritize Epics"
+          "text": "5. Collaborative Loop"
         },
         {
           "level": 3,
-          "text": "6. Create Epic Files"
+          "text": "6. Create Design Documents"
         },
         {
           "level": 3,
-          "text": "7. Create Epic Index"
+          "text": "7. Create Design Index"
         },
         {
           "level": 3,
@@ -169,7 +178,11 @@
         },
         {
           "level": 2,
-          "text": "Epic Rules"
+          "text": "Downstream Validation"
+        },
+        {
+          "level": 2,
+          "text": "Design Document Rules"
         },
         {
           "level": 2,
@@ -180,32 +193,51 @@
           "text": "Constraints"
         }
       ],
-      "totalHeadings": 16,
-      "totalCodeBlocks": 0,
-      "codeBlocks": [],
-      "totalListItems": 61,
+      "totalHeadings": 18,
+      "totalCodeBlocks": 4,
+      "codeBlocks": [
+        {
+          "language": "text",
+          "lines": 1
+        },
+        {
+          "language": "text",
+          "lines": 4
+        },
+        {
+          "language": "text",
+          "lines": 1
+        },
+        {
+          "language": "text",
+          "lines": 1
+        }
+      ],
+      "totalListItems": 89,
       "sections": [
-        "Product Manager Agent",
+        "Solution Designer Agent",
         "Role",
         "Inputs",
+        "Prohibited Inputs",
         "Responsibilities",
         "Workflow",
-        "1. Determine If Discovery Is Required",
-        "2. Analyze Request",
-        "3. Validate Scope",
-        "4. Create Epics",
-        "5. Prioritize Epics",
-        "6. Create Epic Files",
-        "7. Create Epic Index",
+        "1. Understand the Request",
+        "2. Map Relevant Documentation",
+        "3. Research Approaches",
+        "4. Present Options",
+        "5. Collaborative Loop",
+        "6. Create Design Documents",
+        "7. Create Design Index",
         "8. Update Pipeline",
-        "Epic Rules",
+        "Downstream Validation",
+        "Design Document Rules",
         "Return Format",
         "Constraints"
       ]
     },
     ".opencode/agents/02-tech-lead.md": {
-      "size": 4345,
-      "lines": 247,
+      "size": 5510,
+      "lines": 265,
       "type": "markdown",
       "headings": [
         {
@@ -290,13 +322,17 @@
         },
         {
           "level": 2,
+          "text": "Retry Limit (failure escalation)"
+        },
+        {
+          "level": 2,
           "text": "Constraints"
         }
       ],
-      "totalHeadings": 21,
+      "totalHeadings": 22,
       "totalCodeBlocks": 0,
       "codeBlocks": [],
-      "totalListItems": 60,
+      "totalListItems": 64,
       "sections": [
         "Tech Lead Agent",
         "Role",
@@ -318,12 +354,13 @@
         "Parallelization Rules",
         "Output",
         "Parallelization Requirements",
+        "Retry Limit (failure escalation)",
         "Constraints"
       ]
     },
     ".opencode/agents/03-senior-frontend.md": {
-      "size": 2815,
-      "lines": 148,
+      "size": 4352,
+      "lines": 172,
       "type": "markdown",
       "headings": [
         {
@@ -360,15 +397,23 @@
         },
         {
           "level": 3,
-          "text": "4. Validate Implementation"
+          "text": "4. Review Changes"
         },
         {
           "level": 3,
-          "text": "5. Create or Update Tests"
+          "text": "5. Validate Implementation"
         },
         {
           "level": 3,
-          "text": "6. Return Results"
+          "text": "6. Create or Update Tests"
+        },
+        {
+          "level": 3,
+          "text": "7. Run Build Validation (Mandatory)"
+        },
+        {
+          "level": 3,
+          "text": "8. Return Results"
         },
         {
           "level": 2,
@@ -396,13 +441,17 @@
         },
         {
           "level": 2,
+          "text": "Retry Limit (failure escalation)"
+        },
+        {
+          "level": 2,
           "text": "Constraints"
         }
       ],
-      "totalHeadings": 18,
+      "totalHeadings": 21,
       "totalCodeBlocks": 0,
       "codeBlocks": [],
-      "totalListItems": 47,
+      "totalListItems": 52,
       "sections": [
         "Senior Frontend Agent",
         "Role",
@@ -412,21 +461,24 @@
         "1. Review Assigned Tasks",
         "2. Review Relevant Code",
         "3. Implement Solution",
-        "4. Validate Implementation",
-        "5. Create or Update Tests",
-        "6. Return Results",
+        "4. Review Changes",
+        "5. Validate Implementation",
+        "6. Create or Update Tests",
+        "7. Run Build Validation (Mandatory)",
+        "8. Return Results",
         "Implementation Rules",
         "Architecture",
         "Business Logic",
         "TypeScript",
         "Quality",
         "Output",
+        "Retry Limit (failure escalation)",
         "Constraints"
       ]
     },
     ".opencode/agents/04-senior-backend.md": {
-      "size": 3140,
-      "lines": 175,
+      "size": 4422,
+      "lines": 195,
       "type": "markdown",
       "headings": [
         {
@@ -463,19 +515,23 @@
         },
         {
           "level": 3,
-          "text": "4. Validate Implementation"
+          "text": "4. Review Changes"
         },
         {
           "level": 3,
-          "text": "5. Validate Endpoints"
+          "text": "5. Validate Implementation"
         },
         {
           "level": 3,
-          "text": "6. Create or Update Tests"
+          "text": "6. Validate Endpoints"
         },
         {
           "level": 3,
-          "text": "7. Return Results"
+          "text": "7. Create or Update Tests"
+        },
+        {
+          "level": 3,
+          "text": "8. Return Results"
         },
         {
           "level": 2,
@@ -507,13 +563,17 @@
         },
         {
           "level": 2,
+          "text": "Retry Limit (failure escalation)"
+        },
+        {
+          "level": 2,
           "text": "Constraints"
         }
       ],
-      "totalHeadings": 20,
+      "totalHeadings": 22,
       "totalCodeBlocks": 0,
       "codeBlocks": [],
-      "totalListItems": 56,
+      "totalListItems": 61,
       "sections": [
         "Senior Backend Agent",
         "Role",
@@ -523,10 +583,11 @@
         "1. Review Assigned Tasks",
         "2. Review Relevant Code",
         "3. Implement Solution",
-        "4. Validate Implementation",
-        "5. Validate Endpoints",
-        "6. Create or Update Tests",
-        "7. Return Results",
+        "4. Review Changes",
+        "5. Validate Implementation",
+        "6. Validate Endpoints",
+        "7. Create or Update Tests",
+        "8. Return Results",
         "Implementation Rules",
         "Architecture",
         "Business Logic",
@@ -534,12 +595,13 @@
         "Quality",
         "Reliability",
         "Output",
+        "Retry Limit (failure escalation)",
         "Constraints"
       ]
     },
     ".opencode/agents/05-qa-reviewer.md": {
-      "size": 3451,
-      "lines": 182,
+      "size": 4372,
+      "lines": 199,
       "type": "markdown",
       "headings": [
         {
@@ -616,13 +678,17 @@
         },
         {
           "level": 2,
+          "text": "Retry Limit (failure escalation)"
+        },
+        {
+          "level": 2,
           "text": "Constraints"
         }
       ],
-      "totalHeadings": 19,
+      "totalHeadings": 20,
       "totalCodeBlocks": 0,
       "codeBlocks": [],
-      "totalListItems": 58,
+      "totalListItems": 62,
       "sections": [
         "QA Reviewer Agent",
         "Role",
@@ -642,35 +708,8 @@
         "Rejection",
         "Scope",
         "Output",
+        "Retry Limit (failure escalation)",
         "Constraints"
-      ]
-    },
-    ".opencode/agents/shared/implementation-rules.md": {
-      "size": 229,
-      "lines": 15,
-      "type": "markdown",
-      "headings": [
-        {
-          "level": 1,
-          "text": "Common Implementation Rules"
-        },
-        {
-          "level": 2,
-          "text": "Architecture"
-        },
-        {
-          "level": 2,
-          "text": "Quality"
-        }
-      ],
-      "totalHeadings": 3,
-      "totalCodeBlocks": 0,
-      "codeBlocks": [],
-      "totalListItems": 7,
-      "sections": [
-        "Common Implementation Rules",
-        "Architecture",
-        "Quality"
       ]
     },
     ".opencode/architecture/architecture.md": {
@@ -3812,8 +3851,8 @@
       ]
     },
     ".opencode/architecture/docs/feature/design-system-implementation.md": {
-      "size": 1807,
-      "lines": 85,
+      "size": 472,
+      "lines": 22,
       "type": "markdown",
       "headings": [
         {
@@ -3826,27 +3865,7 @@
         },
         {
           "level": 2,
-          "text": "Purpose"
-        },
-        {
-          "level": 2,
-          "text": "Source Documents"
-        },
-        {
-          "level": 2,
-          "text": "Color Palette"
-        },
-        {
-          "level": 2,
-          "text": "Typography"
-        },
-        {
-          "level": 2,
-          "text": "Components"
-        },
-        {
-          "level": 2,
-          "text": "Animations"
+          "text": "Source Document"
         },
         {
           "level": 2,
@@ -3857,26 +3876,21 @@
           "text": "References"
         }
       ],
-      "totalHeadings": 10,
+      "totalHeadings": 5,
       "totalCodeBlocks": 0,
       "codeBlocks": [],
-      "totalListItems": 8,
+      "totalListItems": 6,
       "sections": [
         "Design System Implementation",
         "Status",
-        "Purpose",
-        "Source Documents",
-        "Color Palette",
-        "Typography",
-        "Components",
-        "Animations",
+        "Source Document",
         "Success Criteria",
         "References"
       ]
     },
     ".opencode/architecture/docs/feature/error-handling-and-retry.md": {
-      "size": 2402,
-      "lines": 127,
+      "size": 541,
+      "lines": 24,
       "type": "markdown",
       "headings": [
         {
@@ -3889,55 +3903,7 @@
         },
         {
           "level": 2,
-          "text": "Purpose"
-        },
-        {
-          "level": 2,
-          "text": "Source Documents"
-        },
-        {
-          "level": 2,
-          "text": "Error Categories"
-        },
-        {
-          "level": 3,
-          "text": "Authentication"
-        },
-        {
-          "level": 3,
-          "text": "Calendar"
-        },
-        {
-          "level": 3,
-          "text": "Events"
-        },
-        {
-          "level": 3,
-          "text": "Google API"
-        },
-        {
-          "level": 2,
-          "text": "Retry Strategy"
-        },
-        {
-          "level": 2,
-          "text": "UI Error States"
-        },
-        {
-          "level": 3,
-          "text": "Toast / Banner"
-        },
-        {
-          "level": 3,
-          "text": "Modal"
-        },
-        {
-          "level": 2,
-          "text": "Error Boundaries"
-        },
-        {
-          "level": 2,
-          "text": "User-Facing Messages"
+          "text": "Source Document"
         },
         {
           "level": 2,
@@ -3948,35 +3914,14 @@
           "text": "References"
         }
       ],
-      "totalHeadings": 17,
-      "totalCodeBlocks": 2,
-      "codeBlocks": [
-        {
-          "language": "text",
-          "lines": 4
-        },
-        {
-          "language": "text",
-          "lines": 4
-        }
-      ],
-      "totalListItems": 20,
+      "totalHeadings": 5,
+      "totalCodeBlocks": 0,
+      "codeBlocks": [],
+      "totalListItems": 8,
       "sections": [
         "Error Handling And Retry",
         "Status",
-        "Purpose",
-        "Source Documents",
-        "Error Categories",
-        "Authentication",
-        "Calendar",
-        "Events",
-        "Google API",
-        "Retry Strategy",
-        "UI Error States",
-        "Toast / Banner",
-        "Modal",
-        "Error Boundaries",
-        "User-Facing Messages",
+        "Source Document",
         "Success Criteria",
         "References"
       ]
@@ -7376,8 +7321,8 @@
       ]
     },
     ".opencode/architecture/generation-algorithm.md": {
-      "size": 4910,
-      "lines": 285,
+      "size": 5309,
+      "lines": 291,
       "type": "markdown",
       "headings": [
         {
@@ -7395,6 +7340,14 @@
         {
           "level": 1,
           "text": "Goals"
+        },
+        {
+          "level": 1,
+          "text": "Constraints"
+        },
+        {
+          "level": 2,
+          "text": "Restriction Implementation Parity"
         },
         {
           "level": 1,
@@ -7529,7 +7482,7 @@
           "text": "References"
         }
       ],
-      "totalHeadings": 37,
+      "totalHeadings": 39,
       "totalCodeBlocks": 12,
       "codeBlocks": [
         {
@@ -7587,6 +7540,8 @@
         "BrkRoutnXdle Generation Algorithm",
         "Purpose",
         "Goals",
+        "Constraints",
+        "Restriction Implementation Parity",
         "Non Goals",
         "Inputs",
         "User Settings",
@@ -11278,8 +11233,8 @@
       "sections": []
     },
     ".opencode/docs-catalog.md": {
-      "size": 11232,
-      "lines": 138,
+      "size": 12032,
+      "lines": 143,
       "type": "markdown",
       "headings": [
         {
@@ -11331,8 +11286,8 @@
       ]
     },
     ".opencode/INDEX.md": {
-      "size": 3064,
-      "lines": 91,
+      "size": 3953,
+      "lines": 107,
       "type": "markdown",
       "headings": [
         {
@@ -11377,13 +11332,21 @@
         },
         {
           "level": 1,
+          "text": "Plugins"
+        },
+        {
+          "level": 1,
+          "text": "Tools"
+        },
+        {
+          "level": 1,
           "text": "Planning"
         }
       ],
-      "totalHeadings": 11,
+      "totalHeadings": 13,
       "totalCodeBlocks": 0,
       "codeBlocks": [],
-      "totalListItems": 52,
+      "totalListItems": 62,
       "sections": [
         "Project Documentation Index",
         "Getting Started",
@@ -11395,6 +11358,8 @@
         "Skills",
         "Templates",
         "Commands",
+        "Plugins",
+        "Tools",
         "Planning"
       ]
     },
@@ -11558,8 +11523,8 @@
       ]
     },
     ".opencode/package-lock.json": {
-      "size": 64992,
-      "lines": 1993,
+      "size": 65018,
+      "lines": 1994,
       "type": "json",
       "topKeys": [
         "name",
@@ -11569,8 +11534,8 @@
       ]
     },
     ".opencode/package.json": {
-      "size": 160,
-      "lines": 12,
+      "size": 182,
+      "lines": 13,
       "type": "json",
       "topKeys": [
         "scripts",
@@ -11579,20 +11544,16 @@
       ]
     },
     ".opencode/pipeline.yaml": {
-      "size": 2012,
-      "lines": 138,
+      "size": 1408,
+      "lines": 68,
       "type": "yaml",
       "topKeys": [
-        "pipeline",
-        "tasks",
-        "history",
-        "handoff",
-        "resume"
+        "pipeline"
       ]
     },
     ".opencode/pnpm-lock.yaml": {
-      "size": 38289,
-      "lines": 1239,
+      "size": 38350,
+      "lines": 1242,
       "type": "yaml",
       "topKeys": [
         "lockfileVersion",
@@ -11611,8 +11572,8 @@
       ]
     },
     ".opencode/project-structure.md": {
-      "size": 3618,
-      "lines": 101,
+      "size": 3955,
+      "lines": 111,
       "type": "markdown",
       "headings": [
         {
@@ -11625,7 +11586,7 @@
       "codeBlocks": [
         {
           "language": "(none)",
-          "lines": 96
+          "lines": 106
         }
       ],
       "totalListItems": 0,
@@ -11634,8 +11595,8 @@
       ]
     },
     ".opencode/skills/codebase-analysis/output/docs-report.json": {
-      "size": 361526,
-      "lines": 15382,
+      "size": 405599,
+      "lines": 16760,
       "type": "json",
       "topKeys": [
         "generatedAt",
@@ -11647,14 +11608,29 @@
         "codeBlockLanguages"
       ]
     },
-    ".opencode/skills/codebase-analysis/output/docs-report.md": {
-      "size": 9482,
-      "lines": 159,
+    ".opencode/skills/codebase-analysis/output/implementation-report.json": {
+      "size": 103060,
+      "lines": 4676,
+      "type": "json",
+      "topKeys": [
+        "generatedAt",
+        "mode",
+        "parser",
+        "summary",
+        "files",
+        "errors",
+        "dependencyCount",
+        "perPackage"
+      ]
+    },
+    ".opencode/skills/codebase-analysis/output/implementation-report.md": {
+      "size": 5221,
+      "lines": 162,
       "type": "markdown",
       "headings": [
         {
           "level": 1,
-          "text": "Codebase Analysis — Documentation"
+          "text": "Codebase Analysis — Implementation"
         }
       ],
       "totalHeadings": 1,
@@ -11662,12 +11638,12 @@
       "codeBlocks": [
         {
           "language": "(none)",
-          "lines": 152
+          "lines": 155
         }
       ],
-      "totalListItems": 19,
+      "totalListItems": 0,
       "sections": [
-        "Codebase Analysis — Documentation"
+        "Codebase Analysis — Implementation"
       ]
     },
     ".opencode/skills/codebase-analysis/scripts/package.json": {
@@ -11760,8 +11736,8 @@
       ]
     },
     ".opencode/skills/continuous-learning/SKILL.md": {
-      "size": 3912,
-      "lines": 60,
+      "size": 5716,
+      "lines": 69,
       "type": "markdown",
       "headings": [
         {
@@ -11784,7 +11760,7 @@
       "totalHeadings": 4,
       "totalCodeBlocks": 0,
       "codeBlocks": [],
-      "totalListItems": 30,
+      "totalListItems": 37,
       "sections": [
         "Continuous Learning Skill",
         "When to use",
@@ -11793,49 +11769,72 @@
       ]
     },
     ".opencode/skills/delivery-pipeline/references/agent-response-format.md": {
-      "size": 211,
-      "lines": 19,
+      "size": 1119,
+      "lines": 41,
       "type": "markdown",
       "headings": [
         {
           "level": 1,
           "text": "Standard Agent Response Format"
+        },
+        {
+          "level": 2,
+          "text": "Example"
         }
       ],
-      "totalHeadings": 1,
-      "totalCodeBlocks": 1,
+      "totalHeadings": 2,
+      "totalCodeBlocks": 2,
       "codeBlocks": [
         {
           "language": "yaml",
           "lines": 9
+        },
+        {
+          "language": "yaml",
+          "lines": 11
         }
       ],
-      "totalListItems": 4,
+      "totalListItems": 14,
       "sections": [
-        "Standard Agent Response Format"
+        "Standard Agent Response Format",
+        "Example"
       ]
     },
     ".opencode/skills/delivery-pipeline/references/failure-recovery.md": {
-      "size": 308,
-      "lines": 20,
+      "size": 1099,
+      "lines": 40,
       "type": "markdown",
       "headings": [
         {
           "level": 1,
           "text": "Failure Recovery"
+        },
+        {
+          "level": 3,
+          "text": "Resume Metadata Accuracy"
+        },
+        {
+          "level": 3,
+          "text": "Git Diff Tool Limitations"
         }
       ],
-      "totalHeadings": 1,
-      "totalCodeBlocks": 1,
+      "totalHeadings": 3,
+      "totalCodeBlocks": 2,
       "codeBlocks": [
+        {
+          "language": "text",
+          "lines": 1
+        },
         {
           "language": "text",
           "lines": 1
         }
       ],
-      "totalListItems": 5,
+      "totalListItems": 7,
       "sections": [
-        "Failure Recovery"
+        "Failure Recovery",
+        "Resume Metadata Accuracy",
+        "Git Diff Tool Limitations"
       ]
     },
     ".opencode/skills/delivery-pipeline/references/parallelization-rules.md": {
@@ -11899,8 +11898,8 @@
       ]
     },
     ".opencode/skills/delivery-pipeline/SKILL.md": {
-      "size": 7051,
-      "lines": 323,
+      "size": 14595,
+      "lines": 446,
       "type": "markdown",
       "headings": [
         {
@@ -11914,6 +11913,10 @@
         {
           "level": 2,
           "text": "Templates"
+        },
+        {
+          "level": 3,
+          "text": "Variable Resolution"
         },
         {
           "level": 2,
@@ -11945,6 +11948,14 @@
         },
         {
           "level": 3,
+          "text": "Agent Dispatch Rules"
+        },
+        {
+          "level": 3,
+          "text": "Orchestrator Must Never Do Agent Work"
+        },
+        {
+          "level": 3,
           "text": "Information Handoff"
         },
         {
@@ -11957,7 +11968,7 @@
         },
         {
           "level": 3,
-          "text": "Product Manager Flow"
+          "text": "Solution Designer Flow"
         },
         {
           "level": 3,
@@ -11974,6 +11985,10 @@
         {
           "level": 3,
           "text": "Parallel Execution Phase"
+        },
+        {
+          "level": 3,
+          "text": "Concurrent File Modification Prevention"
         },
         {
           "level": 3,
@@ -12000,8 +12015,32 @@
           "text": "Pipeline Updates"
         },
         {
+          "level": 3,
+          "text": "YAML Formatting"
+        },
+        {
+          "level": 1,
+          "text": "Wrong (causes YAML parse error):"
+        },
+        {
+          "level": 1,
+          "text": "Correct:"
+        },
+        {
+          "level": 3,
+          "text": "Pipeline Completion"
+        },
+        {
           "level": 2,
           "text": "Standard Agent Response Format"
+        },
+        {
+          "level": 3,
+          "text": "Validation Gate"
+        },
+        {
+          "level": 3,
+          "text": "Step Limit Consideration"
         },
         {
           "level": 2,
@@ -12012,14 +12051,15 @@
           "text": "Constraints"
         }
       ],
-      "totalHeadings": 27,
+      "totalHeadings": 37,
       "totalCodeBlocks": 0,
       "codeBlocks": [],
-      "totalListItems": 84,
+      "totalListItems": 130,
       "sections": [
         "Delivery Pipeline Skill",
         "Purpose",
         "Templates",
+        "Variable Resolution",
         "Commands",
         "New Execution",
         "Resume Execution",
@@ -12027,21 +12067,30 @@
         "Responsibilities",
         "Workflow Orchestration",
         "State Management",
+        "Agent Dispatch Rules",
+        "Orchestrator Must Never Do Agent Work",
         "Information Handoff",
         "Workflow",
         "Step 1 - Route Request",
-        "Product Manager Flow",
+        "Solution Designer Flow",
         "Planning Flow",
         "Tech Lead Flow",
         "Parallel Development Phase",
         "Parallel Execution Phase",
+        "Concurrent File Modification Prevention",
         "QA Phase",
         "Corrections Loop",
         "Completion",
         "Parallelization Rules",
         "Failure Recovery",
         "Pipeline Updates",
+        "YAML Formatting",
+        "Wrong (causes YAML parse error):",
+        "Correct:",
+        "Pipeline Completion",
         "Standard Agent Response Format",
+        "Validation Gate",
+        "Step Limit Consideration",
         "Task Tracking",
         "Constraints"
       ]
@@ -12133,8 +12182,8 @@
       ]
     },
     ".opencode/skills/learning-improvement/SKILL.md": {
-      "size": 1891,
-      "lines": 36,
+      "size": 2777,
+      "lines": 41,
       "type": "markdown",
       "headings": [
         {
@@ -12161,7 +12210,7 @@
       "totalHeadings": 5,
       "totalCodeBlocks": 0,
       "codeBlocks": [],
-      "totalListItems": 15,
+      "totalListItems": 20,
       "sections": [
         "Learning Improvement Skill",
         "When to use",
@@ -12228,8 +12277,8 @@
       ]
     },
     ".opencode/skills/workflow-router/SKILL.md": {
-      "size": 2740,
-      "lines": 152,
+      "size": 3111,
+      "lines": 156,
       "type": "markdown",
       "headings": [
         {
@@ -12250,7 +12299,7 @@
         },
         {
           "level": 3,
-          "text": "Route to Product Manager"
+          "text": "Route to Solution Designer"
         },
         {
           "level": 3,
@@ -12309,13 +12358,13 @@
           "lines": 5
         }
       ],
-      "totalListItems": 44,
+      "totalListItems": 45,
       "sections": [
         "Workflow Router Skill",
         "Purpose",
         "Decision Tree",
         "Routing Rules",
-        "Route to Product Manager",
+        "Route to Solution Designer",
         "Route to Planning Analyst",
         "Route to Tech Lead",
         "Complexity Classification",
@@ -12326,86 +12375,118 @@
         "Constraints"
       ]
     },
-    ".opencode/template/epic-template.md": {
-      "size": 852,
-      "lines": 114,
+    ".opencode/template/design-template.md": {
+      "size": 1257,
+      "lines": 124,
       "type": "markdown",
       "headings": [
         {
           "level": 1,
-          "text": "Epic Template"
+          "text": "Design Template"
         },
         {
           "level": 2,
-          "text": "Epic Information"
+          "text": "Context"
         },
         {
           "level": 3,
-          "text": "ID"
+          "text": "Problem Statement"
         },
         {
           "level": 3,
-          "text": "Title"
+          "text": "Goals"
         },
         {
           "level": 3,
-          "text": "Priority"
-        },
-        {
-          "level": 3,
-          "text": "Status"
+          "text": "Constraints"
         },
         {
           "level": 2,
-          "text": "Objective"
+          "text": "Options Considered"
+        },
+        {
+          "level": 3,
+          "text": "Option A (Recommended)"
+        },
+        {
+          "level": 4,
+          "text": "Description"
+        },
+        {
+          "level": 4,
+          "text": "Advantages"
+        },
+        {
+          "level": 4,
+          "text": "Disadvantages"
+        },
+        {
+          "level": 4,
+          "text": "Effort Estimate"
+        },
+        {
+          "level": 3,
+          "text": "Option B"
+        },
+        {
+          "level": 4,
+          "text": "Description"
+        },
+        {
+          "level": 4,
+          "text": "Advantages"
+        },
+        {
+          "level": 4,
+          "text": "Disadvantages"
+        },
+        {
+          "level": 4,
+          "text": "Effort Estimate"
+        },
+        {
+          "level": 3,
+          "text": "Custom Option"
+        },
+        {
+          "level": 4,
+          "text": "Description"
+        },
+        {
+          "level": 4,
+          "text": "Notes"
         },
         {
           "level": 2,
-          "text": "User Value"
+          "text": "Decision"
         },
         {
           "level": 3,
-          "text": "Problem"
+          "text": "Selected Option"
         },
         {
           "level": 3,
-          "text": "Expected Outcome"
+          "text": "Reasoning"
         },
         {
           "level": 3,
-          "text": "Success Criteria"
+          "text": "Trade-offs Accepted"
         },
         {
           "level": 2,
-          "text": "Scope"
+          "text": "Impact"
         },
         {
           "level": 3,
-          "text": "Included"
+          "text": "Documentation Affected"
         },
         {
           "level": 3,
-          "text": "Excluded"
-        },
-        {
-          "level": 2,
-          "text": "Deliverables"
-        },
-        {
-          "level": 2,
-          "text": "Acceptance Criteria"
-        },
-        {
-          "level": 2,
-          "text": "Dependencies"
+          "text": "Architecture Affected"
         },
         {
           "level": 3,
-          "text": "Required"
-        },
-        {
-          "level": 3,
-          "text": "Blocks"
+          "text": "Dependencies Added"
         },
         {
           "level": 2,
@@ -12413,44 +12494,47 @@
         },
         {
           "level": 2,
-          "text": "Notes"
-        },
-        {
-          "level": 2,
-          "text": "References"
+          "text": "Open Questions"
         }
       ],
-      "totalHeadings": 22,
+      "totalHeadings": 29,
       "totalCodeBlocks": 0,
       "codeBlocks": [],
-      "totalListItems": 19,
+      "totalListItems": 16,
       "sections": [
-        "Epic Template",
-        "Epic Information",
-        "ID",
-        "Title",
-        "Priority",
-        "Status",
-        "Objective",
-        "User Value",
-        "Problem",
-        "Expected Outcome",
-        "Success Criteria",
-        "Scope",
-        "Included",
-        "Excluded",
-        "Deliverables",
-        "Acceptance Criteria",
-        "Dependencies",
-        "Required",
-        "Blocks",
-        "Risks",
+        "Design Template",
+        "Context",
+        "Problem Statement",
+        "Goals",
+        "Constraints",
+        "Options Considered",
+        "Option A (Recommended)",
+        "Description",
+        "Advantages",
+        "Disadvantages",
+        "Effort Estimate",
+        "Option B",
+        "Description",
+        "Advantages",
+        "Disadvantages",
+        "Effort Estimate",
+        "Custom Option",
+        "Description",
         "Notes",
-        "References"
+        "Decision",
+        "Selected Option",
+        "Reasoning",
+        "Trade-offs Accepted",
+        "Impact",
+        "Documentation Affected",
+        "Architecture Affected",
+        "Dependencies Added",
+        "Risks",
+        "Open Questions"
       ]
     },
     ".opencode/template/pipeline-template.yaml": {
-      "size": 1360,
+      "size": 1365,
       "lines": 67,
       "type": "yaml",
       "topKeys": [
@@ -12794,7 +12878,7 @@
       ]
     },
     ".opencode/template/variables.md": {
-      "size": 458,
+      "size": 469,
       "lines": 11,
       "type": "markdown",
       "headings": [],
@@ -12812,7 +12896,7 @@
     ],
     "role": [
       ".opencode/agents/00-planning-agent.md",
-      ".opencode/agents/01-product-manager.md",
+      ".opencode/agents/01-solution-designer.md",
       ".opencode/agents/02-tech-lead.md",
       ".opencode/agents/03-senior-frontend.md",
       ".opencode/agents/04-senior-backend.md",
@@ -12820,7 +12904,7 @@
     ],
     "inputs": [
       ".opencode/agents/00-planning-agent.md",
-      ".opencode/agents/01-product-manager.md",
+      ".opencode/agents/01-solution-designer.md",
       ".opencode/agents/02-tech-lead.md",
       ".opencode/agents/03-senior-frontend.md",
       ".opencode/agents/04-senior-backend.md",
@@ -12829,7 +12913,7 @@
     ],
     "responsibilities": [
       ".opencode/agents/00-planning-agent.md",
-      ".opencode/agents/01-product-manager.md",
+      ".opencode/agents/01-solution-designer.md",
       ".opencode/agents/02-tech-lead.md",
       ".opencode/agents/03-senior-frontend.md",
       ".opencode/agents/04-senior-backend.md",
@@ -12843,7 +12927,7 @@
     ],
     "workflow": [
       ".opencode/agents/00-planning-agent.md",
-      ".opencode/agents/01-product-manager.md",
+      ".opencode/agents/01-solution-designer.md",
       ".opencode/agents/02-tech-lead.md",
       ".opencode/agents/03-senior-frontend.md",
       ".opencode/agents/04-senior-backend.md",
@@ -12858,80 +12942,90 @@
     "1. analyze request": [
       ".opencode/agents/00-planning-agent.md"
     ],
-    "2. explore the codebase": [
+    "2. review design documents (if chained after solution designer)": [
       ".opencode/agents/00-planning-agent.md"
     ],
-    "3. analyze feasibility": [
+    "3. explore the codebase": [
       ".opencode/agents/00-planning-agent.md"
     ],
-    "4. analyze impact": [
+    "4. analyze feasibility": [
       ".opencode/agents/00-planning-agent.md"
     ],
-    "5. analyze risks": [
+    "5. analyze impact": [
       ".opencode/agents/00-planning-agent.md"
     ],
-    "6. compare approaches": [
+    "6. analyze risks": [
       ".opencode/agents/00-planning-agent.md"
     ],
-    "7. approval loop": [
+    "7. compare approaches (independent flow only)": [
       ".opencode/agents/00-planning-agent.md"
     ],
-    "8. create planning documents": [
+    "8. approval loop": [
       ".opencode/agents/00-planning-agent.md"
     ],
-    "9. update pipeline": [
-      ".opencode/agents/00-planning-agent.md",
-      ".opencode/agents/02-tech-lead.md"
+    "9. create planning documents": [
+      ".opencode/agents/00-planning-agent.md"
+    ],
+    "10. update pipeline": [
+      ".opencode/agents/00-planning-agent.md"
     ],
     "planning rules": [
       ".opencode/agents/00-planning-agent.md"
     ],
     "return format": [
       ".opencode/agents/00-planning-agent.md",
-      ".opencode/agents/01-product-manager.md"
+      ".opencode/agents/01-solution-designer.md"
     ],
     "constraints": [
       ".opencode/agents/00-planning-agent.md",
-      ".opencode/agents/01-product-manager.md",
+      ".opencode/agents/01-solution-designer.md",
       ".opencode/agents/02-tech-lead.md",
       ".opencode/agents/03-senior-frontend.md",
       ".opencode/agents/04-senior-backend.md",
       ".opencode/agents/05-qa-reviewer.md",
       ".opencode/architecture/docs/feature/manual-calendar-editing.md",
       ".opencode/architecture/docs/feature/mobile-experience.md",
+      ".opencode/architecture/generation-algorithm.md",
       ".opencode/skills/delivery-pipeline/SKILL.md",
       ".opencode/skills/workflow-router/SKILL.md",
+      ".opencode/template/design-template.md",
       ".opencode/template/task-template.md"
     ],
-    "product manager agent": [
-      ".opencode/agents/01-product-manager.md"
+    "solution designer agent": [
+      ".opencode/agents/01-solution-designer.md"
     ],
-    "1. determine if discovery is required": [
-      ".opencode/agents/01-product-manager.md"
+    "prohibited inputs": [
+      ".opencode/agents/01-solution-designer.md"
     ],
-    "2. analyze request": [
-      ".opencode/agents/01-product-manager.md"
+    "1. understand the request": [
+      ".opencode/agents/01-solution-designer.md"
     ],
-    "3. validate scope": [
-      ".opencode/agents/01-product-manager.md"
+    "2. map relevant documentation": [
+      ".opencode/agents/01-solution-designer.md"
     ],
-    "4. create epics": [
-      ".opencode/agents/01-product-manager.md"
+    "3. research approaches": [
+      ".opencode/agents/01-solution-designer.md"
     ],
-    "5. prioritize epics": [
-      ".opencode/agents/01-product-manager.md"
+    "4. present options": [
+      ".opencode/agents/01-solution-designer.md"
     ],
-    "6. create epic files": [
-      ".opencode/agents/01-product-manager.md"
+    "5. collaborative loop": [
+      ".opencode/agents/01-solution-designer.md"
     ],
-    "7. create epic index": [
-      ".opencode/agents/01-product-manager.md"
+    "6. create design documents": [
+      ".opencode/agents/01-solution-designer.md"
+    ],
+    "7. create design index": [
+      ".opencode/agents/01-solution-designer.md"
     ],
     "8. update pipeline": [
-      ".opencode/agents/01-product-manager.md"
+      ".opencode/agents/01-solution-designer.md"
     ],
-    "epic rules": [
-      ".opencode/agents/01-product-manager.md"
+    "downstream validation": [
+      ".opencode/agents/01-solution-designer.md"
+    ],
+    "design document rules": [
+      ".opencode/agents/01-solution-designer.md"
     ],
     "tech lead agent": [
       ".opencode/agents/02-tech-lead.md"
@@ -12958,6 +13052,9 @@
       ".opencode/agents/02-tech-lead.md"
     ],
     "8. create task index": [
+      ".opencode/agents/02-tech-lead.md"
+    ],
+    "9. update pipeline": [
       ".opencode/agents/02-tech-lead.md"
     ],
     "task rules": [
@@ -12988,6 +13085,12 @@
     "parallelization requirements": [
       ".opencode/agents/02-tech-lead.md"
     ],
+    "retry limit (failure escalation)": [
+      ".opencode/agents/02-tech-lead.md",
+      ".opencode/agents/03-senior-frontend.md",
+      ".opencode/agents/04-senior-backend.md",
+      ".opencode/agents/05-qa-reviewer.md"
+    ],
     "senior frontend agent": [
       ".opencode/agents/03-senior-frontend.md"
     ],
@@ -13004,15 +13107,24 @@
       ".opencode/agents/03-senior-frontend.md",
       ".opencode/agents/04-senior-backend.md"
     ],
-    "4. validate implementation": [
+    "4. review changes": [
       ".opencode/agents/03-senior-frontend.md",
       ".opencode/agents/04-senior-backend.md"
     ],
-    "5. create or update tests": [
+    "5. validate implementation": [
+      ".opencode/agents/03-senior-frontend.md",
+      ".opencode/agents/04-senior-backend.md"
+    ],
+    "6. create or update tests": [
       ".opencode/agents/03-senior-frontend.md"
     ],
-    "6. return results": [
+    "7. run build validation (mandatory)": [
       ".opencode/agents/03-senior-frontend.md"
+    ],
+    "8. return results": [
+      ".opencode/agents/03-senior-frontend.md",
+      ".opencode/agents/04-senior-backend.md",
+      ".opencode/agents/05-qa-reviewer.md"
     ],
     "implementation rules": [
       ".opencode/agents/03-senior-frontend.md",
@@ -13021,7 +13133,6 @@
     "architecture": [
       ".opencode/agents/03-senior-frontend.md",
       ".opencode/agents/04-senior-backend.md",
-      ".opencode/agents/shared/implementation-rules.md",
       ".opencode/architecture/docs/backend/api-specification.md",
       ".opencode/architecture/index.md",
       ".opencode/docs-catalog.md",
@@ -13036,19 +13147,15 @@
     ],
     "quality": [
       ".opencode/agents/03-senior-frontend.md",
-      ".opencode/agents/04-senior-backend.md",
-      ".opencode/agents/shared/implementation-rules.md"
+      ".opencode/agents/04-senior-backend.md"
     ],
     "senior backend agent": [
       ".opencode/agents/04-senior-backend.md"
     ],
-    "5. validate endpoints": [
+    "6. validate endpoints": [
       ".opencode/agents/04-senior-backend.md"
     ],
-    "6. create or update tests": [
-      ".opencode/agents/04-senior-backend.md"
-    ],
-    "7. return results": [
+    "7. create or update tests": [
       ".opencode/agents/04-senior-backend.md"
     ],
     "apis": [
@@ -13078,9 +13185,6 @@
     "7. determine result": [
       ".opencode/agents/05-qa-reviewer.md"
     ],
-    "8. return results": [
-      ".opencode/agents/05-qa-reviewer.md"
-    ],
     "review rules": [
       ".opencode/agents/05-qa-reviewer.md"
     ],
@@ -13092,11 +13196,7 @@
     ],
     "scope": [
       ".opencode/agents/05-qa-reviewer.md",
-      ".opencode/template/epic-template.md",
       ".opencode/template/planning-template.md"
-    ],
-    "common implementation rules": [
-      ".opencode/agents/shared/implementation-rules.md"
     ],
     "architecture.md": [
       ".opencode/architecture/architecture.md"
@@ -13206,7 +13306,6 @@
       ".opencode/architecture/docs/backend/api-specification.md",
       ".opencode/architecture/docs/backend/api-specification.md",
       ".opencode/architecture/docs/backend/api-specification.md",
-      ".opencode/architecture/docs/feature/error-handling-and-retry.md",
       ".opencode/architecture/docs/security-architecture.md"
     ],
     "authorization": [
@@ -13287,8 +13386,7 @@
       ".opencode/architecture/google-calendar-integration.md",
       ".opencode/architecture/monorepo-structure.md",
       ".opencode/architecture/package-contracts.md",
-      ".opencode/architecture/ux-flows.md",
-      ".opencode/template/epic-template.md"
+      ".opencode/architecture/ux-flows.md"
     ],
     "related documents": [
       ".opencode/architecture/architecture.md"
@@ -13331,8 +13429,6 @@
       ".opencode/architecture/docs/feature/completion-flow.md",
       ".opencode/architecture/docs/feature/conflict-handling.md",
       ".opencode/architecture/docs/feature/dedicated-calendar-setup.md",
-      ".opencode/architecture/docs/feature/design-system-implementation.md",
-      ".opencode/architecture/docs/feature/error-handling-and-retry.md",
       ".opencode/architecture/docs/feature/future-features-roadmap.md",
       ".opencode/architecture/docs/feature/google-oauth-authentication.md",
       ".opencode/architecture/docs/feature/manual-calendar-editing.md",
@@ -13543,7 +13639,6 @@
       ".opencode/architecture/monorepo-structure.md",
       ".opencode/architecture/package-contracts.md",
       ".opencode/architecture/ux-flows.md",
-      ".opencode/template/epic-template.md",
       ".opencode/template/task-template.md"
     ],
     "commit message convention": [
@@ -13607,7 +13702,6 @@
       ".opencode/architecture/docs/feature/task-management.md",
       ".opencode/architecture/docs/feature/task-priority-and-weight.md",
       ".opencode/architecture/docs/feature/unsaved-changes-protection.md",
-      ".opencode/template/epic-template.md",
       ".opencode/template/task-template.md"
     ],
     "context": [
@@ -13619,7 +13713,8 @@
       ".opencode/architecture/docs/adrs/ADR-006-stateless-backend.md",
       ".opencode/architecture/docs/adrs/ADR-007-preview-before-save.md",
       ".opencode/architecture/docs/adrs/ADR-008-future-only-recalculation.md",
-      ".opencode/architecture/docs/adrs/ADR-009-google-calendar-wins-conflicts.md"
+      ".opencode/architecture/docs/adrs/ADR-009-google-calendar-wins-conflicts.md",
+      ".opencode/template/design-template.md"
     ],
     "decision": [
       ".opencode/architecture/docs/adrs/ADR-001-google-calendar-source-of-truth.md",
@@ -13630,7 +13725,8 @@
       ".opencode/architecture/docs/adrs/ADR-006-stateless-backend.md",
       ".opencode/architecture/docs/adrs/ADR-007-preview-before-save.md",
       ".opencode/architecture/docs/adrs/ADR-008-future-only-recalculation.md",
-      ".opencode/architecture/docs/adrs/ADR-009-google-calendar-wins-conflicts.md"
+      ".opencode/architecture/docs/adrs/ADR-009-google-calendar-wins-conflicts.md",
+      ".opencode/template/design-template.md"
     ],
     "consequences": [
       ".opencode/architecture/docs/adrs/ADR-001-google-calendar-source-of-truth.md",
@@ -13788,8 +13884,7 @@
     ],
     "events": [
       ".opencode/architecture/docs/backend/api-specification.md",
-      ".opencode/architecture/docs/backend/api-specification.md",
-      ".opencode/architecture/docs/feature/error-handling-and-retry.md"
+      ".opencode/architecture/docs/backend/api-specification.md"
     ],
     "save workflow": [
       ".opencode/architecture/docs/backend/api-specification.md",
@@ -13857,7 +13952,6 @@
     ],
     "calendar": [
       ".opencode/architecture/docs/backend/api-specification.md",
-      ".opencode/architecture/docs/feature/error-handling-and-retry.md",
       ".opencode/architecture/docs/feature/task-priority-and-weight.md",
       ".opencode/architecture/references/google-operations.md",
       ".opencode/architecture/ux-flows.md"
@@ -13966,7 +14060,8 @@
       ".opencode/architecture/references/algorithm-phases.md",
       ".opencode/architecture/references/google-operations.md",
       ".opencode/architecture/references/google-operations.md",
-      ".opencode/architecture/references/monorepo-details.md"
+      ".opencode/architecture/references/monorepo-details.md",
+      ".opencode/skills/delivery-pipeline/references/agent-response-format.md"
     ],
     "get /events/week": [
       ".opencode/architecture/docs/backend/references/api-endpoints.md"
@@ -14005,7 +14100,7 @@
     ],
     "notes": [
       ".opencode/architecture/docs/backend/references/api-endpoints.md",
-      ".opencode/template/epic-template.md",
+      ".opencode/template/design-template.md",
       ".opencode/template/planning-template.md"
     ],
     "synchronization": [
@@ -14106,8 +14201,7 @@
       ".opencode/architecture/docs/design-system.md"
     ],
     "typography": [
-      ".opencode/architecture/docs/design-system.md",
-      ".opencode/architecture/docs/feature/design-system-implementation.md"
+      ".opencode/architecture/docs/design-system.md"
     ],
     "spacing": [
       ".opencode/architecture/docs/design-system.md"
@@ -14119,8 +14213,7 @@
       ".opencode/architecture/docs/design-system.md"
     ],
     "components": [
-      ".opencode/architecture/docs/design-system.md",
-      ".opencode/architecture/docs/feature/design-system-implementation.md"
+      ".opencode/architecture/docs/design-system.md"
     ],
     "logo (header)": [
       ".opencode/architecture/docs/design-system.md"
@@ -14147,8 +14240,7 @@
       ".opencode/architecture/docs/design-system.md"
     ],
     "animations": [
-      ".opencode/architecture/docs/design-system.md",
-      ".opencode/architecture/docs/feature/design-system-implementation.md"
+      ".opencode/architecture/docs/design-system.md"
     ],
     "do's and don'ts": [
       ".opencode/architecture/docs/design-system.md"
@@ -14160,8 +14252,7 @@
       ".opencode/architecture/docs/error-handling-strategy.md"
     ],
     "error categories": [
-      ".opencode/architecture/docs/error-handling-strategy.md",
-      ".opencode/architecture/docs/feature/error-handling-and-retry.md"
+      ".opencode/architecture/docs/error-handling-strategy.md"
     ],
     "authentication errors": [
       ".opencode/architecture/docs/error-handling-strategy.md"
@@ -14185,24 +14276,19 @@
       ".opencode/architecture/docs/error-handling-strategy.md"
     ],
     "retry strategy": [
-      ".opencode/architecture/docs/error-handling-strategy.md",
-      ".opencode/architecture/docs/feature/error-handling-and-retry.md"
+      ".opencode/architecture/docs/error-handling-strategy.md"
     ],
     "ui error states": [
-      ".opencode/architecture/docs/error-handling-strategy.md",
-      ".opencode/architecture/docs/feature/error-handling-and-retry.md"
+      ".opencode/architecture/docs/error-handling-strategy.md"
     ],
     "toast / banner": [
-      ".opencode/architecture/docs/error-handling-strategy.md",
-      ".opencode/architecture/docs/feature/error-handling-and-retry.md"
+      ".opencode/architecture/docs/error-handling-strategy.md"
     ],
     "modal": [
-      ".opencode/architecture/docs/error-handling-strategy.md",
-      ".opencode/architecture/docs/feature/error-handling-and-retry.md"
+      ".opencode/architecture/docs/error-handling-strategy.md"
     ],
     "error boundaries": [
-      ".opencode/architecture/docs/error-handling-strategy.md",
-      ".opencode/architecture/docs/feature/error-handling-and-retry.md"
+      ".opencode/architecture/docs/error-handling-strategy.md"
     ],
     "user facing messages": [
       ".opencode/architecture/docs/error-handling-strategy.md"
@@ -14220,8 +14306,6 @@
       ".opencode/architecture/docs/feature/completion-flow.md",
       ".opencode/architecture/docs/feature/conflict-handling.md",
       ".opencode/architecture/docs/feature/dedicated-calendar-setup.md",
-      ".opencode/architecture/docs/feature/design-system-implementation.md",
-      ".opencode/architecture/docs/feature/error-handling-and-retry.md",
       ".opencode/architecture/docs/feature/future-features-roadmap.md",
       ".opencode/architecture/docs/feature/google-oauth-authentication.md",
       ".opencode/architecture/docs/feature/manual-calendar-editing.md",
@@ -14381,16 +14465,11 @@
     "design system implementation": [
       ".opencode/architecture/docs/feature/design-system-implementation.md"
     ],
-    "color palette": [
-      ".opencode/architecture/docs/feature/design-system-implementation.md"
+    "source document": [
+      ".opencode/architecture/docs/feature/design-system-implementation.md",
+      ".opencode/architecture/docs/feature/error-handling-and-retry.md"
     ],
     "error handling and retry": [
-      ".opencode/architecture/docs/feature/error-handling-and-retry.md"
-    ],
-    "google api": [
-      ".opencode/architecture/docs/feature/error-handling-and-retry.md"
-    ],
-    "user-facing messages": [
       ".opencode/architecture/docs/feature/error-handling-and-retry.md"
     ],
     "future features roadmap": [
@@ -14675,8 +14754,7 @@
       ".opencode/architecture/docs/feature/task-priority-and-weight.md"
     ],
     "problem": [
-      ".opencode/architecture/docs/feature/task-priority-and-weight.md",
-      ".opencode/template/epic-template.md"
+      ".opencode/architecture/docs/feature/task-priority-and-weight.md"
     ],
     "solution": [
       ".opencode/architecture/docs/feature/task-priority-and-weight.md"
@@ -15315,6 +15393,10 @@
       ".opencode/architecture/generation-algorithm.md"
     ],
     "goals": [
+      ".opencode/architecture/generation-algorithm.md",
+      ".opencode/template/design-template.md"
+    ],
+    "restriction implementation parity": [
       ".opencode/architecture/generation-algorithm.md"
     ],
     "user settings": [
@@ -15809,7 +15891,8 @@
       ".opencode/architecture/references/contract-enforcement.md"
     ],
     "tools": [
-      ".opencode/architecture/references/contract-enforcement.md"
+      ".opencode/architecture/references/contract-enforcement.md",
+      ".opencode/INDEX.md"
     ],
     "ci rule": [
       ".opencode/architecture/references/contract-enforcement.md"
@@ -16315,6 +16398,9 @@
     "workflow router": [
       ".opencode/INDEX.md"
     ],
+    "plugins": [
+      ".opencode/INDEX.md"
+    ],
     "planning": [
       ".opencode/INDEX.md"
     ],
@@ -16381,8 +16467,8 @@
     "project structure": [
       ".opencode/project-structure.md"
     ],
-    "codebase analysis — documentation": [
-      ".opencode/skills/codebase-analysis/output/docs-report.md"
+    "codebase analysis — implementation": [
+      ".opencode/skills/codebase-analysis/output/implementation-report.md"
     ],
     "codebase analysis skill — jobfindr": [
       ".opencode/skills/codebase-analysis/SKILL.md"
@@ -16428,6 +16514,12 @@
       ".opencode/skills/delivery-pipeline/references/failure-recovery.md",
       ".opencode/skills/delivery-pipeline/SKILL.md"
     ],
+    "resume metadata accuracy": [
+      ".opencode/skills/delivery-pipeline/references/failure-recovery.md"
+    ],
+    "git diff tool limitations": [
+      ".opencode/skills/delivery-pipeline/references/failure-recovery.md"
+    ],
     "allowed": [
       ".opencode/skills/delivery-pipeline/references/parallelization-rules.md"
     ],
@@ -16439,6 +16531,9 @@
       ".opencode/skills/delivery-pipeline/SKILL.md"
     ],
     "delivery pipeline skill": [
+      ".opencode/skills/delivery-pipeline/SKILL.md"
+    ],
+    "variable resolution": [
       ".opencode/skills/delivery-pipeline/SKILL.md"
     ],
     "new execution": [
@@ -16456,13 +16551,19 @@
     "state management": [
       ".opencode/skills/delivery-pipeline/SKILL.md"
     ],
+    "agent dispatch rules": [
+      ".opencode/skills/delivery-pipeline/SKILL.md"
+    ],
+    "orchestrator must never do agent work": [
+      ".opencode/skills/delivery-pipeline/SKILL.md"
+    ],
     "information handoff": [
       ".opencode/skills/delivery-pipeline/SKILL.md"
     ],
     "step 1 - route request": [
       ".opencode/skills/delivery-pipeline/SKILL.md"
     ],
-    "product manager flow": [
+    "solution designer flow": [
       ".opencode/skills/delivery-pipeline/SKILL.md"
     ],
     "planning flow": [
@@ -16477,6 +16578,9 @@
     "parallel execution phase": [
       ".opencode/skills/delivery-pipeline/SKILL.md"
     ],
+    "concurrent file modification prevention": [
+      ".opencode/skills/delivery-pipeline/SKILL.md"
+    ],
     "qa phase": [
       ".opencode/skills/delivery-pipeline/SKILL.md"
     ],
@@ -16487,6 +16591,24 @@
       ".opencode/skills/delivery-pipeline/SKILL.md"
     ],
     "pipeline updates": [
+      ".opencode/skills/delivery-pipeline/SKILL.md"
+    ],
+    "yaml formatting": [
+      ".opencode/skills/delivery-pipeline/SKILL.md"
+    ],
+    "wrong (causes yaml parse error):": [
+      ".opencode/skills/delivery-pipeline/SKILL.md"
+    ],
+    "correct:": [
+      ".opencode/skills/delivery-pipeline/SKILL.md"
+    ],
+    "pipeline completion": [
+      ".opencode/skills/delivery-pipeline/SKILL.md"
+    ],
+    "validation gate": [
+      ".opencode/skills/delivery-pipeline/SKILL.md"
+    ],
+    "step limit consideration": [
       ".opencode/skills/delivery-pipeline/SKILL.md"
     ],
     "doc audit skill": [
@@ -16544,7 +16666,7 @@
     "routing rules": [
       ".opencode/skills/workflow-router/SKILL.md"
     ],
-    "route to product manager": [
+    "route to solution designer": [
       ".opencode/skills/workflow-router/SKILL.md"
     ],
     "route to planning analyst": [
@@ -16562,82 +16684,88 @@
     "large": [
       ".opencode/skills/workflow-router/SKILL.md"
     ],
-    "epic template": [
-      ".opencode/template/epic-template.md"
+    "design template": [
+      ".opencode/template/design-template.md"
     ],
-    "epic information": [
-      ".opencode/template/epic-template.md"
+    "problem statement": [
+      ".opencode/template/design-template.md"
     ],
-    "id": [
-      ".opencode/template/epic-template.md",
-      ".opencode/template/task-template.md"
+    "options considered": [
+      ".opencode/template/design-template.md"
     ],
-    "title": [
-      ".opencode/template/epic-template.md",
-      ".opencode/template/task-template.md"
-    ],
-    "priority": [
-      ".opencode/template/epic-template.md"
-    ],
-    "objective": [
-      ".opencode/template/epic-template.md",
-      ".opencode/template/planning-template.md"
-    ],
-    "user value": [
-      ".opencode/template/epic-template.md"
-    ],
-    "expected outcome": [
-      ".opencode/template/epic-template.md",
-      ".opencode/template/planning-template.md"
-    ],
-    "included": [
-      ".opencode/template/epic-template.md"
-    ],
-    "excluded": [
-      ".opencode/template/epic-template.md"
-    ],
-    "deliverables": [
-      ".opencode/template/epic-template.md"
-    ],
-    "acceptance criteria": [
-      ".opencode/template/epic-template.md",
-      ".opencode/template/task-template.md"
-    ],
-    "dependencies": [
-      ".opencode/template/epic-template.md",
-      ".opencode/template/planning-template.md",
-      ".opencode/template/task-template.md"
-    ],
-    "required": [
-      ".opencode/template/epic-template.md"
-    ],
-    "blocks": [
-      ".opencode/template/epic-template.md"
-    ],
-    "risks": [
-      ".opencode/template/epic-template.md"
-    ],
-    "planning template": [
-      ".opencode/template/planning-template.md"
-    ],
-    "feasibility analysis": [
-      ".opencode/template/planning-template.md"
-    ],
-    "approach a (recommended)": [
-      ".opencode/template/planning-template.md"
+    "option a (recommended)": [
+      ".opencode/template/design-template.md"
     ],
     "description": [
+      ".opencode/template/design-template.md",
+      ".opencode/template/design-template.md",
+      ".opencode/template/design-template.md",
       ".opencode/template/planning-template.md",
       ".opencode/template/planning-template.md",
       ".opencode/template/planning-template.md",
       ".opencode/template/task-template.md"
     ],
     "advantages": [
+      ".opencode/template/design-template.md",
+      ".opencode/template/design-template.md",
       ".opencode/template/planning-template.md",
       ".opencode/template/planning-template.md"
     ],
     "disadvantages": [
+      ".opencode/template/design-template.md",
+      ".opencode/template/design-template.md",
       ".opencode/template/planning-template.md",
+      ".opencode/template/planning-template.md"
+    ],
+    "effort estimate": [
+      ".opencode/template/design-template.md",
+      ".opencode/template/design-template.md"
+    ],
+    "option b": [
+      ".opencode/template/design-template.md"
+    ],
+    "custom option": [
+      ".opencode/template/design-template.md"
+    ],
+    "selected option": [
+      ".opencode/template/design-template.md"
+    ],
+    "reasoning": [
+      ".opencode/template/design-template.md",
+      ".opencode/template/planning-template.md"
+    ],
+    "trade-offs accepted": [
+      ".opencode/template/design-template.md"
+    ],
+    "impact": [
+      ".opencode/template/design-template.md"
+    ],
+    "documentation affected": [
+      ".opencode/template/design-template.md"
+    ],
+    "architecture affected": [
+      ".opencode/template/design-template.md"
+    ],
+    "dependencies added": [
+      ".opencode/template/design-template.md"
+    ],
+    "risks": [
+      ".opencode/template/design-template.md"
+    ],
+    "open questions": [
+      ".opencode/template/design-template.md",
+      ".opencode/template/planning-template.md"
+    ],
+    "planning template": [
+      ".opencode/template/planning-template.md"
+    ],
+    "objective": [
+      ".opencode/template/planning-template.md"
+    ],
+    "feasibility analysis": [
+      ".opencode/template/planning-template.md"
+    ],
+    "approach a (recommended)": [
       ".opencode/template/planning-template.md"
     ],
     "estimated effort": [
@@ -16669,6 +16797,10 @@
     "modules": [
       ".opencode/template/planning-template.md"
     ],
+    "dependencies": [
+      ".opencode/template/planning-template.md",
+      ".opencode/template/task-template.md"
+    ],
     "breaking changes": [
       ".opencode/template/planning-template.md"
     ],
@@ -16690,10 +16822,7 @@
     "selected approach": [
       ".opencode/template/planning-template.md"
     ],
-    "reasoning": [
-      ".opencode/template/planning-template.md"
-    ],
-    "open questions": [
+    "expected outcome": [
       ".opencode/template/planning-template.md"
     ],
     "task template": [
@@ -16702,7 +16831,16 @@
     "task information": [
       ".opencode/template/task-template.md"
     ],
+    "id": [
+      ".opencode/template/task-template.md"
+    ],
+    "title": [
+      ".opencode/template/task-template.md"
+    ],
     "owner": [
+      ".opencode/template/task-template.md"
+    ],
+    "acceptance criteria": [
       ".opencode/template/task-template.md"
     ],
     "required tasks": [
@@ -16746,7 +16884,7 @@
     ]
   },
   "codeBlockLanguages": {
-    "text": 441,
+    "text": 444,
     "json": 46,
     "ts": 58,
     "(none)": 10,
@@ -16754,7 +16892,7 @@
     "bash": 2,
     "css": 4,
     "tsx": 17,
-    "yaml": 3,
+    "yaml": 4,
     "mermaid": 1
   }
 }

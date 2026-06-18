@@ -1,6 +1,6 @@
 # Codebase Analysis — Implementation
 
-Generated: 2026-06-16T00:30:26.303Z
+Generated: 2026-06-18T01:50:57.267Z
 
 ```
 
@@ -8,26 +8,26 @@ Generated: 2026-06-16T00:30:26.303Z
 ║     Codebase — Implementation Report     ║
 ╚══════════════════════════════════════════╝
 
-Generated: 2026-06-16T00:30:26.303Z
+Generated: 2026-06-18T01:50:57.267Z
 Parser:    regex
 
 ── Overview ──
-  Total files:      84 (TS: 47, TSX: 37)
-  Total imports:    249
-  Total exports:    153
-  Functions:        119
-  Arrow functions:  13
+  Total files:      85 (TS: 47, TSX: 38)
+  Total imports:    255
+  Total exports:    158
+  Functions:        130
+  Arrow functions:  20
   Classes:          4
-  Interfaces:       66
-  Type aliases:     3
+  Interfaces:       68
+  Type aliases:     5
   React components: 3
 
 ── Per Package ──
   apps/web:
-    Files:        48
-    Imports:      167
-    Exports:      58
-    Declarations: 109
+    Files:        49
+    Imports:      173
+    Exports:      59
+    Declarations: 125
   apps/api:
     Files:        11
     Imports:      42
@@ -36,13 +36,13 @@ Parser:    regex
   packages/shared:
     Files:        3
     Imports:      1
-    Exports:      18
-    Declarations: 8
+    Exports:      22
+    Declarations: 11
   packages/domain:
     Files:        11
     Imports:      25
     Exports:      27
-    Declarations: 33
+    Declarations: 36
   packages/calendar:
     Files:        6
     Imports:      10
@@ -56,7 +56,7 @@ Parser:    regex
 
 ── Top Dependencies ──
   @brkroutnxdle/shared           50
-  react                          44
+  react                          45
   express                        10
   ./types.js                     7
   ../contexts/CalendarContext    6
@@ -67,9 +67,9 @@ Parser:    regex
   ../contexts/PreviewContext     5
   ../middleware/errorHandler.js  5
   @brkroutnxdle/domain           4
+  ../contexts/BlockContext       4
   ../contexts/TaskContext        3
   ./contexts/AuthContext         2
-  ../services/localStorage       2
 
 ── Files Scanned ──
   apps/api/src/index.ts
@@ -110,6 +110,7 @@ Parser:    regex
   apps/web/src/features/preview/DeleteEventDialog.tsx
   apps/web/src/features/preview/PreviewToolbar.tsx
   apps/web/src/features/preview/SaveButton.tsx
+  apps/web/src/features/shared/CreateActionModal.tsx
   apps/web/src/features/tasks/TaskCard.tsx
   apps/web/src/features/tasks/TaskModal.tsx
   apps/web/src/features/tasks/TaskPanel.tsx

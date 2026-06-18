@@ -187,6 +187,7 @@ If template variables were not resolved in your input, call `resolve-template` w
 - The agent MUST physically create the files.
 - Describing the planning documents is not sufficient.
 - Required files must be written to disk.
+- After creating files, verify they exist on disk. Return the created file paths in `summary.changes`. If any required file was not created, report the missing files in `errors`.
 
 ### 10. Update Pipeline
 

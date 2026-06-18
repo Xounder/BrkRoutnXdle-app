@@ -50,3 +50,43 @@
 .fc-event.brk-block .fc-event-title {
   font-weight: 500;
 }
+
+/* ── Google Calendar-like grid lines ── */
+.fc .fc-timegrid-slots .fc-timegrid-slot {
+  border-bottom: 1px solid #f0f0f0 !important;
+}
+
+/* ── Event pills ── */
+.fc .fc-event {
+  border-radius: 4px !important;
+  border: none !important;
+  font-size: 12px !important;
+}
+
+/* ── Weekend tint ── */
+.fc .fc-day-sat,
+.fc .fc-day-sun {
+  background-color: #fafafa !important;
+}
+
+/* ── Now indicator (red line) ── */
+.fc .fc-timegrid-now-indicator-line {
+  border-color: #ea4335 !important;
+}
+.fc .fc-timegrid-now-indicator-arrow {
+  color: #ea4335 !important;
+  border-color: #ea4335 !important;
+}
+
+/* ── Compact day headers ── */
+.fc .fc-col-header-cell-cushion {
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  text-decoration: none !important;
+}
+
+/* ── Small gray time gutter ── */
+.fc .fc-timegrid-slot-label-cushion {
+  font-size: 11px !important;
+  color: #888 !important;
+}

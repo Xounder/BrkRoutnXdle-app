@@ -313,7 +313,7 @@ export function DashboardPage() {
           }
           scrollTime={`${String(settings.workStartHour).padStart(2, "0")}:00:00`}
           slotMinTime={`${String(settings.workStartHour).padStart(2, "0")}:00:00`}
-          slotMaxTime={`${String(settings.workEndHour).padStart(2, "0")}:00:00`}
+          slotMaxTime={`${String(Math.min(settings.workEndHour + 1, 24)).padStart(2, "0")}:00:00`}
         />
       </MainLayout>
 

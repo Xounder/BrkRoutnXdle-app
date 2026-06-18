@@ -41,7 +41,7 @@ Starts a new delivery workflow.
 Responsibilities:
 
 1. Generate a context name.
-2. Create the planning folder structure using the `create-folder-structure` tool.
+2. Create the planning folder structure using the `create-folder-structure` tool. The tool creates `design-docs/`, `planning/`, and `tasks/` subfolders. If the selected workflow does not use all folders, unused ones remain empty — this is expected.
 3. Create [PIPELINE_FILE] using [PIPELINE_TEMPLATE_FILE].
 4. Invoke the Workflow Router skill.
 5. Execute the selected workflow.
@@ -100,6 +100,12 @@ Responsible for:
 * Tracking concerns
 * Maintaining execution history
 * Supporting workflow recovery
+
+### Agent Dispatch Rules
+
+**Primary agents** (Planning Analyst, Solution Designer) are defined with `mode: primary` in their agent files. They must be dispatched using their proper agent type name via `task` with `subagent_type` matching the agent name. Do NOT dispatch primary agents as `general` or any other type — this skips their workflow and prevents file creation.
+
+**Subagents** (Senior Frontend, Senior Backend, QA) use `mode: subagent` and are dispatched as `general` with their task instructions inline.
 
 ### Orchestrator Must Never Do Agent Work
 
@@ -231,13 +237,14 @@ Planning documents must not be created before approval.
 
 When Planning Analyst is selected:
 
-1. Execute Planning Analyst.
+1. Execute Planning Analyst as a primary agent — invoke using the agent's full workflow directly (not via `task` with `subagent_type`).
 2. Present approaches to the user.
 3. Wait for semantic approval.
 4. Repeat planning loop until approved.
-5. Generate planning documents.
-6. Update pipeline.
-7. Execute Tech Lead.
+5. Planning Analyst generates planning documents (index.md, feasibility.md, impact-analysis.md, risks.md) in `[PLAN_FOLDER_LOCATION]`.
+6. Orchestrator MUST verify planning files were physically created before proceeding. If files are missing, re-dispatch the Planning Analyst with the file creation requirement.
+7. Update pipeline.
+8. Execute Tech Lead.
 
 Planning documents must not be created before approval.
 
@@ -330,7 +337,11 @@ Workflow completes when:
 * All QA reviews are approved
 * No pending work remains
 
-Update pipeline status to completed.
+Upon completion, the orchestrator MUST:
+
+1. Update `pipeline.yaml` status to `completed`, record final errors/concerns, set `updated_at`.
+2. Invoke the mandatory STOP chain: load `learning-improvement` skill → after it completes, load `continuous-learning` skill → after it completes, load `session-save` skill.
+3. Do NOT return to the user or end the session before the STOP chain completes. The STOP chain is part of the pipeline, not optional cleanup.
 
 ## Parallelization Rules
 
@@ -341,6 +352,14 @@ See [references/parallelization-rules.md](references/parallelization-rules.md)
 See [references/failure-recovery.md](references/failure-recovery.md)
 
 ## Pipeline Updates
+
+After EVERY agent dispatch completes, BEFORE dispatching the next agent, update `pipeline.yaml` with:
+
+* The completed step's status (completed / failed / errors)
+* errors and concerns returned by the agent
+* updated_at timestamp
+
+This is mandatory — missed updates cause recovery failures and loss of execution history.
 
 After every agent execution update:
 
@@ -370,57 +389,20 @@ concerns:
   - "Subagent could not verify lint (no lint script configured)"
 ```
 
-### YAML Formatting
-
-YAML strings containing colons must be quoted to avoid parse errors in `read-pipeline-state`. Example:
-
-```yaml
-# Wrong (causes YAML parse error):
-title: Calendar: 24h View
-
-# Correct:
-title: "Calendar: 24h View"
-```
-
 ### Pipeline Completion
 
 When all steps are completed (all tasks approved by QA):
 1. Update `pipeline.status` to `completed`
 2. Invoke the STOP chain: `learning-improvement` → `continuous-learning` → `session-save`
 
-## Standard Agent Response Format
+## References
 
-See [references/agent-response-format.md](references/agent-response-format.md)
-
-### Validation Gate
-
-After every subagent execution, orchestrator MUST run `run-package-command` with `build` (or `typecheck`) on affected packages before marking step complete. Subagents must include `validations` array in response with build result — orchestrator re-calls if missing.
-
-### Step Limit Consideration
-
-Ensure subagent step limits allow build/lint/typecheck validation. Pre-validate build before parallel dispatch via `run-package-command`.
-
-## Task Tracking
-
-See [references/task-tracking.md](references/task-tracking.md)
+- [Standard Agent Response Format](references/agent-response-format.md) — includes Validation Gate and Step Limit guidelines
+- [Task Tracking](references/task-tracking.md)
+- [Parallelization Rules](references/parallelization-rules.md)
+- [Failure Recovery](references/failure-recovery.md)
+- [Constraints](references/constraints.md)
 
 ## Constraints
 
-* Pipeline state is the source of truth.
-* Always update pipeline state after agent execution.
-* Never lose execution history.
-* Never recreate completed work during resume.
-* Always maximize safe parallelism.
-* Always preserve task dependency order.
-* Design approval is mandatory before design document generation.
-* Planning approval is mandatory before plan generation.
-* QA must validate implementation against task requirements and git diff.
-* Respect project boundaries and conventions.
-* Never access files outside the project root.
-* **Never do agent work** — the orchestrator must not write, edit, or implement source code. Only dispatch agents.
-* **One task per agent dispatch** — never assign multiple tasks to a single agent instance. Create N agents for N independent tasks.
-* **On error, re-call the agent** — never attempt to fix agent work manually. Re-dispatch with error context.
-* **Record subagent concerns** — every error, concern, and deviation returned by a subagent must be recorded in the pipeline state under the appropriate step's `errors` or `concerns` array.
-* **Enforce standard response format** — if a subagent does not follow the [standard agent response format](references/agent-response-format.md), re-call it with the format requirement. Do not parse ad-hoc responses.
-* **Never run validation or build** — the orchestrator does not execute build, lint, typecheck, or test commands. That is the exclusive responsibility of subagents and QA.
-* **Never create test/support files** — subagents must not create auxiliary files outside their task scope. Every file must be justified by a task requirement.
+See [references/constraints.md](references/constraints.md) for the full constraint list.

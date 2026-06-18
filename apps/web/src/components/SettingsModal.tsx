@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useSettings } from "../contexts/SettingsContext";
 import { DEFAULT_SETTINGS } from "@brkroutnxdle/shared";
 import type { Settings } from "@brkroutnxdle/shared";
@@ -10,6 +10,15 @@ interface SettingsModalProps {
 
 export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const { settings, updateSettings, resetSettings } = useSettings();
+  const [use12h, setUse12h] = useState(false);
+
+  const clampHour = (value: number): number => Math.max(0, Math.min(23, value));
+
+  const to12h = (h: number) => {
+    const m = h % 12;
+    return m === 0 ? 12 : m;
+  };
+  const ampm = (h: number) => (h < 12 ? "AM" : "PM");
 
   const timezoneOptions = useMemo(() => {
     try {
@@ -67,58 +76,90 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-          {/* Work Start Hour */}
-          <label style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-            <span style={{ fontSize: "14px", fontWeight: 600, color: "#333" }}>Available Start Hour</span>
+          {/* 12h / 24h toggle */}
+          <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "14px" }}>
             <input
-              type="number"
-              min={0}
-              max={23}
-              value={settings.workStartHour}
-              onChange={(e) => updateSettings({ workStartHour: parseInt(e.target.value, 10) })}
-              style={inputStyle}
+              type="checkbox"
+              checked={use12h}
+              onChange={(e) => setUse12h(e.target.checked)}
             />
+            Use 12-hour format (AM/PM)
           </label>
 
-          {/* Work End Hour */}
-          <label style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-            <span style={{ fontSize: "14px", fontWeight: 600, color: "#333" }}>Available End Hour</span>
-            <input
-              type="number"
-              min={0}
-              max={23}
-              value={settings.workEndHour}
-              onChange={(e) => updateSettings({ workEndHour: parseInt(e.target.value, 10) })}
-              style={inputStyle}
-            />
-          </label>
+          {/* Work Start Hour / Work End Hour */}
+          <div style={{ display: "flex", gap: "16px" }}>
+            <label style={{ flex: 1, display: "flex", flexDirection: "column", gap: "4px" }}>
+              <span style={{ fontSize: "14px", fontWeight: 600, color: "#333" }}>Available Start Hour</span>
+              <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                <input
+                  type="number"
+                  min={0}
+                  max={23}
+                  value={settings.workStartHour}
+                  onChange={(e) => {
+                    const raw = parseInt(e.target.value, 10);
+                    const clamped = clampHour(raw);
+                    updateSettings({ workStartHour: clamped, workEndHour: Math.max(clamped, settings.workEndHour) });
+                  }}
+                  style={{ ...inputStyle, flex: 1 }}
+                />
+                {use12h && (
+                  <span style={{ fontSize: "13px", color: "#666", whiteSpace: "nowrap", minWidth: "52px" }}>
+                    {to12h(settings.workStartHour)} {ampm(settings.workStartHour)}
+                  </span>
+                )}
+              </div>
+            </label>
+            <label style={{ flex: 1, display: "flex", flexDirection: "column", gap: "4px" }}>
+              <span style={{ fontSize: "14px", fontWeight: 600, color: "#333" }}>Available End Hour</span>
+              <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                <input
+                  type="number"
+                  min={0}
+                  max={23}
+                  value={settings.workEndHour}
+                  onChange={(e) => {
+                    const raw = parseInt(e.target.value, 10);
+                    const clamped = clampHour(raw);
+                    updateSettings({ workEndHour: clamped, workStartHour: Math.min(clamped, settings.workStartHour) });
+                  }}
+                  style={{ ...inputStyle, flex: 1 }}
+                />
+                {use12h && (
+                  <span style={{ fontSize: "13px", color: "#666", whiteSpace: "nowrap", minWidth: "52px" }}>
+                    {to12h(settings.workEndHour)} {ampm(settings.workEndHour)}
+                  </span>
+                )}
+              </div>
+            </label>
+          </div>
 
-          {/* Max Tasks Per Day */}
-          <label style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-            <span style={{ fontSize: "14px", fontWeight: 600, color: "#333" }}>Max Tasks Per Day</span>
-            <input
-              type="number"
-              min={1}
-              max={20}
-              value={settings.maxTasksPerDay}
-              onChange={(e) => updateSettings({ maxTasksPerDay: parseInt(e.target.value, 10) })}
-              style={inputStyle}
-            />
-          </label>
-
-          {/* Default Task Duration */}
-          <label style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-            <span style={{ fontSize: "14px", fontWeight: 600, color: "#333" }}>Default Task Duration (min)</span>
-            <select
-              value={settings.defaultTaskDuration}
-              onChange={(e) => updateSettings({ defaultTaskDuration: parseInt(e.target.value, 10) })}
-              style={inputStyle}
-            >
-              {[30, 60, 90, 120, 150, 180].map((d) => (
-                <option key={d} value={d}>{d} min</option>
-              ))}
-            </select>
-          </label>
+          {/* Max Tasks Per Day / Default Task Duration */}
+          <div style={{ display: "flex", gap: "16px" }}>
+            <label style={{ flex: 1, display: "flex", flexDirection: "column", gap: "4px" }}>
+              <span style={{ fontSize: "14px", fontWeight: 600, color: "#333" }}>Max Tasks Per Day</span>
+              <input
+                type="number"
+                min={1}
+                max={20}
+                value={settings.maxTasksPerDay}
+                onChange={(e) => updateSettings({ maxTasksPerDay: parseInt(e.target.value, 10) })}
+                style={inputStyle}
+              />
+            </label>
+            <label style={{ flex: 1, display: "flex", flexDirection: "column", gap: "4px" }}>
+              <span style={{ fontSize: "14px", fontWeight: 600, color: "#333" }}>Default Task Duration (min)</span>
+              <select
+                value={settings.defaultTaskDuration}
+                onChange={(e) => updateSettings({ defaultTaskDuration: parseInt(e.target.value, 10) })}
+                style={inputStyle}
+              >
+                {[30, 60, 90, 120, 150, 180].map((d) => (
+                  <option key={d} value={d}>{d} min</option>
+                ))}
+              </select>
+            </label>
+          </div>
 
           {/* Work Days */}
           <fieldset style={{ border: "1px solid #ddd", borderRadius: "8px", padding: "12px" }}>

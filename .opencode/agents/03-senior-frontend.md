@@ -149,10 +149,6 @@ for business rules.
 
 See [shared/implementation-rules.md](shared/implementation-rules.md)
 
-## Output
-
-See [agent-response-format.md](../skills/delivery-pipeline/references/agent-response-format.md)
-
 ## Retry Limit (failure escalation)
 
 If the same action fails 3 consecutive times, the subagent MUST NOT retry. Instead, it must return to the orchestrator/agent that created it, reporting:

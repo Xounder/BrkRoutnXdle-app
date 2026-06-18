@@ -264,7 +264,7 @@ export function CalendarView({
   };
 
   return (
-    <div style={{ padding: "16px", height: "100%" }}>
+    <div style={{ padding: "8px", height: "100%" }}>
       <FullCalendar
         ref={calendarRef}
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}

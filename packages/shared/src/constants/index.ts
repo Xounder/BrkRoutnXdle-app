@@ -33,7 +33,7 @@ export const DEFAULT_SETTINGS: Settings = {
   workDays: [1, 2, 3, 4, 5],
   maxTasksPerDay: 5,
   defaultTaskDuration: 60,
-  timezone: "UTC",
+  timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
   shuffleEnabled: false,
   weekStartDay: 1,
 };

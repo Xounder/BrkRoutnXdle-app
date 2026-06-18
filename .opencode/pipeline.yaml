@@ -1,133 +1,67 @@
 pipeline:
-  name: "calendar-task-management"
-  status: completed
-  started_at: "2026-06-16T10:00:00Z"
+  name: "ui-settings-calendar-sidebar"
+  status: pending
+  started_at: "2026-06-17T12:00:00Z"
   updated_at: "2026-06-17T12:00:00Z"
-  current_step: qa-frontend
-  current_agent: QA Frontend
+  current_step: workflow-router
+  current_agent: workflow-router
   steps:
     solution-designer:
-      status: skipped
-      notes: "Not needed — requirements were clear and codebase exists"
-      updated_at: "2026-06-16T22:06:00Z"
-      errors: []
-      concerns: []
-    planning-analyst:
-      status: completed
-      notes: "Phased approach approved by user. 4 planning documents created."
-      updated_at: "2026-06-16T22:10:00Z"
-      errors: []
-      concerns: []
-    tech-lead:
-      status: completed
-      notes: "7 tasks created. All senior-frontend owned."
-      updated_at: "2026-06-16T22:20:00Z"
-      errors: []
-      concerns: []
-    senior-frontend:
-      status: completed
-      notes: "All 7 tasks implemented successfully"
-      updated_at: "2026-06-16T23:30:00Z"
-      errors: []
-      concerns:
-        - "CalendarView.tsx had concurrent modification between TASK-01 and TASK-02 — resolved by adding slotMinTime/slotMaxTime props"
-        - "Build validation could not be run due to shell restrictions; TASK-06 agent confirmed build passes"
-      tasks:
-        - TASK-01
-        - TASK-02
-        - TASK-03
-        - TASK-04
-        - TASK-05
-        - TASK-06
-        - TASK-07
-    senior-backend:
-      status: skipped
-      notes: "No backend changes required"
-      updated_at: "2026-06-16T23:30:00Z"
-      errors: []
-      concerns: []
-    qa-frontend:
-      status: completed
-      notes: "Approved. All 7 tasks verified against acceptance criteria. Minor concerns: 24h vs settings-bound range ambiguity, block events rely on CSS pointer-events instead of explicit editable:false."
-      updated_at: "2026-06-17T12:00:00Z"
-      errors: []
-      concerns:
-        - "Pipeline AC4 ('Calendar shows all 24h') conflicts with settings-based slotMinTime/slotMaxTime override in DashboardPage"
-        - "Block events rely on CSS pointer-events:none instead of explicit editable:false"
-        - "No lint/test scripts configured in apps/web"
-    qa-backend:
-      status: skipped
-      notes: "No backend changes to review"
+      status: pending
+      notes: null
       updated_at: null
       errors: []
       concerns: []
-  tasks:
-    - id: TASK-01
-      title: Settings Sidebar Wiring + Modal Fixes
-      status: completed
-      owner: senior-frontend
-    - id: TASK-02
-      title: "Calendar: 24h View + Always-Editable + Block Rendering"
-      status: completed
-      owner: senior-frontend
-    - id: TASK-03
-      title: Calendar Click Handlers
-      status: completed
-      owner: senior-frontend
-    - id: TASK-04
-      title: Calendar Drag-and-Drop
-      status: completed
-      owner: senior-frontend
-    - id: TASK-05
-      title: Extend Shared Types
-      status: completed
-      owner: senior-frontend
-    - id: TASK-06
-      title: TaskModal Restriction Fields UI
-      status: completed
-      owner: senior-frontend
-    - id: TASK-07
-      title: Domain Algorithm Update
-      status: completed
-      owner: senior-frontend
-  history:
-    - step: planning-analyst
-      status: completed
-      timestamp: "2026-06-16T22:10:00Z"
-      notes: "Approach approved. Documents created."
-    - step: tech-lead
-      status: completed
-      timestamp: "2026-06-16T22:20:00Z"
-      notes: "7 tasks created."
-    - step: senior-frontend
-      status: completed
-      timestamp: "2026-06-16T23:30:00Z"
-      notes: "All 7 tasks implemented in parallel batches."
-    - step: qa-frontend
-      status: completed
-      timestamp: "2026-06-17T12:00:00Z"
-      notes: "Approved. All 7 tasks verified. 3 minor concerns recorded."
+    planning-analyst:
+      status: pending
+      notes: null
+      updated_at: null
+      errors: []
+      concerns: []
+    tech-lead:
+      status: pending
+      notes: null
+      updated_at: null
+      errors: []
+      concerns: []
+    senior-frontend:
+      status: pending
+      notes: null
+      updated_at: null
+      errors: []
+      concerns: []
+      tasks: []
+    senior-backend:
+      status: pending
+      notes: null
+      updated_at: null
+      errors: []
+      concerns: []
+      tasks: []
+    qa-frontend:
+      status: pending
+      notes: null
+      updated_at: null
+      errors: []
+      concerns: []
+    qa-backend:
+      status: pending
+      notes: null
+      updated_at: null
+      errors: []
+      concerns: []
+  tasks: []
+  history: []
   handoff:
-    context: "calendar-task-management"
-    selected_approach: "Phased (Phase 1 → Phase 2 → Phase 3)"
+    context: null
+    selected_approach: null
     design_summary: null
-    planning_summary: "3-phase plan: Settings fixes → Calendar overhaul → Task restrictions."
-    task_summary: "7 tasks across 3 phases. TASK-01 (Settings), TASK-02-04 (Calendar), TASK-05-07 (Restrictions)."
-    acceptance_criteria:
-      - "Settings sidebar opens SettingsModal"
-      - "Available Start/End Hour bind to calendar slotMinTime/slotMaxTime"
-      - "Timezone is a select (IANA list), not free text"
-      - "Calendar shows all 24h"
-      - "Calendar supports drag-and-drop (tasks + blocks)"
-      - "Click empty slot → modal (create Block or Task)"
-      - "Click existing item → modal (edit/delete)"
-      - "Blocks render on calendar"
-      - "Task restrictions: 4 time groups + custom ranges, frequency, gapDays, allowSameDay"
+    planning_summary: null
+    task_summary: null
+    acceptance_criteria: []
     dependencies: []
-    additional_context:
-      - "git diff shows changes across: CalendarView, DashboardPage, Sidebar, SettingsModal, MainLayout, TaskModal, BlockModal, CreateActionModal (new), useScheduleEditing, CalendarStyles.css, shared types/constants, domain taskDistributor"
+    additional_context: []
   resume:
-    last_completed_agent: QA Frontend
-    last_completed_step: qa-frontend
+    last_completed_agent: null
+    last_completed_step: null
     recovery_required: false
-    completed: true
