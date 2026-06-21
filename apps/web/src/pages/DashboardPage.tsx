@@ -23,12 +23,13 @@ import { useBlockContext } from "../contexts/BlockContext";
 import { CreateActionModal } from "../features/shared/CreateActionModal";
 import { TaskModal } from "../features/tasks/TaskModal";
 import { BlockModal } from "../features/blocks/BlockModal";
+import { Priority as PriorityEnum } from "@brkroutnxdle/shared";
 import type { ViewType, CalendarEvent, Task, BlockedSlot } from "@brkroutnxdle/shared";
 
 export function DashboardPage() {
   const { user, logout } = useAuth();
   const { settings } = useSettings();
-  const { tasks } = useTaskContext();
+  const { tasks, createTask } = useTaskContext();
   const { blocks } = useBlockContext();
   const { generateWeek, generateAgain, discard, isGenerating } = useScheduleGeneration();
   const { isPreviewActive, previewEvents, allocationFailures } = usePreview();
@@ -68,10 +69,11 @@ export function DashboardPage() {
   const [creatingBlockPrefill, setCreatingBlockPrefill] = useState<{
     startDate: string;
     endDate: string;
+    startTime: string;
+    endTime: string;
   } | null>(null);
 
-  // State for creating a task from a slot click (pre-filled duration)
-  const [creatingTaskDuration, setCreatingTaskDuration] = useState<number | null>(null);
+
 
   const { toggleCompletion } = useCompletion();
   const calendarRefresh = useCalendarRefresh();
@@ -112,24 +114,55 @@ export function DashboardPage() {
   const handleCreateBlockFromSlot = useCallback(
     (start: string, end: string) => {
       setSelectedSlot(null);
-      // Extract date portion (YYYY-MM-DD) from ISO strings
+      // Extract date and time portions from ISO strings
       const startDate = start.substring(0, 10);
       const endDate = end.substring(0, 10);
-      setCreatingBlockPrefill({ startDate, endDate });
+      const startTime = start.slice(11, 16);
+      const endTime = end.slice(11, 16);
+      setCreatingBlockPrefill({ startDate, endDate, startTime, endTime });
     },
     [],
   );
 
-  // CreateActionModal: user chose to create a Task
-  const handleCreateTaskFromSlot = useCallback(
-    (start: string, end: string) => {
+  // CreateActionModal: inline task creation from slot
+  const handleCreateTaskInline = useCallback(
+    (name: string, duration: number, start: string, end: string) => {
+      const task = createTask({
+        title: name,
+        duration,
+        priority: PriorityEnum.Medium,
+        frequency: 1,
+        gapDays: 1,
+        allowSameDay: false,
+        description: undefined,
+        isActive: true,
+        restrictions: [],
+      });
+      // Compute end as local-time ISO string (same format as start) to avoid timezone shifts
+      const [datePart, timePart] = start.split("T");
+      const [startHour, startMinute] = timePart.split(":").map(Number);
+      const totalMinutes = startHour * 60 + startMinute + duration;
+      const endHour = Math.floor(totalMinutes / 60);
+      const endMin = totalMinutes % 60;
+      const endStr = `${datePart}T${String(endHour).padStart(2, "0")}:${String(endMin).padStart(2, "0")}:00`;
+
+      setEvents((prev) => [
+        ...prev,
+        {
+          id: task.id,
+          title: task.title,
+          start,
+          end: endStr,
+          isAllDay: false,
+          isGenerated: true,
+          taskId: task.id,
+          isCompleted: false,
+          source: "brkroutnxdle",
+        },
+      ]);
       setSelectedSlot(null);
-      const durationMin = Math.round(
-        (new Date(end).getTime() - new Date(start).getTime()) / 60000,
-      );
-      setCreatingTaskDuration(durationMin);
     },
-    [],
+    [createTask],
   );
 
   const handleRefresh = useCallback(async () => {
@@ -211,110 +244,115 @@ export function DashboardPage() {
         onViewChange={setCurrentView}
         onSettingsClick={() => setSettingsOpen(true)}
       >
-        <div style={{ padding: "12px 16px 0", display: "flex", gap: "12px", alignItems: "center" }}>
-          {!isPreviewActive ? (
-            <CalculateWeekButton
-              onClick={generateWeek}
-              disabled={false}
-              isLoading={isGenerating}
-            />
-          ) : (
-            <PreviewToolbar
-              onGenerateAgain={generateAgain}
-              onDiscard={discard}
-              isLoading={isGenerating}
-              eventCount={previewEvents.length}
-              onSave={handleSave}
-              saveState={saveState}
-            />
-          )}
-          <RefreshButton onClick={handleRefresh} isLoading={isRefreshing} />
-        </div>
-
-        {saveState.status === "success" && (
-          <div
-            style={{
-              margin: "8px 16px 0",
-              padding: "10px 16px",
-              background: "#d4edda",
-              borderRadius: "8px",
-              color: "#155724",
-              fontSize: "14px",
-              fontWeight: 600,
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-            }}
-          >
-            Schedule saved successfully!
+        <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+          <div style={{ padding: "12px 16px 0", display: "flex", gap: "12px", alignItems: "center" }}>
+            {!isPreviewActive ? (
+              <CalculateWeekButton
+                onClick={generateWeek}
+                disabled={false}
+                isLoading={isGenerating}
+              />
+            ) : (
+              <PreviewToolbar
+                onGenerateAgain={generateAgain}
+                onDiscard={discard}
+                isLoading={isGenerating}
+                eventCount={previewEvents.length}
+                onSave={handleSave}
+                saveState={saveState}
+              />
+            )}
+            <RefreshButton onClick={handleRefresh} isLoading={isRefreshing} />
           </div>
-        )}
 
-        {saveState.status === "error" && (
-          <div
-            style={{
-              margin: "8px 16px 0",
-              padding: "10px 16px",
-              background: "#f8d7da",
-              borderRadius: "8px",
-              color: "#721c24",
-              fontSize: "14px",
-              fontWeight: 600,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <span>Error: {saveState.error ?? "An unknown error occurred"}</span>
-            <button
-              onClick={handleSave}
+          {saveState.status === "success" && (
+            <div
               style={{
-                padding: "4px 16px",
-                border: "2px solid #721c24",
-                borderRadius: "9999px",
-                background: "transparent",
-                color: "#721c24",
-                cursor: "pointer",
-                fontWeight: 700,
-                fontSize: "12px",
+                margin: "8px 16px 0",
+                padding: "10px 16px",
+                background: "#d4edda",
+                borderRadius: "8px",
+                color: "#155724",
+                fontSize: "14px",
+                fontWeight: 600,
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
               }}
             >
-              Retry
-            </button>
-          </div>
-        )}
+              Schedule saved successfully!
+            </div>
+          )}
 
-        {isPreviewActive && failurePanelOpen && (
-          <div style={{ padding: "0 16px" }}>
-            <AllocationFailurePanel
-              failures={allocationFailures}
-              onDismiss={() => setFailurePanelOpen(false)}
+          {saveState.status === "error" && (
+            <div
+              style={{
+                margin: "8px 16px 0",
+                padding: "10px 16px",
+                background: "#f8d7da",
+                borderRadius: "8px",
+                color: "#721c24",
+                fontSize: "14px",
+                fontWeight: 600,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <span>Error: {saveState.error ?? "An unknown error occurred"}</span>
+              <button
+                onClick={handleSave}
+                style={{
+                  padding: "4px 16px",
+                  border: "2px solid #721c24",
+                  borderRadius: "9999px",
+                  background: "transparent",
+                  color: "#721c24",
+                  cursor: "pointer",
+                  fontWeight: 700,
+                  fontSize: "12px",
+                }}
+              >
+                Retry
+              </button>
+            </div>
+          )}
+
+          {isPreviewActive && failurePanelOpen && (
+            <div style={{ padding: "0 16px" }}>
+              <AllocationFailurePanel
+                failures={allocationFailures}
+                onDismiss={() => setFailurePanelOpen(false)}
+              />
+            </div>
+          )}
+
+          <div style={{ flex: 1, overflow: "auto", minHeight: 0 }}>
+            <CalendarView
+              events={events}
+              previewEvents={mappedPreviewEvents}
+              blocks={blocks}
+              use12h={settings.use12h}
+              currentView={currentView}
+              currentDate={currentDate}
+              onViewChange={setCurrentView}
+              onDateChange={setCurrentDate}
+              onEventDrop={editing.handleEventDrop}
+              onEventResize={editing.handleEventResize}
+              onDeleteRequest={editing.requestDelete}
+              onEventClick={handleEventClick}
+              onSelect={handleSelect}
+              onEventDragStart={editing.handleEventDragStart}
+              onEventDragStop={editing.handleEventDragStop}
+              validateDrop={(startStr, endStr) =>
+                editing.canDropAt(startStr, endStr)
+              }
+              scrollTime={`${String(settings.workStartHour).padStart(2, "0")}:00:00`}
+              slotMinTime={`${String(settings.workStartHour).padStart(2, "0")}:00:00`}
+              slotMaxTime={`${String(Math.min(settings.workEndHour + 1, 24)).padStart(2, "0")}:00:00`}
             />
           </div>
-        )}
-
-        <CalendarView
-          events={events}
-          previewEvents={mappedPreviewEvents}
-          blocks={blocks}
-          currentView={currentView}
-          currentDate={currentDate}
-          onViewChange={setCurrentView}
-          onDateChange={setCurrentDate}
-          onEventDrop={editing.handleEventDrop}
-          onEventResize={editing.handleEventResize}
-          onDeleteRequest={editing.requestDelete}
-          onEventClick={handleEventClick}
-          onSelect={handleSelect}
-          onEventDragStart={editing.handleEventDragStart}
-          onEventDragStop={editing.handleEventDragStop}
-          validateDrop={(startStr, endStr) =>
-            editing.canDropAt(startStr, endStr)
-          }
-          scrollTime={`${String(settings.workStartHour).padStart(2, "0")}:00:00`}
-          slotMinTime={`${String(settings.workStartHour).padStart(2, "0")}:00:00`}
-          slotMaxTime={`${String(Math.min(settings.workEndHour + 1, 24)).padStart(2, "0")}:00:00`}
-        />
+        </div>
       </MainLayout>
 
       {/* CreateActionModal: appears when an empty calendar slot is selected */}
@@ -323,17 +361,8 @@ export function DashboardPage() {
           start={selectedSlot.start}
           end={selectedSlot.end}
           onCreateBlock={handleCreateBlockFromSlot}
-          onCreateTask={handleCreateTaskFromSlot}
+          onCreateTaskInline={handleCreateTaskInline}
           onClose={() => setSelectedSlot(null)}
-        />
-      )}
-
-      {/* TaskModal: creating a task from a slot click */}
-      {creatingTaskDuration !== null && (
-        <TaskModal
-          task={null}
-          defaultDuration={creatingTaskDuration}
-          onClose={() => setCreatingTaskDuration(null)}
         />
       )}
 
@@ -343,6 +372,8 @@ export function DashboardPage() {
           block={null}
           defaultStartDate={creatingBlockPrefill.startDate}
           defaultEndDate={creatingBlockPrefill.endDate}
+          defaultStartTime={creatingBlockPrefill.startTime}
+          defaultEndTime={creatingBlockPrefill.endTime}
           onClose={() => setCreatingBlockPrefill(null)}
         />
       )}

@@ -10,6 +10,7 @@ interface CalendarViewProps {
   events: CalendarEvent[];
   previewEvents: CalendarEvent[];
   blocks?: BlockedSlot[];
+  use12h?: boolean;
   currentView: ViewType;
   currentDate: Date;
   onViewChange: (view: ViewType) => void;
@@ -43,6 +44,7 @@ export function CalendarView({
   events,
   previewEvents,
   blocks,
+  use12h = false,
   currentView,
   currentDate,
   onViewChange,
@@ -160,7 +162,6 @@ export function CalendarView({
       end: e.end,
       classNames: ["brk-preview"],
       display: "auto" as const,
-      editable: false,
       extendedProps: { isPreview: true },
     }));
 
@@ -265,6 +266,7 @@ export function CalendarView({
         events={fcEvents}
         headerToolbar={false}
         height="100%"
+        timeZone="local"
         slotMinTime={slotMinTime}
         slotMaxTime={slotMaxTime}
         slotDuration="00:30:00"
@@ -274,7 +276,7 @@ export function CalendarView({
         editable={true}
         selectable={true}
         weekNumbers={true}
-        eventTimeFormat={{ hour: '2-digit', minute: '2-digit' }}
+        eventTimeFormat={{ hour: '2-digit', minute: '2-digit', hour12: use12h }}
         dayHeaderFormat={{ weekday: 'short', month: 'short', day: 'numeric' }}
         selectMinDistance={0}
         selectOverlap={false}

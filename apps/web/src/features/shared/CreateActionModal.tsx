@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
+
+const DURATIONS = [30, 60, 90, 120, 150, 180];
 
 interface CreateActionModalProps {
   start: string;
   end: string;
   onCreateBlock: (start: string, end: string) => void;
-  onCreateTask: (start: string, end: string) => void;
+  onCreateTaskInline?: (name: string, duration: number, start: string, end: string) => void;
   onClose: () => void;
 }
 
@@ -90,13 +92,75 @@ const cancelBtnStyle: React.CSSProperties = {
   marginTop: "8px",
 };
 
+const formGroupStyle: React.CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "8px",
+  marginBottom: "16px",
+  textAlign: "left",
+};
+
+const labelStyle: React.CSSProperties = {
+  fontSize: "13px",
+  fontWeight: 600,
+  color: "#333",
+};
+
+const inputStyle: React.CSSProperties = {
+  padding: "10px 12px",
+  borderRadius: "8px",
+  border: "1px solid #ccc",
+  fontSize: "14px",
+  width: "100%",
+  boxSizing: "border-box",
+};
+
+const selectStyle: React.CSSProperties = {
+  padding: "10px 12px",
+  borderRadius: "8px",
+  border: "1px solid #ccc",
+  fontSize: "14px",
+  width: "100%",
+  boxSizing: "border-box",
+  background: "#fff",
+};
+
+const errorStyle: React.CSSProperties = {
+  color: "#d32f2f",
+  fontSize: "13px",
+  margin: "0 0 8px",
+};
+
+const submitBtnStyle: React.CSSProperties = {
+  padding: "14px 24px",
+  background: "linear-gradient(135deg, #2BA8A2, #1E8C86)",
+  border: "none",
+  borderRadius: "9999px",
+  fontWeight: 700,
+  fontSize: "16px",
+  cursor: "pointer",
+  color: "#fff",
+};
+
 export function CreateActionModal({
   start,
   end,
   onCreateBlock,
-  onCreateTask,
+  onCreateTaskInline,
   onClose,
 }: CreateActionModalProps) {
+  const [mode, setMode] = useState<"menu" | "form">("menu");
+  const [name, setName] = useState("");
+  const [duration, setDuration] = useState(() => {
+    const min = Math.round(
+      (new Date(end).getTime() - new Date(start).getTime()) / 60000,
+    );
+    return DURATIONS.reduce((prev, curr) =>
+      Math.abs(curr - min) < Math.abs(prev - min) ? curr : prev
+    );
+  });
+  const [error, setError] = useState<string | null>(null);
+
   const sameDay =
     new Date(start).toDateString() === new Date(end).toDateString();
 
@@ -108,6 +172,22 @@ export function CreateActionModal({
     (new Date(end).getTime() - new Date(start).getTime()) / 60000,
   );
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    if (!name.trim()) {
+      setError("Task name is required");
+      return;
+    }
+    if (!DURATIONS.includes(duration)) {
+      setError("Duration must be 30, 60, 90, 120, 150, or 180 minutes");
+      return;
+    }
+
+    onCreateTaskInline?.(name.trim(), duration, start, end);
+  };
+
   return (
     <div style={overlayStyle} onClick={onClose}>
       <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
@@ -116,23 +196,78 @@ export function CreateActionModal({
           {timeLabel} ({durationMin} min)
         </p>
 
-        <div style={buttonGroupStyle}>
-          <button
-            style={blockBtnStyle}
-            onClick={() => onCreateBlock(start, end)}
-          >
-            Create Block
-          </button>
-          <button
-            style={taskBtnStyle}
-            onClick={() => onCreateTask(start, end)}
-          >
-            Create Task
-          </button>
-          <button style={cancelBtnStyle} onClick={onClose}>
-            Cancel
-          </button>
-        </div>
+        {mode === "menu" ? (
+          <div style={buttonGroupStyle}>
+            <button
+              style={blockBtnStyle}
+              onClick={() => onCreateBlock(start, end)}
+            >
+              Create Block
+            </button>
+            <button
+              style={taskBtnStyle}
+              onClick={() => setMode("form")}
+            >
+              Create Task
+            </button>
+            <button style={cancelBtnStyle} onClick={onClose}>
+              Cancel
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit}>
+            <div style={formGroupStyle}>
+              <label style={labelStyle} htmlFor="task-name">Name</label>
+              <input
+                id="task-name"
+                style={inputStyle}
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Task name"
+                autoFocus
+              />
+            </div>
+
+            <div style={formGroupStyle}>
+              <label style={labelStyle} htmlFor="task-duration">Duration (minutes)</label>
+              <select
+                id="task-duration"
+                style={selectStyle}
+                value={duration}
+                onChange={(e) => setDuration(Number(e.target.value))}
+              >
+                {DURATIONS.map((d) => (
+                  <option key={d} value={d}>{d} min</option>
+                ))}
+              </select>
+            </div>
+
+            {error && <p style={errorStyle}>{error}</p>}
+
+            <div style={buttonGroupStyle}>
+              <button type="submit" style={submitBtnStyle}>
+                Create Task
+              </button>
+              <button
+                type="button"
+                style={cancelBtnStyle}
+                onClick={() => {
+                  setMode("menu");
+                  setError(null);
+                  setName("");
+                  setDuration(
+                    DURATIONS.reduce((prev, curr) =>
+                      Math.abs(curr - durationMin) < Math.abs(prev - durationMin) ? curr : prev
+                    )
+                  );
+                }}
+              >
+                Back
+              </button>
+            </div>
+          </form>
+        )}
       </div>
     </div>
   );

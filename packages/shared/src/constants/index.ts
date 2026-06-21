@@ -36,6 +36,7 @@ export const DEFAULT_SETTINGS: Settings = {
   timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
   shuffleEnabled: false,
   weekStartDay: 1,
+  use12h: false,
 };
 
 /** Mapping of named time group presets to their hour ranges. */

@@ -7,6 +7,20 @@ import type { GoogleCalendarEvent, CreateEventPayload } from "../internal/types.
 const BRKROUTNXDLE_CALENDAR_NAME = "BrkRoutnXdle";
 
 /**
+ * Module-level cache for resolved BrkRoutnXdle calendar IDs, keyed by access token.
+ * Cleared on token changes to ensure stale tokens don't reuse a cached ID.
+ */
+const calendarIdCache = new Map<string, string>();
+
+/**
+ * Clears the calendar ID cache for a given access token.
+ * Call this when the user's access token changes.
+ */
+export function clearCalendarIdCache(accessToken: string): void {
+  calendarIdCache.delete(accessToken);
+}
+
+/**
  * Creates an authenticated calendar client.
  */
 function createClient(accessToken: string): calendar_v3.Calendar {
@@ -16,14 +30,59 @@ function createClient(accessToken: string): calendar_v3.Calendar {
 }
 
 /**
- * Discovers the BrkRoutnXdle calendar ID.
+ * Discovers (or creates) the BrkRoutnXdle calendar ID with caching.
+ *
+ * Caches the resolved ID in a module-level map so `calendarList.list()`
+ * is called at most once per access token session. If the calendar does
+ * not exist, it attempts to auto-create it. If creation fails, it throws
+ * a clear actionable error.
  */
 async function getBrkCalendarId(accessToken: string): Promise<string> {
+  // Return cached ID if available
+  const cached = calendarIdCache.get(accessToken);
+  if (cached) return cached;
+
   const client = createClient(accessToken);
+
+  // Try to find the BrkRoutnXdle calendar in the user's calendar list
   const { data } = await client.calendarList.list();
-  const brkCal = data.items?.find((c: { summary?: string | null; id?: string | null }) => c.summary === BRKROUTNXDLE_CALENDAR_NAME);
-  if (!brkCal?.id) throw new Error("BrkRoutnXdle calendar not found");
-  return brkCal.id;
+  const brkCal = data.items?.find(
+    (c: { summary?: string | null; id?: string | null }) =>
+      c.summary === BRKROUTNXDLE_CALENDAR_NAME,
+  );
+
+  if (brkCal?.id) {
+    calendarIdCache.set(accessToken, brkCal.id);
+    return brkCal.id;
+  }
+
+  // Calendar not found — attempt auto-creation
+  try {
+    const { data: created } = await client.calendars.insert({
+      requestBody: {
+        summary: BRKROUTNXDLE_CALENDAR_NAME,
+        description: "Calendar for BrkRoutnXdle scheduled events",
+      },
+    });
+
+    if (!created.id) {
+      throw new Error(
+        `BrkRoutnXdle calendar not found and auto-creation returned no ID. ` +
+        `Please create a calendar named "${BRKROUTNXDLE_CALENDAR_NAME}" in Google Calendar and try again.`,
+      );
+    }
+
+    calendarIdCache.set(accessToken, created.id);
+    return created.id;
+  } catch (createErr: any) {
+    // If auto-creation fails, provide a clear actionable error
+    throw new Error(
+      `BrkRoutnXdle calendar not found and could not be auto-created. ` +
+      `Please ensure a calendar named "${BRKROUTNXDLE_CALENDAR_NAME}" exists in your Google Calendar ` +
+      `and that the app has permission to access it. ` +
+      `Original error: ${createErr?.message ?? "Unknown"}`,
+    );
+  }
 }
 
 /**

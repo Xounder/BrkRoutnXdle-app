@@ -32,10 +32,16 @@ export function useSaveSchedule() {
       setSaveState((prev) => ({ ...prev, status: "saving", total: totalOps, completed: 0 }));
 
       let completed = 0;
+      // Keep track of new events created so we can update local state with their real IDs
+      const newEventMap = new Map<string, CalendarEvent>();
 
-      // 1. Create new events
+      // 1. Create new events — capture the real Google Calendar event ID from the response
       for (const event of diff.toCreate) {
-        await api.post<CalendarEvent>("/events", event);
+        const created = await api.post<CalendarEvent>("/events", event);
+        // Store by taskId so we can map it back to the preview event
+        if (event.taskId) {
+          newEventMap.set(event.taskId, created);
+        }
         completed++;
         setSaveState((prev) => ({
           ...prev,
@@ -67,6 +73,23 @@ export function useSaveSchedule() {
           completed,
           progress: Math.round((completed / totalOps) * 100),
         }));
+      }
+
+      // 4. Update local events state with the real Google Calendar event IDs from created events.
+      //    Merge newly created events (with real Google Calendar IDs) into the existing events array,
+      //    replacing any stale entries that had the same taskId.
+      if (newEventMap.size > 0) {
+        const updatedEvents = events.map((evt) => {
+          const created = evt.taskId ? newEventMap.get(evt.taskId) : undefined;
+          return created ?? evt;
+        });
+        // Append any new events that weren't in the original array
+        for (const [, created] of newEventMap) {
+          if (!updatedEvents.some((e) => e.id === created.id)) {
+            updatedEvents.push(created);
+          }
+        }
+        setEvents(updatedEvents);
       }
 
       return diff;

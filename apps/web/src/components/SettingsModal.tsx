@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { useSettings } from "../contexts/SettingsContext";
 import { DEFAULT_SETTINGS } from "@brkroutnxdle/shared";
 import type { Settings } from "@brkroutnxdle/shared";
@@ -10,7 +10,6 @@ interface SettingsModalProps {
 
 export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const { settings, updateSettings, resetSettings } = useSettings();
-  const [use12h, setUse12h] = useState(false);
 
   const clampHour = (value: number): number => Math.max(0, Math.min(23, value));
 
@@ -20,12 +19,30 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   };
   const ampm = (h: number) => (h < 12 ? "AM" : "PM");
 
+  const getTimezoneOffset = (tz: string): string => {
+    try {
+      const formatter = new Intl.DateTimeFormat("en", {
+        timeZone: tz,
+        timeZoneName: "shortOffset",
+      });
+      const parts = formatter.formatToParts(new Date());
+      const offsetPart = parts.find((p) => p.type === "timeZoneName");
+      return offsetPart ? offsetPart.value : "";
+    } catch {
+      return "";
+    }
+  };
+
   const timezoneOptions = useMemo(() => {
     try {
-      return Intl.supportedValuesOf("timeZone");
+      const tzs = Intl.supportedValuesOf("timeZone");
+      return tzs.map((tz) => {
+        const offset = getTimezoneOffset(tz);
+        return { value: tz, label: offset ? `${tz} (${offset})` : tz };
+      });
     } catch {
       // Fallback for older browsers that don't support Intl.supportedValuesOf
-      return [
+      const fallback = [
         "UTC",
         "America/New_York",
         "America/Chicago",
@@ -41,6 +58,10 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         "Australia/Sydney",
         "Pacific/Auckland",
       ];
+      return fallback.map((tz) => {
+        const offset = getTimezoneOffset(tz);
+        return { value: tz, label: offset ? `${tz} (${offset})` : tz };
+      });
     }
   }, []);
 
@@ -80,8 +101,8 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "14px" }}>
             <input
               type="checkbox"
-              checked={use12h}
-              onChange={(e) => setUse12h(e.target.checked)}
+              checked={settings.use12h}
+              onChange={(e) => updateSettings({ use12h: e.target.checked })}
             />
             Use 12-hour format (AM/PM)
           </label>
@@ -103,7 +124,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                   }}
                   style={{ ...inputStyle, flex: 1 }}
                 />
-                {use12h && (
+                {settings.use12h && (
                   <span style={{ fontSize: "13px", color: "#666", whiteSpace: "nowrap", minWidth: "52px" }}>
                     {to12h(settings.workStartHour)} {ampm(settings.workStartHour)}
                   </span>
@@ -125,7 +146,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                   }}
                   style={{ ...inputStyle, flex: 1 }}
                 />
-                {use12h && (
+                {settings.use12h && (
                   <span style={{ fontSize: "13px", color: "#666", whiteSpace: "nowrap", minWidth: "52px" }}>
                     {to12h(settings.workEndHour)} {ampm(settings.workEndHour)}
                   </span>
@@ -191,9 +212,9 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               onChange={(e) => updateSettings({ timezone: e.target.value })}
               style={inputStyle}
             >
-              {timezoneOptions.map((tz) => (
-                <option key={tz} value={tz}>
-                  {tz}
+              {timezoneOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
                 </option>
               ))}
             </select>

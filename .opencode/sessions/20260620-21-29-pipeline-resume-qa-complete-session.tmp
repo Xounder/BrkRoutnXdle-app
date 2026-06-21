@@ -1,4 +1,0 @@
-DONE: Resumed delivery pipeline at qa-frontend step. Dispatched QA Frontend to review CalendarView.tsx + CalendarStyles.css. QA approved all 8 acceptance criteria, build passed. Pipeline marked completed.
-WRONG: Pipeline yaml path mismatch — glob **/pipeline.yaml failed to find .opencode/pipeline.yaml (tool behavior). Plan folder name (ui-settings-calendar-sidebar) doesn't match pipeline name (calendar-ui-google-design) — pre-existing naming inconsistency.
-LEARN: QA Frontend subagent can successfully run pnpm build in apps/web as part of validation gate. Resume mode correctly skipped all completed steps and only re-executed the incomplete qa-frontend step.
-NEXT: No follow-ups — pipeline workflow complete.

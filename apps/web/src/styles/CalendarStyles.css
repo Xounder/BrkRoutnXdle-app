@@ -147,6 +147,9 @@
   border-radius: 4px !important;
   opacity: 0.9 !important;
 }
+.brk-calendar-google .fc-event.brk-preview .fc-event-title {
+  color: #333 !important;
+}
 
 /* ── 14. Completed events ── */
 .brk-calendar-google .fc-event.brk-completed {
@@ -155,4 +158,14 @@
 .brk-calendar-google .fc-event.brk-completed::after {
   content: " \2713";
   color: var(--clr-success);
+}
+
+/* ── 15. Event time text — black instead of inherited white ── */
+.brk-calendar-google .fc-event .fc-event-time {
+  color: #333 !important;
+}
+
+/* ── 16. Event block fills full slot height ── */
+.brk-calendar-google .fc-timegrid-event {
+  min-height: 100% !important;
 }

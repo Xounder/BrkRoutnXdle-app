@@ -28,6 +28,14 @@ async function withErrorHandling<T>(operation: () => Promise<T>): Promise<T> {
     if (err?.response?.status === 429) {
       throw new AppError(429, "GOOGLE_RATE_LIMIT", "Google API rate limit exceeded. Try again later.");
     }
+    // Handle "calendar not found" errors from getBrkCalendarId
+    if (err?.message?.includes("BrkRoutnXdle calendar not found")) {
+      throw new AppError(
+        502,
+        "CALENDAR_NOT_FOUND",
+        err.message,
+      );
+    }
     throw new AppError(502, "GOOGLE_API_ERROR", `Google API error: ${err?.message ?? "Unknown"}`);
   }
 }

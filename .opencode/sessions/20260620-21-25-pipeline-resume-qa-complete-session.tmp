@@ -1,5 +1,0 @@
-DONE: Resumed calendar-event-creation-fix pipeline at QA phase, dispatched QA Frontend + QA Backend in parallel, both approved all 3 tasks (TASK-01 backend schema/error fix, TASK-02 calendar click fix, TASK-03 save payload fix), pipeline completed.
-WRONG: Pipeline was left in running QA state for 3 days with no completion marker nor failure note — resume recovery was needed.
-IMPROV: Added "Abandoned Pipeline Detection" section to failure-recovery.md to document 24h TTL guideline for stale running steps.
-LEARN: Resume mode correctly loaded pipeline state and dispatched QA without re-reading task files or re-validating completed work — worked cleanly from state alone.
-NEXT: None — pipeline fully completed.

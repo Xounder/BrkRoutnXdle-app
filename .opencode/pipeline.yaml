@@ -1,109 +1,111 @@
 pipeline:
-  name: "calendar-ui-google-design"
+  name: "calendar-bug-fixes"
   status: completed
-  started_at: "2026-06-17T12:00:00Z"
-  updated_at: "2026-06-20T12:00:00Z"
+  started_at: "2026-06-20T10:00:00.000Z"
+  updated_at: "2026-06-20T10:00:00.000Z"
   current_step: completed
-  current_agent: none
+  current_agent: null
   steps:
     solution-designer:
-      status: completed
-      notes: "Approach 1 (Deep CSS Theming) selected."
-      updated_at: "2026-06-17T12:00:00Z"
+      status: skipped
+      notes: "Router decided Tech Lead directly - well-defined bugs"
+      updated_at: "2026-06-20T10:00:00.000Z"
       errors: []
       concerns: []
     planning-analyst:
-      status: completed
-      notes: "Feasibility HIGH, Impact LOW, Risk LOW."
-      updated_at: "2026-06-17T12:00:00Z"
+      status: skipped
+      notes: "Router decided Tech Lead directly - no planning analysis needed"
+      updated_at: "2026-06-20T10:00:00.000Z"
       errors: []
       concerns: []
     tech-lead:
       status: completed
-      notes: "Created TASK-01 and TASK-02."
-      updated_at: "2026-06-17T12:00:00Z"
+      notes: "Created 5 task files covering all 6 bugs"
+      updated_at: "2026-06-20T10:00:00.000Z"
       errors: []
-      concerns: []
+      concerns:
+        - "TASK-04 and TASK-05 both modify CalendarView.tsx — assign to same agent or sequence"
     senior-frontend:
       status: completed
-      notes: "TASK-01 and TASK-02 completed and built successfully."
-      updated_at: "2026-06-17T12:00:00Z"
+      notes: "All frontend tasks implemented and build passed"
+      updated_at: "2026-06-20T10:00:00.000Z"
       errors: []
       concerns: []
       tasks:
-        - id: TASK-01
-          status: completed
-        - id: TASK-02
-          status: completed
+        - "TASK-02"
+        - "TASK-03"
+        - "TASK-04"
+        - "TASK-05"
     senior-backend:
       status: completed
-      notes: "No backend changes required."
-      updated_at: "2026-06-17T12:00:00Z"
+      notes: "All backend tasks implemented and build passed"
+      updated_at: "2026-06-20T10:00:00.000Z"
       errors: []
       concerns: []
-      tasks: []
+      tasks:
+        - "TASK-01"
     qa-frontend:
       status: completed
-      notes: "All 8 acceptance criteria verified. Build passes. Approved."
-      updated_at: "2026-06-20T12:00:00Z"
+      notes: "All frontend tasks approved — build/typecheck passed"
+      updated_at: "2026-06-20T10:00:00.000Z"
       errors: []
       concerns: []
     qa-backend:
       status: completed
-      notes: "No backend changes to review."
-      updated_at: "2026-06-17T12:00:00Z"
+      notes: "TASK-01 approved — all builds passed"
+      updated_at: "2026-06-20T10:00:00.000Z"
       errors: []
       concerns: []
-  tasks:
-    - id: TASK-01
-      title: CalendarView.tsx props + color migration
-      owner: senior-frontend
-      status: completed
-    - id: TASK-02
-      title: CalendarStyles.css Google-like restyle
-      owner: senior-frontend
-      status: completed
+  tasks: []
   history:
-    - agent: solution-designer
-      status: completed
-      notes: "Approach 1 selected."
-      updated_at: "2026-06-17T12:00:00Z"
-    - agent: planning-analyst
-      status: completed
-      notes: "Planning files created."
-      updated_at: "2026-06-17T12:00:00Z"
-    - agent: tech-lead
-      status: completed
-      notes: "Created TASK-01 and TASK-02."
-      updated_at: "2026-06-17T12:00:00Z"
-    - agent: senior-frontend
-      status: completed
-      notes: "TASK-01 and TASK-02 done."
-      updated_at: "2026-06-17T12:00:00Z"
-    - agent: qa-frontend
-      status: completed
-      notes: "All 8 acceptance criteria passed. Build OK. Approved."
-      updated_at: "2026-06-20T12:00:00Z"
+    - step: pipeline-init
+      agent: orchestrator
+      action: created
+      notes: "Pipeline created for calendar bug fixes"
+      timestamp: "2026-06-20T10:00:00.000Z"
+    - step: workflow-router
+      agent: orchestrator
+      action: completed
+      notes: "Routed to Tech Lead - well-defined bugs, medium complexity"
+      timestamp: "2026-06-20T10:00:00.000Z"
+    - step: tech-lead
+      agent: orchestrator
+      action: completed
+      notes: "Created 5 task files in .opencode/plan/calendar-bug-fixes/tasks/"
+      timestamp: "2026-06-20T10:00:00.000Z"
+    - step: implementation
+      agent: orchestrator
+      action: started
+      notes: "Dispatching Senior Frontend (TASK-02, TASK-03, TASK-04+TASK-05) and Senior Backend (TASK-01)"
+      timestamp: "2026-06-20T10:00:00.000Z"
+    - step: implementation
+      agent: orchestrator
+      action: completed
+      notes: "All 4 agents completed — all builds passed"
+      timestamp: "2026-06-20T10:00:00.000Z"
+    - step: qa
+      agent: orchestrator
+      action: started
+      notes: "Dispatching QA Frontend and QA Backend"
+      timestamp: "2026-06-20T10:00:00.000Z"
   handoff:
-    context: "calendar-ui-google-design"
-    selected_approach: "Deep CSS Theming of FullCalendar"
-    design_summary: "CSS overrides to mimic Google Calendar."
-    planning_summary: "Feasibility HIGH, Impact 2 files, Risk LOW."
-    task_summary: "Both TASK-01 and TASK-02 completed."
+    context: calendar-bug-fixes
+    selected_approach: null
+    design_summary: null
+    planning_summary: null
+    task_summary: null
     acceptance_criteria:
-      - "Calendar grid uses clean white background with subtle gray grid lines"
-      - "Events display as compact rounded chips with colored left border accent"
-      - "Week numbers visible in month view"
-      - "All-day slot enabled at top"
-      - "Google-style red now indicator line"
-      - "Smooth hover effects on events"
-      - "Today cell highlighted with gold accent"
-      - "All existing interactions preserved"
+      - "Fix 502 Bad Gateway when deleting events created via 'Create in this slot' modal (Google API: BrkRoutnXdle calendar not found)"
+      - "Event time text should be black, not white"
+      - "Event blocks should fill their entire time slot extension (e.g., 5:00-5:30 should fill full height)"
+      - "Allow selecting multi-slot durations (>30min) and save with correct start/end times"
+      - "Events created via 'Generate Week' should be movable like 'Create in this slot' events"
+      - "Block creation in calendar should save at the exact marked location"
     dependencies: []
     additional_context:
-      - "TASK-01: CalendarView.tsx — added wrapper class, FullCalendar props, removed hardcoded colors"
-      - "TASK-02: CalendarStyles.css — comprehensive restyle with all rules scoped under .brk-calendar-google"
+      - "User request includes error logs from POST http://localhost:5173/api/v1/events returning 502"
+      - "Error response: {success: false, error: {code: GOOGLE_API_ERROR, message: 'Google API error: BrkRoutnXdle calendar not found'}}"
   resume:
-    last_completed_agent: senior-frontend
-    last_completed_step: senior-frontend
+    last_completed_agent: null
+    last_completed_step: null
     recovery_required: false

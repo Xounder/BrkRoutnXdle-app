@@ -48,7 +48,7 @@ export function MainLayout({
       />
       <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
         <Sidebar isCollapsed={sidebarCollapsed} onToggle={toggleSidebar} onSettingsClick={onSettingsClick} />
-        <main style={{ flex: 1, overflow: "auto" }}>
+        <main style={{ flex: 1, overflow: "hidden" }}>
           {children}
         </main>
       </div>

@@ -288,7 +288,13 @@ Update pipeline after every completed task.
 
 ### Concurrent File Modification Prevention
 
-When multiple tasks modify the same file, assign them sequentially or use a merge strategy. Review task file lists for overlaps before parallel dispatch. If overlap is detected, either sequence the tasks or ensure proper merge handling.
+When multiple tasks modify the same file, assign them sequentially or use a merge strategy. Review task file lists for overlaps before parallel dispatch. If overlap is detected, choose one of:
+
+1. **Sequence**: Run tasks that touch the same file sequentially, in a logical order (e.g., type changes first, then component changes, then layout changes).
+2. **Parallel with non-overlapping sections**: If tasks affect clearly separate sections of the same file (different functions, different JSX branches), dispatch in parallel and instruct each agent to only modify its designated lines.
+3. **Merge agent**: When 3+ tasks overlap on the same file, consider dispatching a single agent with all related tasks to minimize merge conflicts.
+
+The Tech Lead should flag file overlaps in the task metadata so the orchestrator can plan the dispatch order early.
 
 ### QA Phase
 

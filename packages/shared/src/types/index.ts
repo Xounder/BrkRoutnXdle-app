@@ -120,6 +120,8 @@ export interface Settings {
   shuffleEnabled: boolean;
   /** Week start day (0=Sun, 1=Mon). */
   weekStartDay: number;
+  /** Whether to use 12-hour (AM/PM) time format. */
+  use12h: boolean;
 }
 
 /** A calendar event (normalised from Google Calendar or system-generated). */

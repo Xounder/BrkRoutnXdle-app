@@ -1,0 +1,9 @@
+DONE: 5 frontend fixes implemented — schedule font color, inline slot modal (Name+Duration), home scroll fix, AM/PM settings sync, timezone UTC offset display. All building, QA approved after 1 correction cycle.
+
+WRONG: TASK-02 used raw slot end instead of recalculating from selected duration — QA caught it. File overlap (3 tasks → DashboardPage.tsx) forced sequential dispatch.
+
+IMPROV: Added explicit overlap resolution strategies to pipeline skill (sequence, parallel-with-sections, merge-agent). Architecture unchanged.
+
+LEARN: Intl.DateTimeFormat with timeZoneName:shortOffset computes UTC offsets reliably. FullCalendar hour12 must be explicitly set per CalendarView instance.
+
+NEXT: User should manually verify all 5 changes in browser — especially slot creation placement, scroll behavior across calendar views, and AM/PM toggle persistence.
