@@ -3,9 +3,9 @@ import type { CalendarEvent } from "@brkroutnxdle/shared";
 
 export interface DiffResult {
   toCreate: Array<{
-    title: string;
-    start: string;
-    end: string;
+    summary: string;
+    start: { dateTime: string };
+    end: { dateTime: string };
     taskId?: string;
   }>;
   toUpdate: Array<{
@@ -41,9 +41,9 @@ export function computeDiff(
     if (!persisted) {
       // New event — create
       result.toCreate.push({
-        title: `Task ${preview.taskId}`,
-        start: preview.start,
-        end: preview.end,
+        summary: `Task ${preview.taskId}`,
+        start: { dateTime: preview.start },
+        end: { dateTime: preview.end },
         taskId: preview.taskId,
       });
     } else if (

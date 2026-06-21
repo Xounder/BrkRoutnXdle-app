@@ -1,92 +1,158 @@
-/* BrkRoutnXdle generated events */
-.fc-event.brk-generated {
-  border-radius: 8px;
-  border: none;
+/* ═══════════════════════════════════════════════════════════════════════════
+   CalendarStyles.css — Google Calendar-like restyle
+   All selectors scoped under .brk-calendar-google wrapper
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Grid — clean white background, subtle grid lines ── */
+.brk-calendar-google .fc .fc-timegrid-slots .fc-timegrid-slot {
+  border-bottom: 1px solid #e8e8e8 !important;
+}
+.brk-calendar-google .fc .fc-timegrid-slot-lane {
+  background: var(--clr-card) !important;
 }
 
-.fc-event.brk-generated:hover {
-  filter: brightness(1.1);
-}
-
-/* Preview events (teal/translucent) */
-.fc-event.brk-preview {
-  border-radius: 8px;
-  border: 2px dashed #0d9488;
-  opacity: 0.9;
-}
-
-/* Completed events */
-.fc-event.brk-completed {
-  opacity: 0.7;
-}
-
-.fc-event.brk-completed::after {
-  content: " ✓";
-}
-
-/* External events */
-.fc-event.brk-external {
-  border-radius: 8px;
-  opacity: 0.8;
-}
-
-/* Blocked slots — gray with diagonal stripe pattern */
-.fc-event.brk-block {
-  background: repeating-linear-gradient(
-    45deg,
-    #e8e8e8,
-    #e8e8e8 4px,
-    #d4d4d4 4px,
-    #d4d4d4 8px
-  ) !important;
-  border: 1px solid #b0b0b0 !important;
-  border-radius: 4px !important;
-  color: #666 !important;
+/* ── 2. Day headers — compact uppercase text ── */
+.brk-calendar-google .fc .fc-col-header-cell-cushion {
   font-size: 12px !important;
-  opacity: 0.85;
-  pointer-events: none;
+  font-weight: 500 !important;
+  text-decoration: none !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.03em !important;
+  color: #555 !important;
 }
 
-.fc-event.brk-block .fc-event-title {
-  font-weight: 500;
+/* ── 3. Time gutter — compact gray labels ── */
+.brk-calendar-google .fc .fc-timegrid-slot-label-cushion {
+  font-size: 11px !important;
+  color: #888 !important;
 }
 
-/* ── Google Calendar-like grid lines ── */
-.fc .fc-timegrid-slots .fc-timegrid-slot {
-  border-bottom: 1px solid #f0f0f0 !important;
+/* ── 4. Today cell — gold accent ── */
+.brk-calendar-google .fc .fc-day-today {
+  background: color-mix(in srgb, var(--clr-accent) 8%, transparent) !important;
+}
+.brk-calendar-google .fc .fc-day-today .fc-col-header-cell-cushion {
+  color: var(--clr-accent-dark) !important;
+  font-weight: 700 !important;
 }
 
-/* ── Event pills ── */
-.fc .fc-event {
-  border-radius: 4px !important;
-  border: none !important;
-  font-size: 12px !important;
-}
-
-/* ── Weekend tint ── */
-.fc .fc-day-sat,
-.fc .fc-day-sun {
-  background-color: #fafafa !important;
-}
-
-/* ── Now indicator (red line) ── */
-.fc .fc-timegrid-now-indicator-line {
+/* ── 5. Now indicator — Google red line ── */
+.brk-calendar-google .fc .fc-timegrid-now-indicator-line {
   border-color: #ea4335 !important;
+  border-width: 2px !important;
 }
-.fc .fc-timegrid-now-indicator-arrow {
+.brk-calendar-google .fc .fc-timegrid-now-indicator-arrow {
   color: #ea4335 !important;
   border-color: #ea4335 !important;
 }
 
-/* ── Compact day headers ── */
-.fc .fc-col-header-cell-cushion {
-  font-size: 12px !important;
-  font-weight: 500 !important;
-  text-decoration: none !important;
+/* ── 6. Weekend tint ── */
+.brk-calendar-google .fc .fc-day-sat,
+.brk-calendar-google .fc .fc-day-sun {
+  background-color: var(--clr-surface) !important;
 }
 
-/* ── Small gray time gutter ── */
-.fc .fc-timegrid-slot-label-cushion {
+/* ── 7. All-day slot ── */
+.brk-calendar-google .fc .fc-timegrid-all-day {
+  background: var(--clr-cream) !important;
+  border-bottom: 2px solid #dadce0 !important;
+}
+.brk-calendar-google .fc .fc-timegrid-all-day .fc-daygrid-event {
+  border-radius: var(--radius-sm) !important;
+  font-size: 12px !important;
+}
+
+/* ── 8. Week numbers ── */
+.brk-calendar-google .fc .fc-daygrid-week-number {
   font-size: 11px !important;
+  color: #999 !important;
+  padding: 2px 4px !important;
+  font-weight: 400 !important;
+}
+
+/* ── 9. Events — compact chip with colored left border ── */
+.brk-calendar-google .fc .fc-event {
+  border-radius: 4px !important;
+  border: none !important;
+  font-size: 12px !important;
+  padding: 2px 4px !important;
+  margin: 1px 0 !important;
+  transition: box-shadow 0.15s ease, transform 0.1s ease !important;
+}
+.brk-calendar-google .fc .fc-event:hover {
+  box-shadow: var(--shadow-teal-glow) !important;
+  transform: translateY(-1px) !important;
+}
+.brk-calendar-google .fc .fc-event .fc-event-title {
+  font-weight: 500 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* ── 10. Generated events — teal chip ── */
+.brk-calendar-google .fc-event.brk-generated {
+  background: color-mix(in srgb, var(--clr-primary) 15%, var(--clr-card)) !important;
+  border-left: 4px solid var(--clr-primary-dark) !important;
+  color: #333 !important;
+}
+.brk-calendar-google .fc-event.brk-generated:hover {
+  background: color-mix(in srgb, var(--clr-primary) 25%, var(--clr-card)) !important;
+}
+.brk-calendar-google .fc-event.brk-generated .fc-event-title {
+  color: var(--clr-primary-dark) !important;
+}
+
+/* ── 11. External events — sky blue chip ── */
+.brk-calendar-google .fc-event.brk-external {
+  background: color-mix(in srgb, var(--clr-sky) 15%, var(--clr-card)) !important;
+  border-left: 4px solid var(--clr-sky) !important;
+  color: #333 !important;
+}
+.brk-calendar-google .fc-event.brk-external:hover {
+  background: color-mix(in srgb, var(--clr-sky) 25%, var(--clr-card)) !important;
+}
+.brk-calendar-google .fc-event.brk-external .fc-event-title {
+  color: #2b6b9e !important;
+}
+
+/* ── 12. Blocked slots — coral diagonal stripe ── */
+.brk-calendar-google .fc-event.brk-block {
+  background: repeating-linear-gradient(
+    45deg,
+    color-mix(in srgb, var(--clr-coral) 12%, var(--clr-card)),
+    color-mix(in srgb, var(--clr-coral) 12%, var(--clr-card)) 4px,
+    color-mix(in srgb, var(--clr-coral) 8%, var(--clr-card)) 4px,
+    color-mix(in srgb, var(--clr-coral) 8%, var(--clr-card)) 8px
+  ) !important;
+  border-left: 4px solid var(--clr-coral) !important;
+  border-top: none !important;
+  border-right: none !important;
+  border-bottom: none !important;
+  border-radius: 4px !important;
   color: #888 !important;
+  font-size: 12px !important;
+  opacity: 0.85;
+  pointer-events: none;
+}
+.brk-calendar-google .fc-event.brk-block .fc-event-title {
+  font-weight: 500 !important;
+}
+
+/* ── 13. Preview events — translucent teal dashed border ── */
+.brk-calendar-google .fc-event.brk-preview {
+  background: color-mix(in srgb, var(--clr-primary) 10%, var(--clr-card)) !important;
+  border: 2px dashed var(--clr-primary) !important;
+  border-left: 4px solid var(--clr-primary-dark) !important;
+  border-radius: 4px !important;
+  opacity: 0.9 !important;
+}
+
+/* ── 14. Completed events ── */
+.brk-calendar-google .fc-event.brk-completed {
+  opacity: 0.6 !important;
+}
+.brk-calendar-google .fc-event.brk-completed::after {
+  content: " \2713";
+  color: var(--clr-success);
 }

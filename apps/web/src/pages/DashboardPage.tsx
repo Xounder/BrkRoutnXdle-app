@@ -265,7 +265,7 @@ export function DashboardPage() {
               justifyContent: "space-between",
             }}
           >
-            <span>Error: {saveState.error}</span>
+            <span>Error: {saveState.error ?? "An unknown error occurred"}</span>
             <button
               onClick={handleSave}
               style={{

@@ -37,3 +37,14 @@ delivery-pipeline:resume
 must continue from the latest persisted state.
 
 Completed work must never be repeated.
+
+### Abandoned Pipeline Detection
+
+If a pipeline step remains `running` for more than 24 hours without state updates, it should be treated as potentially abandoned. Before resuming:
+
+1. Verify the step's agent actually produced output (check for target files, git diff, build artifacts).
+2. If output exists but the step was not marked complete, update the step to `completed` and continue.
+3. If no output exists, re-dispatch the agent with the original task context.
+4. If re-dispatch fails repeatedly (3 attempts), mark the step as `failed` and update pipeline status to `failed`.
+
+This prevents stale `running` states from blocking pipeline recovery.

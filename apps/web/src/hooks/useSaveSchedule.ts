@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { api } from "../services/api";
+import { api, ApiError } from "../services/api";
 import { computeDiff } from "../services/diffCalculator";
 import { usePreview } from "../contexts/PreviewContext";
 import { useCalendar } from "../contexts/CalendarContext";
@@ -76,10 +76,20 @@ export function useSaveSchedule() {
       clearPreview();
     },
     onError: (err: Error) => {
+      let message = "Failed to save schedule";
+      if (err instanceof ApiError) {
+        message = `Save failed: ${err.message} (${err.status})`;
+        if (err.details?.fieldErrors) {
+          const fields = Object.keys(err.details.fieldErrors as Record<string, unknown>).join(", ");
+          message += ` — Invalid fields: ${fields}`;
+        }
+      } else if (err.message) {
+        message = err.message;
+      }
       setSaveState((prev) => ({
         ...prev,
         status: "error",
-        error: err.message ?? "Failed to save schedule",
+        error: message,
       }));
     },
   });

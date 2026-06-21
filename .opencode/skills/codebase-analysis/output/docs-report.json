@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-06-18T02:07:10.353Z",
+  "generatedAt": "2026-06-18T02:23:59.187Z",
   "mode": "docs",
   "summary": {
-    "totalFiles": 102,
-    "totalMdFiles": 93,
+    "totalFiles": 104,
+    "totalMdFiles": 95,
     "totalJsonFiles": 5,
     "totalYamlFiles": 4,
     "totalTxtFiles": 0,
-    "totalHeadings": 1835,
-    "totalCodeBlocks": 587,
-    "totalListItems": 1678
+    "totalHeadings": 1828,
+    "totalCodeBlocks": 588,
+    "totalListItems": 1701
   },
   "files": {
     ".opencode/agents/00-planning-agent.md": {
@@ -359,8 +359,8 @@
       ]
     },
     ".opencode/agents/03-senior-frontend.md": {
-      "size": 4352,
-      "lines": 172,
+      "size": 4240,
+      "lines": 168,
       "type": "markdown",
       "headings": [
         {
@@ -437,10 +437,6 @@
         },
         {
           "level": 2,
-          "text": "Output"
-        },
-        {
-          "level": 2,
           "text": "Retry Limit (failure escalation)"
         },
         {
@@ -448,7 +444,7 @@
           "text": "Constraints"
         }
       ],
-      "totalHeadings": 21,
+      "totalHeadings": 20,
       "totalCodeBlocks": 0,
       "codeBlocks": [],
       "totalListItems": 52,
@@ -471,14 +467,13 @@
         "Business Logic",
         "TypeScript",
         "Quality",
-        "Output",
         "Retry Limit (failure escalation)",
         "Constraints"
       ]
     },
     ".opencode/agents/04-senior-backend.md": {
-      "size": 4422,
-      "lines": 195,
+      "size": 4310,
+      "lines": 191,
       "type": "markdown",
       "headings": [
         {
@@ -559,10 +554,6 @@
         },
         {
           "level": 2,
-          "text": "Output"
-        },
-        {
-          "level": 2,
           "text": "Retry Limit (failure escalation)"
         },
         {
@@ -570,7 +561,7 @@
           "text": "Constraints"
         }
       ],
-      "totalHeadings": 22,
+      "totalHeadings": 21,
       "totalCodeBlocks": 0,
       "codeBlocks": [],
       "totalListItems": 61,
@@ -594,14 +585,13 @@
         "APIs",
         "Quality",
         "Reliability",
-        "Output",
         "Retry Limit (failure escalation)",
         "Constraints"
       ]
     },
     ".opencode/agents/05-qa-reviewer.md": {
-      "size": 4372,
-      "lines": 199,
+      "size": 4260,
+      "lines": 195,
       "type": "markdown",
       "headings": [
         {
@@ -674,10 +664,6 @@
         },
         {
           "level": 2,
-          "text": "Output"
-        },
-        {
-          "level": 2,
           "text": "Retry Limit (failure escalation)"
         },
         {
@@ -685,7 +671,7 @@
           "text": "Constraints"
         }
       ],
-      "totalHeadings": 20,
+      "totalHeadings": 19,
       "totalCodeBlocks": 0,
       "codeBlocks": [],
       "totalListItems": 62,
@@ -707,7 +693,6 @@
         "Approval",
         "Rejection",
         "Scope",
-        "Output",
         "Retry Limit (failure escalation)",
         "Constraints"
       ]
@@ -11233,8 +11218,8 @@
       "sections": []
     },
     ".opencode/docs-catalog.md": {
-      "size": 12032,
-      "lines": 143,
+      "size": 12142,
+      "lines": 144,
       "type": "markdown",
       "headings": [
         {
@@ -11544,7 +11529,7 @@
       ]
     },
     ".opencode/pipeline.yaml": {
-      "size": 1408,
+      "size": 1383,
       "lines": 68,
       "type": "yaml",
       "topKeys": [
@@ -11595,8 +11580,8 @@
       ]
     },
     ".opencode/skills/codebase-analysis/output/docs-report.json": {
-      "size": 405599,
-      "lines": 16760,
+      "size": 409486,
+      "lines": 16898,
       "type": "json",
       "topKeys": [
         "generatedAt",
@@ -11608,9 +11593,32 @@
         "codeBlockLanguages"
       ]
     },
+    ".opencode/skills/codebase-analysis/output/docs-report.md": {
+      "size": 12528,
+      "lines": 191,
+      "type": "markdown",
+      "headings": [
+        {
+          "level": 1,
+          "text": "Codebase Analysis — Documentation"
+        }
+      ],
+      "totalHeadings": 1,
+      "totalCodeBlocks": 1,
+      "codeBlocks": [
+        {
+          "language": "(none)",
+          "lines": 184
+        }
+      ],
+      "totalListItems": 18,
+      "sections": [
+        "Codebase Analysis — Documentation"
+      ]
+    },
     ".opencode/skills/codebase-analysis/output/implementation-report.json": {
-      "size": 103060,
-      "lines": 4676,
+      "size": 103359,
+      "lines": 4689,
       "type": "json",
       "topKeys": [
         "generatedAt",
@@ -11800,6 +11808,24 @@
         "Example"
       ]
     },
+    ".opencode/skills/delivery-pipeline/references/constraints.md": {
+      "size": 1651,
+      "lines": 21,
+      "type": "markdown",
+      "headings": [
+        {
+          "level": 1,
+          "text": "Pipeline Constraints"
+        }
+      ],
+      "totalHeadings": 1,
+      "totalCodeBlocks": 0,
+      "codeBlocks": [],
+      "totalListItems": 18,
+      "sections": [
+        "Pipeline Constraints"
+      ]
+    },
     ".opencode/skills/delivery-pipeline/references/failure-recovery.md": {
       "size": 1099,
       "lines": 40,
@@ -11898,8 +11924,8 @@
       ]
     },
     ".opencode/skills/delivery-pipeline/SKILL.md": {
-      "size": 14595,
-      "lines": 446,
+      "size": 12463,
+      "lines": 409,
       "type": "markdown",
       "headings": [
         {
@@ -12016,45 +12042,21 @@
         },
         {
           "level": 3,
-          "text": "YAML Formatting"
-        },
-        {
-          "level": 1,
-          "text": "Wrong (causes YAML parse error):"
-        },
-        {
-          "level": 1,
-          "text": "Correct:"
-        },
-        {
-          "level": 3,
           "text": "Pipeline Completion"
         },
         {
           "level": 2,
-          "text": "Standard Agent Response Format"
-        },
-        {
-          "level": 3,
-          "text": "Validation Gate"
-        },
-        {
-          "level": 3,
-          "text": "Step Limit Consideration"
-        },
-        {
-          "level": 2,
-          "text": "Task Tracking"
+          "text": "References"
         },
         {
           "level": 2,
           "text": "Constraints"
         }
       ],
-      "totalHeadings": 37,
+      "totalHeadings": 31,
       "totalCodeBlocks": 0,
       "codeBlocks": [],
-      "totalListItems": 130,
+      "totalListItems": 117,
       "sections": [
         "Delivery Pipeline Skill",
         "Purpose",
@@ -12084,14 +12086,8 @@
         "Parallelization Rules",
         "Failure Recovery",
         "Pipeline Updates",
-        "YAML Formatting",
-        "Wrong (causes YAML parse error):",
-        "Correct:",
         "Pipeline Completion",
-        "Standard Agent Response Format",
-        "Validation Gate",
-        "Step Limit Consideration",
-        "Task Tracking",
+        "References",
         "Constraints"
       ]
     },
@@ -13075,9 +13071,6 @@
     ],
     "output": [
       ".opencode/agents/02-tech-lead.md",
-      ".opencode/agents/03-senior-frontend.md",
-      ".opencode/agents/04-senior-backend.md",
-      ".opencode/agents/05-qa-reviewer.md",
       ".opencode/architecture/generation-algorithm.md",
       ".opencode/skills/codebase-analysis/SKILL.md",
       ".opencode/skills/workflow-router/SKILL.md"
@@ -13639,6 +13632,7 @@
       ".opencode/architecture/monorepo-structure.md",
       ".opencode/architecture/package-contracts.md",
       ".opencode/architecture/ux-flows.md",
+      ".opencode/skills/delivery-pipeline/SKILL.md",
       ".opencode/template/task-template.md"
     ],
     "commit message convention": [
@@ -16467,6 +16461,9 @@
     "project structure": [
       ".opencode/project-structure.md"
     ],
+    "codebase analysis — documentation": [
+      ".opencode/skills/codebase-analysis/output/docs-report.md"
+    ],
     "codebase analysis — implementation": [
       ".opencode/skills/codebase-analysis/output/implementation-report.md"
     ],
@@ -16507,8 +16504,10 @@
       ".opencode/skills/continuous-learning/SKILL.md"
     ],
     "standard agent response format": [
-      ".opencode/skills/delivery-pipeline/references/agent-response-format.md",
-      ".opencode/skills/delivery-pipeline/SKILL.md"
+      ".opencode/skills/delivery-pipeline/references/agent-response-format.md"
+    ],
+    "pipeline constraints": [
+      ".opencode/skills/delivery-pipeline/references/constraints.md"
     ],
     "failure recovery": [
       ".opencode/skills/delivery-pipeline/references/failure-recovery.md",
@@ -16527,8 +16526,7 @@
       ".opencode/skills/delivery-pipeline/references/parallelization-rules.md"
     ],
     "task tracking": [
-      ".opencode/skills/delivery-pipeline/references/task-tracking.md",
-      ".opencode/skills/delivery-pipeline/SKILL.md"
+      ".opencode/skills/delivery-pipeline/references/task-tracking.md"
     ],
     "delivery pipeline skill": [
       ".opencode/skills/delivery-pipeline/SKILL.md"
@@ -16593,22 +16591,7 @@
     "pipeline updates": [
       ".opencode/skills/delivery-pipeline/SKILL.md"
     ],
-    "yaml formatting": [
-      ".opencode/skills/delivery-pipeline/SKILL.md"
-    ],
-    "wrong (causes yaml parse error):": [
-      ".opencode/skills/delivery-pipeline/SKILL.md"
-    ],
-    "correct:": [
-      ".opencode/skills/delivery-pipeline/SKILL.md"
-    ],
     "pipeline completion": [
-      ".opencode/skills/delivery-pipeline/SKILL.md"
-    ],
-    "validation gate": [
-      ".opencode/skills/delivery-pipeline/SKILL.md"
-    ],
-    "step limit consideration": [
       ".opencode/skills/delivery-pipeline/SKILL.md"
     ],
     "doc audit skill": [
@@ -16887,7 +16870,7 @@
     "text": 444,
     "json": 46,
     "ts": 58,
-    "(none)": 10,
+    "(none)": 11,
     "http": 1,
     "bash": 2,
     "css": 4,

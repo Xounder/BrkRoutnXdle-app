@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-18T01:50:57.267Z",
+  "generatedAt": "2026-06-18T02:23:59.157Z",
   "mode": "implementation",
   "parser": "regex",
   "summary": {
@@ -12,9 +12,9 @@
     "totalClasses": 4,
     "totalInterfaces": 68,
     "totalTypes": 5,
-    "totalArrowFunctions": 20,
+    "totalArrowFunctions": 22,
     "totalReactComponents": 3,
-    "totalHookOrUtilities": 17
+    "totalHookOrUtilities": 19
   },
   "files": {
     "apps/web/src/App.tsx": {
@@ -435,7 +435,8 @@
           "default": true,
           "defaultName": "React",
           "named": [
-            "useMemo"
+            "useMemo",
+            "useState"
           ]
         },
         {
@@ -471,6 +472,18 @@
         {
           "kind": "function",
           "name": "SettingsModal",
+          "exported": false,
+          "async": false
+        },
+        {
+          "kind": "arrow-function",
+          "name": "to12h",
+          "exported": false,
+          "async": false
+        },
+        {
+          "kind": "arrow-function",
+          "name": "ampm",
           "exported": false,
           "async": false
         },
@@ -4640,7 +4653,7 @@
       "files": 49,
       "imports": 173,
       "exports": 59,
-      "declarations": 125
+      "declarations": 127
     },
     "apps/api": {
       "files": 11,

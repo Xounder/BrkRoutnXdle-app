@@ -38,13 +38,26 @@ export async function apiFetch<T>(
     credentials: "include", // sends HttpOnly cookies
   });
 
-  const json = await response.json();
+  let json: any;
+  try {
+    json = await response.json();
+  } catch {
+    if (!response.ok) {
+      throw new ApiError(
+        "HTTP_ERROR",
+        `Request failed with status ${response.status} (no response body)`,
+        response.status,
+      );
+    }
+    throw new ApiError("PARSE_ERROR", "Failed to parse response as JSON", response.status);
+  }
 
   if (!response.ok) {
     throw new ApiError(
       json.error?.code ?? "UNKNOWN_ERROR",
       json.error?.message ?? "An unknown error occurred",
       response.status,
+      json.error?.details,
     );
   }
 
@@ -52,13 +65,17 @@ export async function apiFetch<T>(
 }
 
 export class ApiError extends Error {
+  public details?: Record<string, unknown>;
+
   constructor(
     public code: string,
     message: string,
     public status: number,
+    details?: Record<string, unknown>,
   ) {
     super(message);
     this.name = "ApiError";
+    this.details = details;
   }
 }
 

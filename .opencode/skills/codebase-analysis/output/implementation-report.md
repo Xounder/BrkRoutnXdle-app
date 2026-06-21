@@ -1,6 +1,6 @@
 # Codebase Analysis — Implementation
 
-Generated: 2026-06-18T01:50:57.267Z
+Generated: 2026-06-18T02:23:59.157Z
 
 ```
 
@@ -8,7 +8,7 @@ Generated: 2026-06-18T01:50:57.267Z
 ║     Codebase — Implementation Report     ║
 ╚══════════════════════════════════════════╝
 
-Generated: 2026-06-18T01:50:57.267Z
+Generated: 2026-06-18T02:23:59.157Z
 Parser:    regex
 
 ── Overview ──
@@ -16,7 +16,7 @@ Parser:    regex
   Total imports:    255
   Total exports:    158
   Functions:        130
-  Arrow functions:  20
+  Arrow functions:  22
   Classes:          4
   Interfaces:       68
   Type aliases:     5
@@ -27,7 +27,7 @@ Parser:    regex
     Files:        49
     Imports:      173
     Exports:      59
-    Declarations: 125
+    Declarations: 127
   apps/api:
     Files:        11
     Imports:      42

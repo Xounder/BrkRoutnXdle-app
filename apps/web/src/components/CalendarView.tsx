@@ -95,7 +95,6 @@ export function CalendarView({
         title: block.title || "Blocked",
         classNames: ["brk-block"],
         display: "auto",
-        textColor: "#666",
         extendedProps: { isBlock: true, blockId: block.id, blockType: block.blockType },
       };
 
@@ -151,9 +150,6 @@ export function CalendarView({
       start: e.start,
       end: e.end,
       classNames: e.isGenerated ? ["brk-generated"] : ["brk-external"],
-      backgroundColor: e.isGenerated ? "#2BA8A2" : "#5DADE2",
-      borderColor: e.isGenerated ? "#1E8C86" : "#3498DB",
-      textColor: "#fff",
       extendedProps: { isGenerated: e.isGenerated, isCompleted: e.isCompleted },
     }));
 
@@ -163,9 +159,6 @@ export function CalendarView({
       start: e.start,
       end: e.end,
       classNames: ["brk-preview"],
-      backgroundColor: "#14b8a6",
-      borderColor: "#0d9488",
-      textColor: "#fff",
       display: "auto" as const,
       editable: false,
       extendedProps: { isPreview: true },
@@ -264,7 +257,7 @@ export function CalendarView({
   };
 
   return (
-    <div style={{ padding: "8px", height: "100%" }}>
+    <div className="brk-calendar-google" style={{ padding: "8px", height: "100%" }}>
       <FullCalendar
         ref={calendarRef}
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
@@ -275,10 +268,15 @@ export function CalendarView({
         slotMinTime={slotMinTime}
         slotMaxTime={slotMaxTime}
         slotDuration="00:30:00"
-        allDaySlot={false}
+        allDaySlot={true}
+        allDayText="All day"
         nowIndicator={true}
         editable={true}
         selectable={true}
+        weekNumbers={true}
+        eventTimeFormat={{ hour: '2-digit', minute: '2-digit' }}
+        dayHeaderFormat={{ weekday: 'short', month: 'short', day: 'numeric' }}
+        selectMinDistance={0}
         selectOverlap={false}
         select={handleSelect}
         scrollTime={scrollTime}
