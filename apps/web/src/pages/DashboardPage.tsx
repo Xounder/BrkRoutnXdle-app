@@ -1,8 +1,8 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useSettings } from "../contexts/SettingsContext";
 import { useTaskContext } from "../contexts/TaskContext";
-import { useCalendarEvents } from "../hooks/useCalendar";
+import { useCalendar, useCalendarEvents } from "../hooks/useCalendar";
 import { useScheduleGeneration } from "../hooks/useScheduleGeneration";
 import { useScheduleEditing } from "../hooks/useScheduleEditing";
 import { useSaveSchedule } from "../hooks/useSaveSchedule";
@@ -23,37 +23,45 @@ import { useBlockContext } from "../contexts/BlockContext";
 import { CreateActionModal } from "../features/shared/CreateActionModal";
 import { TaskModal } from "../features/tasks/TaskModal";
 import { BlockModal } from "../features/blocks/BlockModal";
-import { Priority as PriorityEnum } from "@brkroutnxdle/shared";
+import { SaveButton } from "../features/preview/SaveButton";
+import { Priority as PriorityEnum, BlockType as BlockTypeEnum } from "@brkroutnxdle/shared";
 import type { ViewType, CalendarEvent, Task, BlockedSlot } from "@brkroutnxdle/shared";
 
 export function DashboardPage() {
   const { user, logout } = useAuth();
   const { settings } = useSettings();
   const { tasks, createTask } = useTaskContext();
-  const { blocks } = useBlockContext();
+  const { blocks, createBlock } = useBlockContext();
   const { generateWeek, generateAgain, discard, isGenerating } = useScheduleGeneration();
-  const { isPreviewActive, previewEvents, allocationFailures } = usePreview();
+  const { isPreviewActive, previewEvents, allocationFailures, clearPreview } = usePreview();
+  const { events, setEvents } = useCalendar();
   const handleExternalEventChange = useCallback(
     (id: string, startStr: string, endStr: string) => {
       setEvents((prev) =>
         prev.map((e) => (e.id === id ? { ...e, start: startStr, end: endStr } : e)),
       );
+      setHasUnsavedChanges(true);
     },
     [],
   );
-
   const editing = useScheduleEditing(handleExternalEventChange);
   const { saveState, save, resetSaveState } = useSaveSchedule();
   const [currentView, setCurrentView] = useState<ViewType>("week" as ViewType);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [failurePanelOpen, setFailurePanelOpen] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [conflictState, setConflictState] = useState<{
     hasConflicts: boolean;
     changedEvents: string[];
   }>({ hasConflicts: false, changedEvents: [] });
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  useEffect(() => {
+    if (saveState.status === "success") {
+      setHasUnsavedChanges(false);
+    }
+  }, [saveState.status]);
 
   // Modal state for empty-slot creation
   const [selectedSlot, setSelectedSlot] = useState<{
@@ -77,8 +85,6 @@ export function DashboardPage() {
 
   const { toggleCompletion } = useCompletion();
   const calendarRefresh = useCalendarRefresh();
-  const { clearPreview } = usePreview();
-
   useUnsavedChanges(isPreviewActive);
 
   // Handle empty slot selection — show CreateActionModal
@@ -138,13 +144,6 @@ export function DashboardPage() {
         isActive: true,
         restrictions: [],
       });
-      // Compute end as local-time ISO string (same format as start) to avoid timezone shifts
-      const [datePart, timePart] = start.split("T");
-      const [startHour, startMinute] = timePart.split(":").map(Number);
-      const totalMinutes = startHour * 60 + startMinute + duration;
-      const endHour = Math.floor(totalMinutes / 60);
-      const endMin = totalMinutes % 60;
-      const endStr = `${datePart}T${String(endHour).padStart(2, "0")}:${String(endMin).padStart(2, "0")}:00`;
 
       setEvents((prev) => [
         ...prev,
@@ -152,7 +151,7 @@ export function DashboardPage() {
           id: task.id,
           title: task.title,
           start,
-          end: endStr,
+          end,  // Use actual end from user selection, NOT start + duration
           isAllDay: false,
           isGenerated: true,
           taskId: task.id,
@@ -160,6 +159,7 @@ export function DashboardPage() {
           source: "brkroutnxdle",
         },
       ]);
+      setHasUnsavedChanges(true);
       setSelectedSlot(null);
     },
     [createTask],
@@ -188,7 +188,7 @@ export function DashboardPage() {
   // Fetch events (will run on mount and when date changes)
   const timeMin = new Date(currentDate.getTime() - 3 * 86400_000).toISOString();
   const timeMax = new Date(currentDate.getTime() + 10 * 86400_000).toISOString();
-  // useCalendarEvents(timeMin, timeMax); // Will be wired when backend is ready
+  useCalendarEvents(timeMin, timeMax);
 
   // Map GeneratedEvent[] to CalendarEvent[] for the CalendarView
   const mappedPreviewEvents: CalendarEvent[] = useMemo(() => {
@@ -226,6 +226,58 @@ export function DashboardPage() {
 
   const handleToday = () => setCurrentDate(new Date());
 
+  const handleExternalDrop = useCallback(
+    (info: { dateStr: string; allDay: boolean; dragData: any }) => {
+      const { dateStr, allDay, dragData } = info;
+      const workStartHour = settings.workStartHour;
+      const start = allDay || !dateStr.includes("T")
+        ? `${dateStr.slice(0, 10)}T${String(workStartHour).padStart(2, "0")}:00:00`
+        : dateStr;
+      const startDate = new Date(start);
+      let end: string;
+
+      if (dragData.type === "task") {
+        const duration = dragData.duration || 30;
+        const endDate = new Date(startDate.getTime() + duration * 60000);
+        end = endDate.toISOString().slice(0, 19);
+      } else if (dragData.type === "block") {
+        const endDate = new Date(startDate.getTime() + 60 * 60000);
+        end = endDate.toISOString().slice(0, 19);
+      } else {
+        return;
+      }
+
+      if (!editing.canDropAt(start, end)) return;
+
+      if (dragData.type === "task") {
+        setEvents((prev) => [
+          ...prev,
+          {
+            id: crypto.randomUUID(),
+            title: dragData.title,
+            start,
+            end,
+            isAllDay: false,
+            isGenerated: true,
+            taskId: dragData.taskId,
+            isCompleted: false,
+            source: "brkroutnxdle",
+          },
+        ]);
+        setHasUnsavedChanges(true);
+      } else if (dragData.type === "block") {
+        createBlock({
+          title: dragData.title || "Blocked",
+          blockType: BlockTypeEnum.SingleDay,
+          startDate: start,
+          endDate: end,
+        });
+        setHasUnsavedChanges(true);
+      }
+    },
+    [editing.canDropAt, setEvents, createBlock, settings],
+  );
+
   const handleSave = () => {
     if (saveState.status === "error") {
       resetSaveState();
@@ -247,11 +299,19 @@ export function DashboardPage() {
         <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
           <div style={{ padding: "12px 16px 0", display: "flex", gap: "12px", alignItems: "center" }}>
             {!isPreviewActive ? (
-              <CalculateWeekButton
-                onClick={generateWeek}
-                disabled={false}
-                isLoading={isGenerating}
-              />
+              <>
+                <CalculateWeekButton
+                  onClick={generateWeek}
+                  disabled={false}
+                  isLoading={isGenerating}
+                />
+                <SaveButton
+                  onClick={handleSave}
+                  disabled={!hasUnsavedChanges}
+                  isSaving={saveState.status === "saving"}
+                  progress={saveState.progress}
+                />
+              </>
             ) : (
               <PreviewToolbar
                 onGenerateAgain={generateAgain}
@@ -342,6 +402,7 @@ export function DashboardPage() {
               onDeleteRequest={editing.requestDelete}
               onEventClick={handleEventClick}
               onSelect={handleSelect}
+              onExternalDrop={handleExternalDrop}
               onEventDragStart={editing.handleEventDragStart}
               onEventDragStop={editing.handleEventDragStop}
               validateDrop={(startStr, endStr) =>

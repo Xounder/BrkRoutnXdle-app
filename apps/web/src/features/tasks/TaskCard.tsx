@@ -15,8 +15,23 @@ const PRIORITY_COLORS: Record<Priority, string> = {
 };
 
 export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
+  const handleDragStart = (e: React.DragEvent) => {
+    e.dataTransfer.setData(
+      "application/json",
+      JSON.stringify({
+        type: "task",
+        taskId: task.id,
+        title: task.title,
+        duration: task.duration,
+      }),
+    );
+    e.dataTransfer.effectAllowed = "copy";
+  };
+
   return (
     <div
+      draggable="true"
+      onDragStart={handleDragStart}
       style={{
         padding: "12px",
         borderRadius: "16px",
@@ -24,7 +39,7 @@ export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
         boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
         borderLeft: `6px solid ${PRIORITY_COLORS[task.priority]}`,
         marginBottom: "8px",
-        cursor: "pointer",
+        cursor: "grab",
       }}
       onClick={() => onEdit(task)}
     >

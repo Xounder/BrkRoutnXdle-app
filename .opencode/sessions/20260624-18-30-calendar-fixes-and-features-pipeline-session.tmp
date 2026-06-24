@@ -1,0 +1,5 @@
+DONE: Pipeline calendar-fixes-and-features completed — 7 frontend tasks implemented. Batch 1 (TASK-02/03/04/05) verified from prior commit. Batch 2: TASK-06 (sidebar drag-to-calendar via HTML5 DnD + FullCalendar droppable), TASK-01+TASK-07 merge agent (save button without preview, diffCalculator task title fix, useCalendarEvents wired, save preserves manual events). QA approved after 1 correction loop (save button disabled state, double usePreview). All builds pass (apps/web).
+WRONG: None.
+IMPROV: External drop in month view uses workStartHour as default time since dateStr is date-only — month view drops could be smarter.
+LEARN: Merging TASK-01+TASK-07 as a single agent avoided merge conflicts on shared files (DashboardPage.tsx, diffCalculator.ts, useSaveSchedule.ts). Pipeline resume mode correctly identified batch 1 as already implemented and only dispatched batch 2.
+NEXT: Run manual end-to-end validation on the running application to verify all 7 fixes.

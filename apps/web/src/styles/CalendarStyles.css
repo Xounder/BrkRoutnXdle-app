@@ -84,6 +84,7 @@
   transform: translateY(-1px) !important;
 }
 .brk-calendar-google .fc .fc-event .fc-event-title {
+  color: #333 !important;
   font-weight: 500 !important;
   white-space: nowrap !important;
   overflow: hidden !important;
@@ -136,6 +137,7 @@
   pointer-events: none;
 }
 .brk-calendar-google .fc-event.brk-block .fc-event-title {
+  color: var(--clr-coral-dark) !important;
   font-weight: 500 !important;
 }
 
@@ -148,7 +150,7 @@
   opacity: 0.9 !important;
 }
 .brk-calendar-google .fc-event.brk-preview .fc-event-title {
-  color: #333 !important;
+  color: var(--clr-primary-dark) !important;
 }
 
 /* ── 14. Completed events ── */

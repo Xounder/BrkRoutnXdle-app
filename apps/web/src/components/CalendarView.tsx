@@ -22,6 +22,7 @@ interface CalendarViewProps {
   onDeleteRequest?: (id: string, title: string) => void;
   onEventDragStart?: (info: any) => void;
   onEventDragStop?: (info: any) => void;
+  onExternalDrop?: (info: { dateStr: string; allDay: boolean; dragData: any }) => void;
   validateDrop?: (startStr: string, endStr: string) => boolean;
   scrollTime?: string;
   slotMinTime?: string;
@@ -56,6 +57,7 @@ export function CalendarView({
   onDeleteRequest,
   onEventDragStart,
   onEventDragStop,
+  onExternalDrop,
   validateDrop,
   scrollTime = "06:00:00",
   slotMinTime = "00:00:00",
@@ -219,6 +221,14 @@ export function CalendarView({
     onEventDragStop?.(info);
   };
 
+  const handleExternalDrop = (info: any) => {
+    const jsEvent = info.jsEvent as DragEvent;
+    const rawData = jsEvent.dataTransfer?.getData("application/json");
+    if (!rawData) return;
+    const dragData = JSON.parse(rawData);
+    onExternalDrop?.({ dateStr: info.dateStr, allDay: info.allDay, dragData });
+  };
+
   const handleEventAllow = (dropInfo: any, _draggedEvent: any): boolean => {
     return validateDrop?.(dropInfo.startStr, dropInfo.endStr) ?? true;
   };
@@ -226,7 +236,7 @@ export function CalendarView({
   const handleEventDidMount = (info: any) => {
     if (!onDeleteRequest) return;
     const props = info.event.extendedProps;
-    if (!props.isGenerated) return;
+    if (!props.isGenerated && !props.isBlock) return;
 
     const el = info.el as HTMLElement;
     el.style.position = "relative";
@@ -287,6 +297,8 @@ export function CalendarView({
         eventResize={(info) => onEventResize?.(info)}
         eventDragStart={handleEventDragStart}
         eventDragStop={handleEventDragStop}
+        droppable={true}
+        drop={handleExternalDrop}
         eventAllow={handleEventAllow}
         datesSet={handleDatesSet}
         eventDidMount={handleEventDidMount}

@@ -1,0 +1,5 @@
+DONE: Invoked learning-improvement standalone as requested. Pipeline calendar-fixes-and-features was previously completed — all 7 tasks implemented, QA approved, STOP chain already executed.
+WRONG: None.
+IMPROV: None.
+LEARN: None.
+NEXT: Run manual end-to-end validation on the running application to verify all 7 fixes.

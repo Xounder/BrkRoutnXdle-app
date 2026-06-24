@@ -4,7 +4,9 @@ import { api, ApiError } from "../services/api";
 import { computeDiff } from "../services/diffCalculator";
 import { usePreview } from "../contexts/PreviewContext";
 import { useCalendar } from "../contexts/CalendarContext";
+import { useTaskContext } from "../contexts/TaskContext";
 import type { CalendarEvent } from "@brkroutnxdle/shared";
+import type { GeneratedEvent } from "@brkroutnxdle/domain";
 
 interface SaveState {
   status: "idle" | "saving" | "success" | "error";
@@ -17,6 +19,7 @@ interface SaveState {
 export function useSaveSchedule() {
   const { previewEvents, allocationFailures, clearPreview } = usePreview();
   const { events, setEvents } = useCalendar();
+  const { tasks } = useTaskContext();
   const [saveState, setSaveState] = useState<SaveState>({
     status: "idle",
     progress: 0,
@@ -27,7 +30,38 @@ export function useSaveSchedule() {
 
   const saveMutation = useMutation({
     mutationFn: async () => {
-      const diff = computeDiff(previewEvents, events);
+      const isManualSave = previewEvents.length === 0;
+
+      let diff: ReturnType<typeof computeDiff>;
+
+      if (isManualSave) {
+        // Manual save: persist manually created events (from "Create in this slot" or external drops)
+        // Fetch current persisted events from backend to compute what needs creating/updating
+        const persisted: CalendarEvent[] = await api
+          .get<CalendarEvent[]>("/events")
+          .catch(() => [] as CalendarEvent[]);
+
+        // Convert context events to GeneratedEvent[] for the diff
+        const desired: GeneratedEvent[] = events.map((e) => ({
+          id: e.id,
+          taskId: e.taskId ?? "",
+          start: e.start,
+          end: e.end,
+          completed: e.isCompleted,
+          createdAt: "",
+          updatedAt: "",
+        }));
+
+        diff = computeDiff(desired, persisted, tasks, { noDelete: true });
+      } else {
+        // Preview save: only consider preview-related events for deletion
+        const previewTaskIds = new Set(previewEvents.map((e) => e.taskId));
+        const previewRelatedPersisted = events.filter(
+          (e) => e.taskId && previewTaskIds.has(e.taskId),
+        );
+        diff = computeDiff(previewEvents, previewRelatedPersisted, tasks);
+      }
+
       const totalOps = diff.toCreate.length + diff.toUpdate.length + diff.toDelete.length;
       setSaveState((prev) => ({ ...prev, status: "saving", total: totalOps, completed: 0 }));
 

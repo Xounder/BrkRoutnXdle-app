@@ -38,7 +38,7 @@ export function useScheduleEditing(
   const { previewEvents, allocationFailures, setPreview } = usePreview();
   const { events } = useCalendar();
   const { settings } = useSettings();
-  const { blocks, updateBlock, getBlock } = useBlockContext();
+  const { blocks, updateBlock, deleteBlock, getBlock } = useBlockContext();
   const [editing, setEditing] = useState<EditingState>({
     isDragging: false,
     isResizing: false,
@@ -229,12 +229,16 @@ export function useScheduleEditing(
 
   const confirmDelete = useCallback(() => {
     if (!editing.deleteTarget) return;
-    const updatedEvents = previewEvents.filter(
-      (e) => e.id !== editing.deleteTarget!.id,
-    );
-    setPreview(updatedEvents, allocationFailures);
+    const { id } = editing.deleteTarget;
+    if (id.startsWith("block-")) {
+      const blockId = id.slice(6);
+      deleteBlock(blockId);
+    } else {
+      const updatedEvents = previewEvents.filter((e) => e.id !== id);
+      setPreview(updatedEvents, allocationFailures);
+    }
     setEditing((prev) => ({ ...prev, deleteTarget: null }));
-  }, [editing.deleteTarget, previewEvents, allocationFailures, setPreview]);
+  }, [editing.deleteTarget, previewEvents, allocationFailures, setPreview, deleteBlock]);
 
   const cancelDelete = useCallback(() => {
     setEditing((prev) => ({ ...prev, deleteTarget: null }));

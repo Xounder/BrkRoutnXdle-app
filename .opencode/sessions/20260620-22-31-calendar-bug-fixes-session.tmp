@@ -1,5 +1,0 @@
-DONE: Pipeline calendar-bug-fixes completed — 6 bugs fixed across 5 tasks. Backend: calendar ID caching with module-level Map, auto-creation, Google event ID storage, taskId fallback matching in diffCalculator. Frontend: event time text color (white→black), slot height (min-height:100%), multi-slot duration default (closest DURATIONS match), drag-move for preview events (removed editable:false), timezone-safe creation position (string-based end computation, timeZone=local config). All builds pass (packages/calendar, apps/api, apps/web). QA Frontend + QA Backend both approved.
-WRONG: None — all agents completed successfully.
-IMPROV: None.
-LEARN: FullCalendar per-event editable:false overrides global editable={true} — remove per-event prop to inherit. FullCalendar startStr has no timezone indicator — new Date(startStr) interpreted as UTC; string-based arithmetic avoids shift. Combining overlapping-file tasks (TASK-04+TASK-05 both modify CalendarView.tsx) into one agent avoids merge conflicts.
-NEXT: Run manual end-to-end validation on the running application to verify all 6 fixes.

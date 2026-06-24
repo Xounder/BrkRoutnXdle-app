@@ -4,6 +4,8 @@ import type { CalendarEvent } from "@brkroutnxdle/shared";
 import { useCalendar } from "../contexts/CalendarContext";
 import { useEffect } from "react";
 
+export { useCalendar };
+
 export function useCalendarEvents(timeMin?: string, timeMax?: string) {
   const { setEvents } = useCalendar();
 
@@ -19,7 +21,11 @@ export function useCalendarEvents(timeMin?: string, timeMax?: string) {
 
   useEffect(() => {
     if (query.data) {
-      setEvents(query.data);
+      setEvents((prev) => {
+        const fetchedIds = new Set(query.data!.map((e) => e.id));
+        const localOnly = prev.filter((e) => !fetchedIds.has(e.id));
+        return [...localOnly, ...query.data!];
+      });
     }
   }, [query.data, setEvents]);
 

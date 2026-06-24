@@ -15,8 +15,23 @@ const TYPE_LABELS: Record<BlockType, string> = {
 };
 
 export function BlockCard({ block, onEdit, onDelete }: BlockCardProps) {
+  const handleDragStart = (e: React.DragEvent) => {
+    e.dataTransfer.setData(
+      "application/json",
+      JSON.stringify({
+        type: "block",
+        blockId: block.id,
+        blockType: block.blockType,
+        title: block.title,
+      }),
+    );
+    e.dataTransfer.effectAllowed = "copy";
+  };
+
   return (
     <div
+      draggable="true"
+      onDragStart={handleDragStart}
       style={{
         padding: "12px",
         borderRadius: "16px",
@@ -24,7 +39,7 @@ export function BlockCard({ block, onEdit, onDelete }: BlockCardProps) {
         boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
         borderLeft: "6px solid #EF6C4A",
         marginBottom: "8px",
-        cursor: "pointer",
+        cursor: "grab",
       }}
       onClick={() => onEdit(block)}
     >

@@ -6,8 +6,8 @@ interface CalendarContextValue {
   previewEvents: CalendarEvent[];
   currentView: ViewType;
   currentDate: Date;
-  setEvents: (events: CalendarEvent[]) => void;
-  setPreviewEvents: (events: CalendarEvent[]) => void;
+  setEvents: React.Dispatch<React.SetStateAction<CalendarEvent[]>>;
+  setPreviewEvents: React.Dispatch<React.SetStateAction<CalendarEvent[]>>;
   setCurrentView: (view: ViewType) => void;
   setCurrentDate: (date: Date) => void;
   refreshCalendar: () => void;

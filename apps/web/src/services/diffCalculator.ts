@@ -1,5 +1,5 @@
 import type { GeneratedEvent } from "@brkroutnxdle/domain";
-import type { CalendarEvent } from "@brkroutnxdle/shared";
+import type { CalendarEvent, Task } from "@brkroutnxdle/shared";
 
 export interface DiffResult {
   toCreate: Array<{
@@ -61,6 +61,11 @@ function findPersistedMatch(
   return undefined;
 }
 
+export function getTaskTitle(taskId: string, tasks: Task[]): string {
+  const task = tasks.find((t) => t.id === taskId);
+  return task?.title ?? taskId;
+}
+
 /**
  * Computes the diff between a preview state and the persisted calendar state.
  * Determines minimal set of create/update/delete operations needed.
@@ -74,6 +79,8 @@ function findPersistedMatch(
 export function computeDiff(
   previewEvents: GeneratedEvent[],
   persistedEvents: CalendarEvent[],
+  tasks: Task[] = [],
+  options?: { noDelete?: boolean },
 ): DiffResult {
   const previewMap = new Map(previewEvents.map((e) => [e.id, e]));
   const { byId: persistedById, byTaskId: persistedByTaskId } =
@@ -95,7 +102,7 @@ export function computeDiff(
     if (!persisted) {
       // New event — create
       result.toCreate.push({
-        summary: `Task ${preview.taskId}`,
+        summary: getTaskTitle(preview.taskId, tasks),
         start: { dateTime: preview.start },
         end: { dateTime: preview.end },
         taskId: preview.taskId,
@@ -120,9 +127,11 @@ export function computeDiff(
   }
 
   // Find deletes: events in persisted but not in preview (and not matched by taskId)
-  for (const [, persisted] of persistedById) {
-    if (!matchedPersistedIds.has(persisted.id)) {
-      result.toDelete.push(persisted.id);
+  if (!options?.noDelete) {
+    for (const [, persisted] of persistedById) {
+      if (!matchedPersistedIds.has(persisted.id)) {
+        result.toDelete.push(persisted.id);
+      }
     }
   }
 
