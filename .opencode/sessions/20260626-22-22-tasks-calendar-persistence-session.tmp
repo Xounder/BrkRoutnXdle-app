@@ -1,0 +1,5 @@
+DONE: Pipeline tasks-calendar-persistence completed — 4 tasks implemented across 6 files, all QA approved. Pipeline yaml fixed from stale completed state to new context.
+WRONG: None.
+IMPROV: None.
+LEARN: Parallel dispatch of SF agents for independent tasks works well; Tech Lead's file overlap analysis enables safe parallel execution (TASK-03 + TASK-04 both modified useScheduleEditing.ts in different functions).
+NEXT: Run manual end-to-end validation on the running application to verify all 4 fixes.

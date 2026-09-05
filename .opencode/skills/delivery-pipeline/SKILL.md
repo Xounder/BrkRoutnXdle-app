@@ -57,10 +57,11 @@ Resumes the last execution from [PIPELINE_FILE].
 
 Responsibilities:
 
-1. Load pipeline state.
-2. Identify incomplete steps.
-3. Resume execution from the last known state.
-4. Avoid re-executing completed work.
+1. Validate `pipeline.yaml` parses via `read-pipeline-state`. If it fails (e.g., duplicate YAML keys), repair/rewrite the file first, then load state.
+2. Load pipeline state.
+3. Identify incomplete steps.
+4. Resume execution from the last known state.
+5. Avoid re-executing completed work.
 
 ## Pipeline State
 
@@ -106,6 +107,8 @@ Responsible for:
 **Primary agents** (Planning Analyst, Solution Designer) are defined with `mode: primary` in their agent files. They must be dispatched using their proper agent type name via `task` with `subagent_type` matching the agent name. Do NOT dispatch primary agents as `general` or any other type — this skips their workflow and prevents file creation.
 
 **Subagents** (Senior Frontend, Senior Backend, QA) use `mode: subagent` and are dispatched as `general` with their task instructions inline.
+
+Dispatch subagents ONLY as `general`. Dispatching them via their named agent type (QA Reviewer, Senior Frontend, Senior Backend) can fail with a model-resolution error such as `Model not found: opencode/...` even though the agent file declares a model — always delegate through `general` instead.
 
 ### Orchestrator Must Never Do Agent Work
 
@@ -366,6 +369,8 @@ After EVERY agent dispatch completes, BEFORE dispatching the next agent, update 
 * updated_at timestamp
 
 This is mandatory — missed updates cause recovery failures and loss of execution history.
+
+Validate the file after every write: call `read-pipeline-state` before dispatching the next agent. An invalid `pipeline.yaml` (e.g., duplicate YAML keys under a step) blocks recovery and must be repaired first.
 
 After every agent execution update:
 

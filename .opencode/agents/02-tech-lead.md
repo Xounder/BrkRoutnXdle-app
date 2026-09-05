@@ -2,7 +2,7 @@
 name: Tech Lead
 description: Analyzes design and planning documents and creates clear, actionable implementation tasks for the development team.
 mode: subagent
-model: opencode/deepseek-v4-flash-free
+model: opencode/big-pickle
 ---
 
 # Tech Lead Agent
@@ -52,7 +52,7 @@ Review the provided context and identify:
 
 Read approved design documents from `[DESIGN_FOLDER_LOCATION]` and/or planning documents from `[PLAN_FOLDER_LOCATION]` when available.
 
-Before creating tasks: validate current build state via `run-package-command` with `build` on affected packages; record concerns if failing.
+Before creating tasks: validate current build state via `run-package-command` with `build` on affected packages (and `test` when the affected package has E2E tests); record concerns if failing.
 
 ### 2. Identify Work Units
 
@@ -63,6 +63,7 @@ Tasks must:
 - Be independently executable whenever possible
 - Have clear ownership
 - Have measurable acceptance criteria
+- When E2E interaction is required (drag-drop, FullCalendar integration), include E2E test criteria in the task with a cost note (~30s per run)
 - Remain implementation-focused
 - Reference approved design decisions when applicable
 
@@ -163,6 +164,16 @@ TASK-N-*.md
 
 One task per file.
 
+For each task, preencha a seção **Edge Cases** com cenários de borda específicos:
+- Race conditions (concorrência entre states, carregamento assíncrono)
+- Estados vazios (empty arrays, null/undefined, fallbacks)
+- Falhas de API ou storage (quota excedida, parse error, timeout)
+- Campos opcionais ou ausentes (eventos sem `end`, sem `title`)
+- Limites (datas extremas, eventos recorrentes, many items)
+- Regressões em funcionalidades existentes
+
+Quando uma task modificar um arquivo que também é modificado por outra task, documente um **File Overlap Warning** no corpo da task e inclua a **merge strategy** recomendada (execução sequencial vs paralelo com merge cuidadoso em seções diferentes do mesmo arquivo).
+
 If template variables were not resolved in your input, use `[TASK_TEMPLATE_FILE]` as the template reference or call `resolve-template` with `template: '.opencode/template/task-template.md'` and the pipeline context name to get the rendered content.
 
 ### 8. Create Task Index
@@ -179,6 +190,8 @@ The index must contain:
 - Execution order
 - Dependency graph
 - Ownership mapping
+- **File Overlaps** — lista de arquivos tocados por múltiplas tasks com estratégia de merge (sequencial vs paralelo com merge cuidadoso)
+- **Parallelization Plan** — batches recomendados com justificativa (ex: "Batch 1: TASK-A + TASK-B independentes; Batch 2: TASK-C (depende de TASK-A)")
 
 ### 9. Update Pipeline
 

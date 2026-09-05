@@ -1,134 +1,64 @@
 pipeline:
-  name: "calendar-fixes-and-features"
-  status: completed
-  started_at: "2026-06-20T10:30:00.000Z"
-  updated_at: "2026-06-24T15:00:00.000Z"
-  current_step: completed
-  current_agent: orchestrator
+  name: "google-token-retry-modal"
+  status: pending
+  started_at: "2026-09-05T02:10:00.000Z"
+  updated_at: "2026-09-05T02:12:00.000Z"
+  current_step: tech-lead
+  current_agent: tech-lead
   steps:
     solution-designer:
-      status: completed
-      notes: "Skipped — Tech Lead route"
-      updated_at: "2026-06-20T10:31:00.000Z"
+      status: skipped
+      notes: "Skipped — routed by workflow-router: codebase exists, well-defined small bug fix."
+      updated_at: "2026-09-05T02:12:00.000Z"
       errors: []
       concerns: []
     planning-analyst:
-      status: completed
-      notes: "Skipped — Tech Lead route"
-      updated_at: "2026-06-20T10:31:00.000Z"
+      status: pending
+      notes: null
+      updated_at: null
       errors: []
       concerns: []
     tech-lead:
-      status: completed
-      notes: "Created 7 task files covering all 7 calendar issues/features"
-      updated_at: "2026-06-20T10:32:00.000Z"
-      errors: []
-      concerns:
-        - "TASK-01 and TASK-07 both modify DashboardPage.tsx and diffCalculator.ts — sequence them"
-        - "TASK-03 and TASK-06 both modify CalendarView.tsx — sequence them"
-    senior-frontend:
-      status: completed
-      notes: "All 7 tasks implemented. Batch 1: TASK-02/03/04/05. Batch 2: TASK-06, TASK-01+TASK-07 merge agent."
-      updated_at: "2026-06-24T14:30:00.000Z"
+      status: pending
+      notes: null
+      updated_at: null
       errors: []
       concerns: []
-      tasks:
-        - "TASK-01"
-        - "TASK-02"
-        - "TASK-03"
-        - "TASK-04"
-        - "TASK-05"
-        - "TASK-06"
-        - "TASK-07"
+    senior-frontend:
+      status: pending
+      notes: null
+      updated_at: null
+      errors: []
+      concerns: []
+      tasks: []
     senior-backend:
-      status: completed
-      notes: "No backend tasks in this pipeline"
-      updated_at: "2026-06-24T14:00:00.000Z"
+      status: pending
+      notes: null
+      updated_at: null
       errors: []
       concerns: []
       tasks: []
     qa-frontend:
-      status: completed
-      notes: "All 7 tasks approved after correction loop"
-      updated_at: "2026-06-24T15:00:00.000Z"
+      status: pending
+      notes: null
+      updated_at: null
       errors: []
       concerns: []
     qa-backend:
-      status: completed
-      notes: "No backend tasks — skipped"
-      updated_at: "2026-06-24T14:00:00.000Z"
+      status: pending
+      notes: null
+      updated_at: null
       errors: []
       concerns: []
-  tasks:
-    TASK-01:
-      status: completed
-      notes: "Save button visible without preview; useSaveSchedule extended for manual saves"
-    TASK-02:
-      status: completed
-      notes: "CalendarStyles.css — all event title colors set"
-    TASK-03:
-      status: completed
-      notes: "CalendarView.tsx + useScheduleEditing.ts — X button and block deletion"
-    TASK-04:
-      status: completed
-      notes: "DashboardPage.tsx — handleCreateTaskInline uses end param directly"
-    TASK-05:
-      status: completed
-      notes: "useScheduleGeneration.ts — previousWeekRef wired to generateSchedule"
-    TASK-06:
-      status: completed
-      notes: "Sidebar drag-to-calendar implemented via HTML5 DnD + FullCalendar droppable"
-    TASK-07:
-      status: completed
-      notes: "diffCalculator task title fix, useCalendarEvents wired, save preserves manual events"
+  tasks: []
   history:
     - step: pipeline-init
       agent: orchestrator
       action: created
-      notes: "Pipeline created for calendar fixes and features"
-      timestamp: "2026-06-20T10:30:00.000Z"
-    - step: workflow-router
-      agent: orchestrator
-      action: completed
-      notes: "Routed to Tech Lead - multiple well-defined bugs/features, medium complexity"
-      timestamp: "2026-06-20T10:31:00.000Z"
-    - step: tech-lead
-      agent: orchestrator
-      action: completed
-      notes: "Created 7 task files in .opencode/plan/calendar-fixes-and-features/tasks/"
-      timestamp: "2026-06-20T10:32:00.000Z"
-    - step: implementation/batch-1
-      agent: orchestrator
-      action: started
-      notes: "Dispatching TASK-02, TASK-03, TASK-04, TASK-05 in parallel (no file overlap)"
-      timestamp: "2026-06-20T10:32:00.000Z"
-    - step: implementation/batch-1
-      agent: orchestrator
-      action: completed
-      notes: "All 4 tasks verified in codebase (commit a45d915). Build passes."
-      timestamp: "2026-06-24T14:00:00.000Z"
-    - step: implementation/batch-2
-      agent: orchestrator
-      action: started
-      notes: "Dispatching TASK-06 (standalone), then TASK-01+TASK-07 merge agent"
-      timestamp: "2026-06-24T14:00:00.000Z"
-    - step: implementation/batch-2
-      agent: orchestrator
-      action: completed
-      notes: "All 3 remaining tasks implemented. Build passes. Dispatching QA Frontend."
-      timestamp: "2026-06-24T14:30:00.000Z"
-    - step: qa-frontend
-      agent: orchestrator
-      action: completed
-      notes: "All 7 tasks approved after correction loop (save button disabled state, double usePreview)"
-      timestamp: "2026-06-24T15:00:00.000Z"
-    - step: pipeline-completion
-      agent: orchestrator
-      action: completed
-      notes: "Pipeline calendar-fixes-and-features completed. Invoking STOP chain."
-      timestamp: "2026-06-24T15:00:00.000Z"
+      notes: "New pipeline: google-token-retry-modal. User reports: when Google token sync fails in dev mode with 'Failed to sync calendar events: Google token expired. Please re-authenticate.', the Retry button appears to do nothing. Desired: a modal offering reauthentication (insert new token) or retry; on either action the modal closes and a retry happens (same token on retry, new token when inserted)."
+      timestamp: "2026-09-05T02:10:00.000Z"
   handoff:
-    context: calendar-fixes-and-features
+    context: "google-token-retry-modal"
     selected_approach: null
     design_summary: null
     planning_summary: null

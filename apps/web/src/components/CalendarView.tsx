@@ -23,7 +23,7 @@ interface CalendarViewProps {
   onEventDragStart?: (info: any) => void;
   onEventDragStop?: (info: any) => void;
   onExternalDrop?: (info: { dateStr: string; allDay: boolean; dragData: any }) => void;
-  validateDrop?: (startStr: string, endStr: string) => boolean;
+  validateDrop?: (startStr: string, endStr: string, draggedEventId?: string) => boolean;
   scrollTime?: string;
   slotMinTime?: string;
   slotMaxTime?: string;
@@ -148,26 +148,68 @@ export function CalendarView({
 
   // Map CalendarEvent[] + BlockedSlot[] to FullCalendar event format
   const fcEvents: any[] = useMemo(() => {
-    const taskEvents = events.map((e) => ({
-      id: e.id,
-      title: e.title,
-      start: e.start,
-      end: e.end,
-      classNames: e.isGenerated ? ["brk-generated"] : ["brk-external"],
-      extendedProps: { isGenerated: e.isGenerated, isCompleted: e.isCompleted },
-    }));
+    const now = Date.now();
 
-    const previewMapped = previewEvents.map((e) => ({
-      id: e.id,
-      title: e.title,
-      start: e.start,
-      end: e.end,
-      classNames: ["brk-preview"],
-      display: "auto" as const,
-      extendedProps: { isPreview: true },
-    }));
+    const taskEvents = events.map((e) => {
+      const eventEnd = e.end
+        ? new Date(e.end).getTime()
+        : new Date(e.start).getTime() + 30 * 60000;
+      const isPast = eventEnd < now;
+      return {
+        id: e.id,
+        title: e.title,
+        start: e.start,
+        end: e.end,
+        classNames: e.isGenerated ? ["brk-generated"] : ["brk-external"],
+        extendedProps: {
+          isGenerated: e.isGenerated,
+          isCompleted: e.isCompleted,
+          isPast,
+        },
+        eventStartEditable: !isPast,
+        eventDurationEditable: !isPast,
+      };
+    });
 
-    return [...taskEvents, ...previewMapped, ...fcBlockEvents];
+    const previewMapped = previewEvents.map((e) => {
+      const eventEnd = e.end
+        ? new Date(e.end).getTime()
+        : new Date(e.start).getTime() + 30 * 60000;
+      const isPast = eventEnd < now;
+      return {
+        id: e.id,
+        title: e.title,
+        start: e.start,
+        end: e.end,
+        classNames: ["brk-preview"],
+        display: "auto" as const,
+        extendedProps: {
+          isPreview: true,
+          isPast,
+        },
+        eventStartEditable: !isPast,
+        eventDurationEditable: !isPast,
+      };
+    });
+
+    const blockMapped = fcBlockEvents.map((block: any) => {
+      // SingleDay blocks have explicit start/end — compute isPast
+      if (block.start && block.end) {
+        const blockEnd = new Date(block.end).getTime();
+        const isPast = blockEnd < now;
+        return {
+          ...block,
+          extendedProps: { ...block.extendedProps, isPast },
+          eventStartEditable: !isPast,
+          eventDurationEditable: !isPast,
+        };
+      }
+      // Recurring blocks: FC renders each occurrence individually,
+      // so editable is left as default (true) — defense-in-depth in callbacks
+      return block;
+    });
+
+    return [...taskEvents, ...previewMapped, ...blockMapped];
   }, [events, previewEvents, fcBlockEvents]);
 
   const handleEventClick = (info: any) => {
@@ -229,14 +271,23 @@ export function CalendarView({
     onExternalDrop?.({ dateStr: info.dateStr, allDay: info.allDay, dragData });
   };
 
-  const handleEventAllow = (dropInfo: any, _draggedEvent: any): boolean => {
-    return validateDrop?.(dropInfo.startStr, dropInfo.endStr) ?? true;
+  const handleEventAllow = (dropInfo: any, draggedEvent: any): boolean => {
+    return validateDrop?.(dropInfo.startStr, dropInfo.endStr, draggedEvent?.id) ?? true;
   };
 
   const handleEventDidMount = (info: any) => {
     if (!onDeleteRequest) return;
     const props = info.event.extendedProps;
-    if (!props.isGenerated && !props.isBlock) return;
+    if (!props.isGenerated && !props.isBlock && !props.isPreview) return;
+
+    // Hide × button for past events
+    if (props.isPast) return;
+
+    // Runtime past check for events without isPast (e.g., recurring blocks)
+    const endMs = info.event.endStr
+      ? new Date(info.event.endStr).getTime()
+      : new Date(info.event.startStr).getTime() + 30 * 60000;
+    if (endMs < Date.now()) return;
 
     const el = info.el as HTMLElement;
     el.style.position = "relative";
@@ -258,13 +309,26 @@ export function CalendarView({
       lineHeight: "18px",
       textAlign: "center",
       padding: "0",
-      zIndex: "5",
+      zIndex: "15",
+      pointerEvents: "auto",
+      userSelect: "none",
     });
+    deleteBtn.className = "brk-event-delete-btn";
     deleteBtn.onclick = (e) => {
       e.stopPropagation();
+      // Guard against double-click — event.detail > 1 means multi-click
+      if (e.detail > 1) return;
       onDeleteRequest(info.event.id, info.event.title);
     };
     el.appendChild(deleteBtn);
+  };
+
+  const handleEventWillUnmount = (info: any) => {
+    const el = info.el as HTMLElement;
+    const deleteBtn = el.querySelector<HTMLButtonElement>(".brk-event-delete-btn");
+    if (deleteBtn) {
+      deleteBtn.remove();
+    }
   };
 
   return (
@@ -302,6 +366,7 @@ export function CalendarView({
         eventAllow={handleEventAllow}
         datesSet={handleDatesSet}
         eventDidMount={handleEventDidMount}
+        eventWillUnmount={handleEventWillUnmount}
       />
     </div>
   );

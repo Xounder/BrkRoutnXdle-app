@@ -93,6 +93,13 @@ or
 
 ---
 
+## Edge Cases
+
+- [Edge case — race conditions, empty states, API failures, optional fields, limits]
+- [Edge case]
+
+---
+
 ## Testing
 
 ### Unit Tests

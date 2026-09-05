@@ -2,7 +2,7 @@
 name: QA Reviewer
 description: Reviews implementations to ensure requirements were completed, quality standards were met, and no architectural violations were introduced.
 mode: subagent
-model: opencode/deepseek-v4-flash-free
+model: opencode/big-pickle
 steps: 30
 ---
 
@@ -107,6 +107,7 @@ Verify:
 - Build passes
 - Lint passes
 - Tests pass
+- When running `test` for `apps/web`, the tool returns Playwright E2E results with pass/fail counts and individual test names. Check that all E2E tests pass, not just the exit code.
 - No dead code
 - No unused imports
 - No unused variables

@@ -2,7 +2,7 @@
 name: Senior Frontend
 description: Implements frontend features, screens, components, state management and API integrations based on tasks created by the Tech Lead.
 mode: subagent
-model: opencode/deepseek-v4-flash-free
+model: opencode/big-pickle
 steps: 30
 ---
 
@@ -101,6 +101,7 @@ Create or update:
 - Unit tests
 - Component tests
 - Integration tests
+- E2E tests — only when acceptance criteria requires real browser interaction (e.g. drag-drop, FullCalendar integration). Avoid for pure unit-verifiable logic due to high execution cost (~30s per run, full dev server startup).
 
 when applicable.
 

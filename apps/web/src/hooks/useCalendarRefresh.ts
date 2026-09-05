@@ -22,7 +22,10 @@ export function useCalendarRefresh() {
     });
 
     setCalendarCache(freshEvents);
-    setEvents(freshEvents);
+    setEvents((prev) => {
+      const apiIds = new Set(freshEvents.map((e) => e.id));
+      return [...prev.filter((e) => !apiIds.has(e.id)), ...freshEvents];
+    });
     return freshEvents;
   }, [setEvents]);
 

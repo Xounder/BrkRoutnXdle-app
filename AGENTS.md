@@ -220,12 +220,16 @@ The shell environment rejects the following patterns:
 - **Node/tsx execution**: scripts must be inside the project directory with `.ts`, `.js`, or `.tsx` extension; the script path is resolved from the project root (not from any `workdir` override); flags like `-e`, `--eval`, `--require` are blocked
 - **File operations**: all file paths must resolve inside the project root
 - **pnpm**: flags/filters (e.g., `--filter`, `--exec`) blocked — use `run-package-command` tool for `build`, `lint`, `typecheck`, `test`
+- **npx**: direct invocation of test runners (e.g., `npx playwright test`) is blocked — use `run-package-command` tool for `test` instead
 - **Curl**: only allowed to `localhost` URLs
 
 ### Build validation
 - `pnpm` with flags/filters (e.g., `--filter`, `--exec`) is blocked — use `run-package-command` tool for `build`, `lint`, `typecheck`, `test`
 - Subagents MUST run build validation via `run-package-command` before returning
 - Include results in `summary.validations` in standard response format
+- When running `test` for `apps/web`, the tool returns Playwright E2E results (pass/fail counts, individual test names, error details). Test failures surface with exit code 1 and the full Playwright report in the tool output.
+- Existing tests must not be modified — they represent verified acceptance criteria.
+- New tests must verify real functionality (assertions on state, output, or behavior). Trivial tests that pass without validating requirements are not allowed.
 
 ### Standard Response Format
 All subagents MUST return results using the [standard agent response format](.opencode/skills/delivery-pipeline/references/agent-response-format.md):

@@ -1,6 +1,6 @@
 # Codebase Analysis — Implementation
 
-Generated: 2026-06-18T02:23:59.157Z
+Generated: 2026-09-05T02:02:33.314Z
 
 ```
 
@@ -8,15 +8,15 @@ Generated: 2026-06-18T02:23:59.157Z
 ║     Codebase — Implementation Report     ║
 ╚══════════════════════════════════════════╝
 
-Generated: 2026-06-18T02:23:59.157Z
+Generated: 2026-09-05T02:02:33.314Z
 Parser:    regex
 
 ── Overview ──
   Total files:      85 (TS: 47, TSX: 38)
-  Total imports:    255
-  Total exports:    158
-  Functions:        130
-  Arrow functions:  22
+  Total imports:    260
+  Total exports:    162
+  Functions:        137
+  Arrow functions:  29
   Classes:          4
   Interfaces:       68
   Type aliases:     5
@@ -25,14 +25,14 @@ Parser:    regex
 ── Per Package ──
   apps/web:
     Files:        49
-    Imports:      173
-    Exports:      59
-    Declarations: 127
+    Imports:      179
+    Exports:      61
+    Declarations: 139
   apps/api:
     Files:        11
-    Imports:      42
+    Imports:      41
     Exports:      19
-    Declarations: 25
+    Declarations: 26
   packages/shared:
     Files:        3
     Imports:      1
@@ -46,8 +46,8 @@ Parser:    regex
   packages/calendar:
     Files:        6
     Imports:      10
-    Exports:      21
-    Declarations: 18
+    Exports:      23
+    Declarations: 19
   packages/ui:
     Files:        5
     Imports:      4
@@ -55,10 +55,11 @@ Parser:    regex
     Declarations: 12
 
 ── Top Dependencies ──
-  @brkroutnxdle/shared           50
+  @brkroutnxdle/shared           51
   react                          45
-  express                        10
+  express                        9
   ./types.js                     7
+  @brkroutnxdle/domain           6
   ../contexts/CalendarContext    6
   ../middleware/auth.js          6
   ../contexts/SettingsContext    5
@@ -66,10 +67,13 @@ Parser:    regex
   @tanstack/react-query          5
   ../contexts/PreviewContext     5
   ../middleware/errorHandler.js  5
-  @brkroutnxdle/domain           4
   ../contexts/BlockContext       4
-  ../contexts/TaskContext        3
-  ./contexts/AuthContext         2
+  ../contexts/TaskContext        4
+  ../services/localStorage       3
+
+── Exported API Surface (1) ──
+  web:
+    function       useCalendarEvents              apps/web/src/hooks/useCalendar.ts
 
 ── Files Scanned ──
   apps/api/src/index.ts

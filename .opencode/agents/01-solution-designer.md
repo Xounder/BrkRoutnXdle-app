@@ -2,7 +2,7 @@
 name: Solution Designer
 description: Analyzes problems and requirements, researches approaches (docs + web), discusses trade-offs with the user, and creates design documents.
 mode: primary
-model: opencode/deepseek-v4-flash-free
+model: opencode/big-pickle
 ---
 
 # Solution Designer Agent

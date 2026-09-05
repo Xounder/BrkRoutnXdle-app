@@ -21,6 +21,15 @@ interface EditingState {
   deleteTarget: { id: string; title: string } | null;
 }
 
+/** Check if a FullCalendar event is in the past (ended before now). */
+function isEventPast(info: FcEventInfo): boolean {
+  const endMs = info.event.endStr
+    ? new Date(info.event.endStr).getTime()
+    : new Date(info.event.startStr).getTime() + 30 * 60000;
+  if (isNaN(endMs)) return false;
+  return endMs < Date.now();
+}
+
 /** Extract "HH:mm" from an ISO-8601 string. */
 function extractTime(isoStr: string): string {
   return isoStr.slice(11, 16);
@@ -36,7 +45,7 @@ export function useScheduleEditing(
   onExternalEventChange?: (id: string, startStr: string, endStr: string) => void,
 ) {
   const { previewEvents, allocationFailures, setPreview } = usePreview();
-  const { events } = useCalendar();
+  const { events, setEvents } = useCalendar();
   const { settings } = useSettings();
   const { blocks, updateBlock, deleteBlock, getBlock } = useBlockContext();
   const [editing, setEditing] = useState<EditingState>({
@@ -48,10 +57,13 @@ export function useScheduleEditing(
   /** Validate drop position. */
   const canDropAt = useCallback(
     (startStr: string, endStr: string, excludeEventId?: string): boolean => {
-      const startHour = new Date(startStr).getUTCHours();
-      const endHour = new Date(endStr).getUTCHours();
+      const startHour = new Date(startStr).getHours();
+      const endHour = new Date(endStr).getHours();
 
-      // Must be within available hours
+      // Must be within available hours.
+      // `+ 1` allows events ending within the hour after workEndHour (e.g. a
+      // 30-min event at 17:00 when workEndHour=17 ends at 17:30 and passes;
+      // a 1-hour event ending at 18:30 → 18 → passes; one ending at 19:00 is rejected).
       if (startHour < settings.workStartHour || endHour > settings.workEndHour + 1) {
         return false;
       }
@@ -95,10 +107,10 @@ export function useScheduleEditing(
           const blockStartMin = timeToMinutes(block.startTime ?? "00:00");
           const blockEndMin = timeToMinutes(block.endTime ?? "23:59");
           const dropStartMin =
-            dropDate.getUTCHours() * 60 + dropDate.getUTCMinutes();
+            dropDate.getHours() * 60 + dropDate.getMinutes();
           const dropEndMin =
-            new Date(endStr).getUTCHours() * 60 +
-            new Date(endStr).getUTCMinutes();
+            new Date(endStr).getHours() * 60 +
+            new Date(endStr).getMinutes();
 
           if (dropStartMin < blockEndMin && dropEndMin > blockStartMin) return false;
         }
@@ -112,6 +124,12 @@ export function useScheduleEditing(
   /** Handle event drop (drag-and-drop). */
   const handleEventDrop = useCallback(
     (info: FcEventInfo) => {
+      // Revert if event is in the past
+      if (isEventPast(info)) {
+        info.revert?.();
+        return;
+      }
+
       const extProps = info.event.extendedProps ?? {};
 
       // Validate drop position
@@ -167,6 +185,12 @@ export function useScheduleEditing(
   /** Handle event resize. */
   const handleEventResize = useCallback(
     (info: FcEventInfo) => {
+      // Revert if event is in the past
+      if (isEventPast(info)) {
+        info.revert?.();
+        return;
+      }
+
       const extProps = info.event.extendedProps ?? {};
 
       const newDuration =
@@ -233,12 +257,14 @@ export function useScheduleEditing(
     if (id.startsWith("block-")) {
       const blockId = id.slice(6);
       deleteBlock(blockId);
+    } else if (events.some((e) => e.id === id)) {
+      setEvents((prev) => prev.filter((e) => e.id !== id));
     } else {
       const updatedEvents = previewEvents.filter((e) => e.id !== id);
       setPreview(updatedEvents, allocationFailures);
     }
     setEditing((prev) => ({ ...prev, deleteTarget: null }));
-  }, [editing.deleteTarget, previewEvents, allocationFailures, setPreview, deleteBlock]);
+  }, [editing.deleteTarget, events, setEvents, previewEvents, allocationFailures, setPreview, deleteBlock]);
 
   const cancelDelete = useCallback(() => {
     setEditing((prev) => ({ ...prev, deleteTarget: null }));

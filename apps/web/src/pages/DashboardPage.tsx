@@ -186,9 +186,23 @@ export function DashboardPage() {
   }, [clearPreview]);
 
   // Fetch events (will run on mount and when date changes)
-  const timeMin = new Date(currentDate.getTime() - 3 * 86400_000).toISOString();
-  const timeMax = new Date(currentDate.getTime() + 10 * 86400_000).toISOString();
-  useCalendarEvents(timeMin, timeMax);
+  const getWeekStart = (date: Date) => {
+    const d = new Date(date);
+    d.setDate(d.getDate() - d.getDay()); // Sunday
+    d.setHours(0, 0, 0, 0);
+    return d;
+  };
+  const getWeekEnd = (date: Date) => {
+    const d = new Date(date);
+    d.setDate(d.getDate() + (6 - d.getDay())); // Saturday
+    d.setHours(23, 59, 59, 999);
+    return d;
+  };
+  const prevWeekStart = getWeekStart(new Date(currentDate.getTime() - 7 * 86400_000));
+  const nextWeekEnd = getWeekEnd(new Date(currentDate.getTime() + 7 * 86400_000));
+  const timeMin = prevWeekStart.toISOString();
+  const timeMax = nextWeekEnd.toISOString();
+  const calendarQuery = useCalendarEvents(timeMin, timeMax);
 
   // Map GeneratedEvent[] to CalendarEvent[] for the CalendarView
   const mappedPreviewEvents: CalendarEvent[] = useMemo(() => {
@@ -239,10 +253,20 @@ export function DashboardPage() {
       if (dragData.type === "task") {
         const duration = dragData.duration || 30;
         const endDate = new Date(startDate.getTime() + duration * 60000);
-        end = endDate.toISOString().slice(0, 19);
+        const endYear = endDate.getFullYear();
+        const endMonth = String(endDate.getMonth() + 1).padStart(2, "0");
+        const endDay = String(endDate.getDate()).padStart(2, "0");
+        const endHours = String(endDate.getHours()).padStart(2, "0");
+        const endMinutes = String(endDate.getMinutes()).padStart(2, "0");
+        end = `${endYear}-${endMonth}-${endDay}T${endHours}:${endMinutes}:00`;
       } else if (dragData.type === "block") {
         const endDate = new Date(startDate.getTime() + 60 * 60000);
-        end = endDate.toISOString().slice(0, 19);
+        const endYear = endDate.getFullYear();
+        const endMonth = String(endDate.getMonth() + 1).padStart(2, "0");
+        const endDay = String(endDate.getDate()).padStart(2, "0");
+        const endHours = String(endDate.getHours()).padStart(2, "0");
+        const endMinutes = String(endDate.getMinutes()).padStart(2, "0");
+        end = `${endYear}-${endMonth}-${endDay}T${endHours}:${endMinutes}:00`;
       } else {
         return;
       }
@@ -378,6 +402,58 @@ export function DashboardPage() {
             </div>
           )}
 
+          {calendarQuery.isError && (
+            <div
+              style={{
+                margin: "8px 16px 0",
+                padding: "10px 16px",
+                background: "#f8d7da",
+                borderRadius: "8px",
+                color: "#721c24",
+                fontSize: "14px",
+                fontWeight: 600,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <span>Failed to sync calendar events: {calendarQuery.error?.message ?? "Unknown error"}</span>
+              <button
+                onClick={() => calendarQuery.refetch()}
+                disabled={calendarQuery.isFetching}
+                style={{
+                  padding: "4px 16px",
+                  border: "2px solid #721c24",
+                  borderRadius: "9999px",
+                  background: "transparent",
+                  color: "#721c24",
+                  cursor: "pointer",
+                  fontWeight: 700,
+                  fontSize: "12px",
+                  opacity: calendarQuery.isFetching ? 0.5 : 1,
+                }}
+              >
+                Retry
+              </button>
+            </div>
+          )}
+
+          {calendarQuery.isLoading && (
+            <div
+              style={{
+                margin: "8px 16px 0",
+                padding: "10px 16px",
+                borderRadius: "8px",
+                fontSize: "14px",
+                fontWeight: 500,
+                color: "#555",
+                background: "#e8f4fd",
+              }}
+            >
+              Loading calendar events...
+            </div>
+          )}
+
           {isPreviewActive && failurePanelOpen && (
             <div style={{ padding: "0 16px" }}>
               <AllocationFailurePanel
@@ -405,8 +481,8 @@ export function DashboardPage() {
               onExternalDrop={handleExternalDrop}
               onEventDragStart={editing.handleEventDragStart}
               onEventDragStop={editing.handleEventDragStop}
-              validateDrop={(startStr, endStr) =>
-                editing.canDropAt(startStr, endStr)
+              validateDrop={(startStr, endStr, draggedEventId) =>
+                editing.canDropAt(startStr, endStr, draggedEventId)
               }
               scrollTime={`${String(settings.workStartHour).padStart(2, "0")}:00:00`}
               slotMinTime={`${String(settings.workStartHour).padStart(2, "0")}:00:00`}

@@ -1,20 +1,20 @@
 {
-  "generatedAt": "2026-06-18T02:23:59.157Z",
+  "generatedAt": "2026-09-05T02:02:33.314Z",
   "mode": "implementation",
   "parser": "regex",
   "summary": {
     "totalFiles": 85,
     "totalTsFiles": 47,
     "totalTsxFiles": 38,
-    "totalImports": 255,
-    "totalExports": 158,
-    "totalFunctions": 130,
+    "totalImports": 260,
+    "totalExports": 162,
+    "totalFunctions": 137,
     "totalClasses": 4,
     "totalInterfaces": 68,
     "totalTypes": 5,
-    "totalArrowFunctions": 22,
+    "totalArrowFunctions": 29,
     "totalReactComponents": 3,
-    "totalHookOrUtilities": 19
+    "totalHookOrUtilities": 26
   },
   "files": {
     "apps/web/src/App.tsx": {
@@ -175,9 +175,22 @@
         },
         {
           "kind": "arrow-function",
+          "name": "handleExternalDrop",
+          "exported": false,
+          "async": false
+        },
+        {
+          "kind": "arrow-function",
           "name": "handleEventDidMount",
           "exported": false,
           "async": false
+        },
+        {
+          "kind": "arrow-function",
+          "name": "handleEventWillUnmount",
+          "exported": false,
+          "async": false,
+          "reactComponent": true
         },
         {
           "kind": "interface",
@@ -435,8 +448,7 @@
           "default": true,
           "defaultName": "React",
           "named": [
-            "useMemo",
-            "useState"
+            "useMemo"
           ]
         },
         {
@@ -706,6 +718,13 @@
             "CalendarEvent",
             "ViewType"
           ]
+        },
+        {
+          "source": "../services/localStorage",
+          "default": false,
+          "named": [
+            "storage"
+          ]
         }
       ],
       "exports": [
@@ -719,6 +738,12 @@
         }
       ],
       "declarations": [
+        {
+          "kind": "function",
+          "name": "loadEvents",
+          "exported": false,
+          "async": false
+        },
         {
           "kind": "function",
           "name": "CalendarProvider",
@@ -988,6 +1013,12 @@
           "async": false
         },
         {
+          "kind": "arrow-function",
+          "name": "handleDragStart",
+          "exported": false,
+          "async": false
+        },
+        {
           "kind": "interface",
           "name": "BlockCardProps",
           "exported": false
@@ -1045,8 +1076,7 @@
           "kind": "arrow-function",
           "name": "handleSubmit",
           "exported": false,
-          "async": false,
-          "reactComponent": true
+          "async": false
         },
         {
           "kind": "interface",
@@ -1363,7 +1393,9 @@
           "source": "react",
           "default": true,
           "defaultName": "React",
-          "named": []
+          "named": [
+            "useState"
+          ]
         }
       ],
       "exports": [
@@ -1390,6 +1422,13 @@
           "name": "CreateActionModal",
           "exported": false,
           "async": false
+        },
+        {
+          "kind": "arrow-function",
+          "name": "handleSubmit",
+          "exported": false,
+          "async": false,
+          "reactComponent": true
         },
         {
           "kind": "interface",
@@ -1426,6 +1465,12 @@
         {
           "kind": "function",
           "name": "TaskCard",
+          "exported": false,
+          "async": false
+        },
+        {
+          "kind": "arrow-function",
+          "name": "handleDragStart",
           "exported": false,
           "async": false
         },
@@ -1666,13 +1711,17 @@
         {
           "type": "named",
           "name": "useCalendarEvents"
+        },
+        {
+          "type": "named",
+          "name": "useCalendar"
         }
       ],
       "declarations": [
         {
           "kind": "function",
           "name": "useCalendarEvents",
-          "exported": false,
+          "exported": true,
           "async": false
         }
       ]
@@ -1853,7 +1902,8 @@
           "source": "../services/api",
           "default": false,
           "named": [
-            "api"
+            "api",
+            "ApiError"
           ]
         },
         {
@@ -1878,11 +1928,26 @@
           ]
         },
         {
+          "source": "../contexts/TaskContext",
+          "default": false,
+          "named": [
+            "useTaskContext"
+          ]
+        },
+        {
           "source": "@brkroutnxdle/shared",
           "default": true,
           "defaultName": "type",
           "named": [
             "CalendarEvent"
+          ]
+        },
+        {
+          "source": "@brkroutnxdle/domain",
+          "default": true,
+          "defaultName": "type",
+          "named": [
+            "GeneratedEvent"
           ]
         }
       ],
@@ -1961,6 +2026,12 @@
       "declarations": [
         {
           "kind": "function",
+          "name": "isEventPast",
+          "exported": false,
+          "async": false
+        },
+        {
+          "kind": "function",
           "name": "extractTime",
           "exported": false,
           "async": false
@@ -1995,7 +2066,8 @@
           "source": "react",
           "default": false,
           "named": [
-            "useCallback"
+            "useCallback",
+            "useRef"
           ]
         },
         {
@@ -2003,6 +2075,14 @@
           "default": false,
           "named": [
             "generateSchedule"
+          ]
+        },
+        {
+          "source": "@brkroutnxdle/domain",
+          "default": true,
+          "defaultName": "type",
+          "named": [
+            "PreviousWeekSnapshot"
           ]
         },
         {
@@ -2243,7 +2323,8 @@
           "named": [
             "useState",
             "useMemo",
-            "useCallback"
+            "useCallback",
+            "useEffect"
           ]
         },
         {
@@ -2271,6 +2352,7 @@
           "source": "../hooks/useCalendar",
           "default": false,
           "named": [
+            "useCalendar",
             "useCalendarEvents"
           ]
         },
@@ -2415,6 +2497,21 @@
           ]
         },
         {
+          "source": "../features/preview/SaveButton",
+          "default": false,
+          "named": [
+            "SaveButton"
+          ]
+        },
+        {
+          "source": "@brkroutnxdle/shared",
+          "default": false,
+          "named": [
+            "Priority",
+            "BlockType"
+          ]
+        },
+        {
           "source": "@brkroutnxdle/shared",
           "default": true,
           "defaultName": "type",
@@ -2441,6 +2538,18 @@
         },
         {
           "kind": "arrow-function",
+          "name": "getWeekStart",
+          "exported": false,
+          "async": false
+        },
+        {
+          "kind": "arrow-function",
+          "name": "getWeekEnd",
+          "exported": false,
+          "async": false
+        },
+        {
+          "kind": "arrow-function",
           "name": "handlePrev",
           "exported": false,
           "async": false
@@ -2455,8 +2564,7 @@
           "kind": "arrow-function",
           "name": "handleToday",
           "exported": false,
-          "async": false,
-          "reactComponent": true
+          "async": false
         },
         {
           "kind": "arrow-function",
@@ -2612,7 +2720,8 @@
           "default": true,
           "defaultName": "type",
           "named": [
-            "CalendarEvent"
+            "CalendarEvent",
+            "Task"
           ]
         }
       ],
@@ -2623,10 +2732,32 @@
         },
         {
           "type": "named",
+          "name": "getTaskTitle"
+        },
+        {
+          "type": "named",
           "name": "computeDiff"
         }
       ],
       "declarations": [
+        {
+          "kind": "function",
+          "name": "buildPersistedLookup",
+          "exported": false,
+          "async": false
+        },
+        {
+          "kind": "function",
+          "name": "findPersistedMatch",
+          "exported": false,
+          "async": false
+        },
+        {
+          "kind": "function",
+          "name": "getTaskTitle",
+          "exported": false,
+          "async": false
+        },
         {
           "kind": "function",
           "name": "computeDiff",
@@ -3006,15 +3137,10 @@
           "default": false,
           "named": [
             "Router",
-            "type Router"
-          ]
-        },
-        {
-          "source": "express",
-          "default": true,
-          "defaultName": "type",
-          "named": [
-            "Response"
+            "type Router",
+            "type Request",
+            "type Response",
+            "type NextFunction"
           ]
         },
         {
@@ -3054,6 +3180,12 @@
         }
       ],
       "declarations": [
+        {
+          "kind": "function",
+          "name": "asyncHandler",
+          "exported": false,
+          "async": false
+        },
         {
           "kind": "function",
           "name": "getMonday",
@@ -4088,6 +4220,10 @@
         },
         {
           "type": "named",
+          "name": "clearCalendarIdCache"
+        },
+        {
+          "type": "named",
           "name": "normalizeEvents"
         }
       ],
@@ -4318,8 +4454,19 @@
           ]
         }
       ],
-      "exports": [],
+      "exports": [
+        {
+          "type": "named",
+          "name": "clearCalendarIdCache"
+        }
+      ],
       "declarations": [
+        {
+          "kind": "function",
+          "name": "clearCalendarIdCache",
+          "exported": false,
+          "async": false
+        },
         {
           "kind": "function",
           "name": "createClient",
@@ -4560,7 +4707,7 @@
     "@fullcalendar/daygrid": 1,
     "@fullcalendar/timegrid": 1,
     "@fullcalendar/interaction": 1,
-    "@brkroutnxdle/shared": 50,
+    "@brkroutnxdle/shared": 51,
     "./ErrorFallback": 1,
     "@brkroutnxdle/ui": 1,
     "./Header": 1,
@@ -4569,8 +4716,8 @@
     "../features/tasks/TaskPanel": 1,
     "../features/blocks/BlockPanel": 1,
     "../services/api": 5,
-    "../services/localStorage": 2,
-    "@brkroutnxdle/domain": 4,
+    "../services/localStorage": 3,
+    "@brkroutnxdle/domain": 6,
     "../../hooks/useBlocks": 2,
     "./BlockCard": 1,
     "./BlockModal": 1,
@@ -4584,7 +4731,7 @@
     "../contexts/PreviewContext": 5,
     "../services/calendarCache": 1,
     "../services/diffCalculator": 1,
-    "../contexts/TaskContext": 3,
+    "../contexts/TaskContext": 4,
     "react-dom/client": 1,
     "./contexts/SettingsContext": 1,
     "./contexts/CalendarContext": 1,
@@ -4616,7 +4763,8 @@
     "../features/shared/CreateActionModal": 1,
     "../features/tasks/TaskModal": 1,
     "../features/blocks/BlockModal": 1,
-    "express": 10,
+    "../features/preview/SaveButton": 1,
+    "express": 9,
     "cors": 1,
     "cookie-parser": 1,
     "helmet": 1,
@@ -4651,15 +4799,15 @@
   "perPackage": {
     "apps/web": {
       "files": 49,
-      "imports": 173,
-      "exports": 59,
-      "declarations": 127
+      "imports": 179,
+      "exports": 61,
+      "declarations": 139
     },
     "apps/api": {
       "files": 11,
-      "imports": 42,
+      "imports": 41,
       "exports": 19,
-      "declarations": 25
+      "declarations": 26
     },
     "packages/shared": {
       "files": 3,
@@ -4676,8 +4824,8 @@
     "packages/calendar": {
       "files": 6,
       "imports": 10,
-      "exports": 21,
-      "declarations": 18
+      "exports": 23,
+      "declarations": 19
     },
     "packages/ui": {
       "files": 5,

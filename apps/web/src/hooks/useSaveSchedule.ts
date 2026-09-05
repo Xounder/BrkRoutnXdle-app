@@ -29,7 +29,10 @@ export function useSaveSchedule() {
   });
 
   const saveMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (): Promise<{
+      diff: ReturnType<typeof computeDiff>;
+      newEventMap: Map<string, CalendarEvent>;
+    }> => {
       const isManualSave = previewEvents.length === 0;
 
       let diff: ReturnType<typeof computeDiff>;
@@ -126,11 +129,18 @@ export function useSaveSchedule() {
         setEvents(updatedEvents);
       }
 
-      return diff;
+      return { diff, newEventMap };
     },
-    onSuccess: () => {
+    onSuccess: ({ newEventMap }) => {
       setSaveState({ status: "success", progress: 100, total: 0, completed: 0, error: null });
       clearPreview();
+
+      // Remove successfully saved events from persisted state —
+      // they will come back from the Google Calendar API on next fetch.
+      if (newEventMap.size > 0) {
+        const savedIds = new Set([...newEventMap.values()].map((e) => e.id));
+        setEvents((prev) => prev.filter((e) => !savedIds.has(e.id)));
+      }
     },
     onError: (err: Error) => {
       let message = "Failed to save schedule";

@@ -15,7 +15,8 @@ export default tool({
       return `Error: No package.json found at ${dir}`
     }
     try {
-      const stdout = execSync(`pnpm ${command}`, { cwd: dir, encoding: "utf-8", stdio: "pipe" })
+      const opts: any = { cwd: dir, encoding: "utf-8", stdio: "pipe", maxBuffer: 10 * 1024 * 1024 }
+      const stdout = execSync(`pnpm ${command}`, opts)
       return stdout || "(no output)"
     } catch (e: any) {
       const stderr = (e.stderr || "").toString().trim()

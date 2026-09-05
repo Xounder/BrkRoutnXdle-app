@@ -171,3 +171,11 @@
 .brk-calendar-google .fc-timegrid-event {
   min-height: 100% !important;
 }
+
+/* ── 17. X button visibility — prevent FC from clipping absolute-positioned children ── */
+.brk-calendar-google .fc .fc-event {
+  overflow: visible !important;
+}
+.brk-calendar-google .fc .fc-event .fc-event-main {
+  overflow: visible !important;
+}

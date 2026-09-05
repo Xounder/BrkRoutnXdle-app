@@ -1,5 +1,12 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
 import { CalendarEvent, ViewType } from "@brkroutnxdle/shared";
+import { storage } from "../services/localStorage";
+
+const STORAGE_KEY = "brkroutnxdle:events";
+
+function loadEvents(): CalendarEvent[] {
+  return storage.get<CalendarEvent[]>(STORAGE_KEY, []);
+}
 
 interface CalendarContextValue {
   events: CalendarEvent[];
@@ -16,11 +23,29 @@ interface CalendarContextValue {
 const CalendarContext = createContext<CalendarContextValue | null>(null);
 
 export function CalendarProvider({ children }: { children: React.ReactNode }) {
-  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [events, setEvents] = useState<CalendarEvent[]>(loadEvents);
   const [previewEvents, setPreviewEvents] = useState<CalendarEvent[]>([]);
   const [currentView, setCurrentView] = useState<ViewType>(ViewType.Week);
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [refreshKey, setRefreshKey] = useState(0);
+
+  const persistEvents: React.Dispatch<React.SetStateAction<CalendarEvent[]>> = useCallback(
+    (action) => {
+      setEvents((prev) => {
+        const next =
+          typeof action === "function"
+            ? (action as (prev: CalendarEvent[]) => CalendarEvent[])(prev)
+            : action;
+        try {
+          storage.set(STORAGE_KEY, next);
+        } catch (e) {
+          console.warn("Failed to persist events to localStorage:", e);
+        }
+        return next;
+      });
+    },
+    [setEvents],
+  );
 
   const refreshCalendar = useCallback(() => {
     setRefreshKey((k) => k + 1);
@@ -33,7 +58,7 @@ export function CalendarProvider({ children }: { children: React.ReactNode }) {
         previewEvents,
         currentView,
         currentDate,
-        setEvents,
+        setEvents: persistEvents,
         setPreviewEvents,
         setCurrentView,
         setCurrentDate,
