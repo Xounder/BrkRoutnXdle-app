@@ -4,11 +4,19 @@ import { LoginPage } from "./pages/LoginPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { DevModeBadge } from "./components/DevModeBadge";
 import { DevModePanel } from "./components/DevModePanel";
-import { useDevMode } from "./hooks/useDevMode";
+import { DevModeProvider, useDevModeContext } from "./contexts/DevModeContext";
 
 export default function App() {
+  return (
+    <DevModeProvider>
+      <AppContent />
+    </DevModeProvider>
+  );
+}
+
+function AppContent() {
   const { authenticated, loading } = useAuth();
-  const devMode = useDevMode();
+  const devMode = useDevModeContext();
 
   if (loading) {
     return (

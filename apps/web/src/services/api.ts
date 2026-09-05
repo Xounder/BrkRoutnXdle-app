@@ -99,3 +99,7 @@ export const api = {
   delete: <T>(path: string) =>
     apiFetch<T>(path, { method: "DELETE" }),
 };
+
+export function isAuthTokenExpiredError(error: unknown): boolean {
+  return error instanceof ApiError && error.code === "AUTH_EXPIRED";
+}

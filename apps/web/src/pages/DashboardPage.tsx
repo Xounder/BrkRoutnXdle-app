@@ -18,6 +18,8 @@ import { AllocationFailurePanel } from "../features/preview/AllocationFailurePan
 import { DeleteEventDialog } from "../features/preview/DeleteEventDialog";
 import { RefreshButton } from "../features/completion/RefreshButton";
 import { ConflictDialog } from "../features/completion/ConflictDialog";
+import { TokenRetryModal } from "../features/completion/TokenRetryModal";
+import { isAuthTokenExpiredError } from "../services/api";
 import { useUnsavedChanges } from "../hooks/useUnsavedChanges";
 import { useBlockContext } from "../contexts/BlockContext";
 import { CreateActionModal } from "../features/shared/CreateActionModal";
@@ -56,6 +58,7 @@ export function DashboardPage() {
     changedEvents: string[];
   }>({ hasConflicts: false, changedEvents: [] });
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [tokenModalOpen, setTokenModalOpen] = useState(false);
 
   useEffect(() => {
     if (saveState.status === "success") {
@@ -203,6 +206,19 @@ export function DashboardPage() {
   const timeMin = prevWeekStart.toISOString();
   const timeMax = nextWeekEnd.toISOString();
   const calendarQuery = useCalendarEvents(timeMin, timeMax);
+
+  const handleCalendarRetry = useCallback(() => {
+    if (calendarQuery.isFetching) return;
+    calendarQuery.refetch().catch(() => undefined);
+  }, [calendarQuery]);
+
+  useEffect(() => {
+    if (calendarQuery.isError && isAuthTokenExpiredError(calendarQuery.error)) {
+      setTokenModalOpen(true);
+    } else if (!calendarQuery.isError) {
+      setTokenModalOpen(false);
+    }
+  }, [calendarQuery.isError, calendarQuery.error]);
 
   // Map GeneratedEvent[] to CalendarEvent[] for the CalendarView
   const mappedPreviewEvents: CalendarEvent[] = useMemo(() => {
@@ -419,7 +435,7 @@ export function DashboardPage() {
             >
               <span>Failed to sync calendar events: {calendarQuery.error?.message ?? "Unknown error"}</span>
               <button
-                onClick={() => calendarQuery.refetch()}
+                onClick={isAuthTokenExpiredError(calendarQuery.error) ? () => setTokenModalOpen(true) : handleCalendarRetry}
                 disabled={calendarQuery.isFetching}
                 style={{
                   padding: "4px 16px",
@@ -545,6 +561,12 @@ export function DashboardPage() {
         changedEventCount={conflictState.changedEvents.length}
         onReload={handleReload}
         onDiscardPreview={handleDiscardPreview}
+      />
+
+      <TokenRetryModal
+        isOpen={tokenModalOpen}
+        onClose={() => setTokenModalOpen(false)}
+        onRetry={handleCalendarRetry}
       />
     </>
   );

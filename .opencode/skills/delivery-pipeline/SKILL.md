@@ -106,9 +106,9 @@ Responsible for:
 
 **Primary agents** (Planning Analyst, Solution Designer) are defined with `mode: primary` in their agent files. They must be dispatched using their proper agent type name via `task` with `subagent_type` matching the agent name. Do NOT dispatch primary agents as `general` or any other type — this skips their workflow and prevents file creation.
 
-**Subagents** (Senior Frontend, Senior Backend, QA) use `mode: subagent` and are dispatched as `general` with their task instructions inline.
+**Subagents** (Senior Frontend, Senior Backend, QA) use `mode: subagent` and are dispatched using their proper agent type name via `task` with `subagent_type` matching the agent name, with their task instructions inline.
 
-Dispatch subagents ONLY as `general`. Dispatching them via their named agent type (QA Reviewer, Senior Frontend, Senior Backend) can fail with a model-resolution error such as `Model not found: opencode/...` even though the agent file declares a model — always delegate through `general` instead.
+**Dispatch stalls/failures:** If a named agent dispatch fails or stalls (e.g., a model-resolution error such as `Model not found: opencode/...`), retry the SAME dispatch up to 3 consecutive attempts. If all 3 attempts fail, ABORT the step and REPORT the error — never fall back to dispatching as `general` or any other agent type to work around a failed dispatch.
 
 ### Orchestrator Must Never Do Agent Work
 

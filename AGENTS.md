@@ -210,6 +210,10 @@ Never open, read, write, or request files outside this project directory. All op
 ### Tool preference for file operations
 Prefer the **dedicated tools** (`grep`, `glob`, `read`, `edit`, `write`) for file searching and content operations over `bash`/PowerShell. Use `bash` only as a last resort when the dedicated tools cannot accomplish the task.
 
+### Tool limitations
+- `glob` ignores dot-directories (e.g. `.opencode/plan/`). To verify generated pipeline files, use `read` on the directory instead.
+- `get-git-diff` compares refs only and misses untracked/unstaged files. When reviewing new files, read them directly from disk.
+
 ### Custom tools
 See [INDEX.md](.opencode/INDEX.md#tools) for the full list of custom tools in `tools/`. Agents should use these tools directly instead of implementing equivalent logic via bash.
 
@@ -244,6 +248,9 @@ If a subagent does not follow this format, the orchestrator must re-call it spec
 All subagents dispatched by the orchestrator implement a **3-attempt retry limit**. If the same action fails 3 consecutive times, the subagent must stop and report to the orchestrator which action failed, the error reason, and that it cannot proceed.
 
 The orchestrator must then re-dispatch the subagent with appropriate error context — never attempt to resolve the failure directly.
+
+### Agent Dispatch Failure (retry then abort)
+If a named agent dispatch fails or stalls (e.g., a model-resolution error such as `Model not found: opencode/...`), retry the **same named dispatch** up to **3 consecutive attempts**. If all 3 attempts fail, **abort** the step and **report the error** to the user with the failure reason. Never fall back to dispatching as `general` or any other agent type to work around a failed dispatch.
 
 ## References
 
