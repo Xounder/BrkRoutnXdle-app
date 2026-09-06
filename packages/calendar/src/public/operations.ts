@@ -7,6 +7,13 @@ import type { GoogleCalendarEvent, CreateEventPayload } from "../internal/types.
 const BRKROUTNXDLE_CALENDAR_NAME = "BrkRoutnXdle";
 
 /**
+ * Google Calendar API v3 `events.list` only accepts `orderBy: "startTime" | "updated"`.
+ * `startTime` ordering requires `singleEvents: true` and a `timeMin`/`timeMax` range,
+ * both of which are set on every `events.list` call in this module.
+ */
+const ORDER_BY_START_TIME = "startTime" as const;
+
+/**
  * Module-level cache for resolved BrkRoutnXdle calendar IDs, keyed by access token.
  * Cleared on token changes to ensure stale tokens don't reuse a cached ID.
  */
@@ -100,7 +107,7 @@ export async function fetchEvents(
     timeMin,
     timeMax,
     singleEvents: true,
-    orderBy: "start",
+    orderBy: ORDER_BY_START_TIME,
   });
   return normalizeEvents((data.items ?? []) as GoogleCalendarEvent[], brkCalId, true);
 }
@@ -120,7 +127,7 @@ export async function fetchEventsFromCalendar(
     timeMin,
     timeMax,
     singleEvents: true,
-    orderBy: "start",
+    orderBy: ORDER_BY_START_TIME,
   });
   return normalizeEvents(
     (data.items ?? []) as GoogleCalendarEvent[],

@@ -1,6 +1,6 @@
 # Codebase Analysis — Implementation
 
-Generated: 2026-09-05T02:02:33.314Z
+Generated: 2026-09-06T13:58:40.604Z
 
 ```
 
@@ -8,26 +8,26 @@ Generated: 2026-09-05T02:02:33.314Z
 ║     Codebase — Implementation Report     ║
 ╚══════════════════════════════════════════╝
 
-Generated: 2026-09-05T02:02:33.314Z
+Generated: 2026-09-06T13:58:40.604Z
 Parser:    regex
 
 ── Overview ──
-  Total files:      85 (TS: 47, TSX: 38)
-  Total imports:    260
-  Total exports:    162
-  Functions:        137
-  Arrow functions:  29
+  Total files:      87 (TS: 47, TSX: 40)
+  Total imports:    267
+  Total exports:    166
+  Functions:        145
+  Arrow functions:  31
   Classes:          4
-  Interfaces:       68
-  Type aliases:     5
-  React components: 3
+  Interfaces:       69
+  Type aliases:     6
+  React components: 5
 
 ── Per Package ──
   apps/web:
-    Files:        49
-    Imports:      179
-    Exports:      61
-    Declarations: 139
+    Files:        51
+    Imports:      186
+    Exports:      65
+    Declarations: 151
   apps/api:
     Files:        11
     Imports:      41
@@ -56,14 +56,14 @@ Parser:    regex
 
 ── Top Dependencies ──
   @brkroutnxdle/shared           51
-  react                          45
+  react                          47
   express                        9
   ./types.js                     7
+  ../services/api                6
   @brkroutnxdle/domain           6
   ../contexts/CalendarContext    6
   ../middleware/auth.js          6
   ../contexts/SettingsContext    5
-  ../services/api                5
   @tanstack/react-query          5
   ../contexts/PreviewContext     5
   ../middleware/errorHandler.js  5
@@ -100,6 +100,7 @@ Parser:    regex
   apps/web/src/contexts/AuthContext.tsx
   apps/web/src/contexts/BlockContext.tsx
   apps/web/src/contexts/CalendarContext.tsx
+  apps/web/src/contexts/DevModeContext.tsx
   apps/web/src/contexts/PreviewContext.tsx
   apps/web/src/contexts/SettingsContext.tsx
   apps/web/src/contexts/TaskContext.tsx
@@ -109,6 +110,7 @@ Parser:    regex
   apps/web/src/features/completion/CompletionAction.tsx
   apps/web/src/features/completion/ConflictDialog.tsx
   apps/web/src/features/completion/RefreshButton.tsx
+  apps/web/src/features/completion/TokenRetryModal.tsx
   apps/web/src/features/preview/AllocationFailurePanel.tsx
   apps/web/src/features/preview/CalculateWeekButton.tsx
   apps/web/src/features/preview/DeleteEventDialog.tsx

@@ -1,19 +1,19 @@
 {
-  "generatedAt": "2026-09-05T02:02:33.314Z",
+  "generatedAt": "2026-09-06T13:58:40.604Z",
   "mode": "implementation",
   "parser": "regex",
   "summary": {
-    "totalFiles": 85,
+    "totalFiles": 87,
     "totalTsFiles": 47,
-    "totalTsxFiles": 38,
-    "totalImports": 260,
-    "totalExports": 162,
-    "totalFunctions": 137,
+    "totalTsxFiles": 40,
+    "totalImports": 267,
+    "totalExports": 166,
+    "totalFunctions": 145,
     "totalClasses": 4,
-    "totalInterfaces": 68,
-    "totalTypes": 5,
-    "totalArrowFunctions": 29,
-    "totalReactComponents": 3,
+    "totalInterfaces": 69,
+    "totalTypes": 6,
+    "totalArrowFunctions": 31,
+    "totalReactComponents": 5,
     "totalHookOrUtilities": 26
   },
   "files": {
@@ -61,10 +61,11 @@
           ]
         },
         {
-          "source": "./hooks/useDevMode",
+          "source": "./contexts/DevModeContext",
           "default": false,
           "named": [
-            "useDevMode"
+            "DevModeProvider",
+            "useDevModeContext"
           ]
         }
       ],
@@ -74,7 +75,14 @@
           "name": "App"
         }
       ],
-      "declarations": []
+      "declarations": [
+        {
+          "kind": "function",
+          "name": "AppContent",
+          "exported": false,
+          "async": false
+        }
+      ]
     },
     "apps/web/src/components/CalendarView.tsx": {
       "imports": [
@@ -763,6 +771,55 @@
         }
       ]
     },
+    "apps/web/src/contexts/DevModeContext.tsx": {
+      "imports": [
+        {
+          "source": "react",
+          "default": true,
+          "defaultName": "React",
+          "named": [
+            "createContext",
+            "useContext"
+          ]
+        },
+        {
+          "source": "../hooks/useDevMode",
+          "default": false,
+          "named": [
+            "useDevMode"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "type": "named",
+          "name": "DevModeProvider"
+        },
+        {
+          "type": "named",
+          "name": "useDevModeContext"
+        }
+      ],
+      "declarations": [
+        {
+          "kind": "function",
+          "name": "DevModeProvider",
+          "exported": false,
+          "async": false
+        },
+        {
+          "kind": "function",
+          "name": "useDevModeContext",
+          "exported": false,
+          "async": false
+        },
+        {
+          "kind": "type",
+          "name": "DevModeContextValue",
+          "exported": false
+        }
+      ]
+    },
     "apps/web/src/contexts/PreviewContext.tsx": {
       "imports": [
         {
@@ -1223,6 +1280,66 @@
         {
           "kind": "interface",
           "name": "RefreshButtonProps",
+          "exported": false
+        }
+      ]
+    },
+    "apps/web/src/features/completion/TokenRetryModal.tsx": {
+      "imports": [
+        {
+          "source": "react",
+          "default": true,
+          "defaultName": "React",
+          "named": [
+            "useEffect",
+            "useState"
+          ]
+        },
+        {
+          "source": "@brkroutnxdle/ui",
+          "default": false,
+          "named": [
+            "Modal"
+          ]
+        },
+        {
+          "source": "../../contexts/DevModeContext",
+          "default": false,
+          "named": [
+            "useDevModeContext"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "type": "named",
+          "name": "TokenRetryModal"
+        }
+      ],
+      "declarations": [
+        {
+          "kind": "function",
+          "name": "TokenRetryModal",
+          "exported": false,
+          "async": false
+        },
+        {
+          "kind": "arrow-function",
+          "name": "handleRetry",
+          "exported": false,
+          "async": false,
+          "reactComponent": true
+        },
+        {
+          "kind": "arrow-function",
+          "name": "handleApply",
+          "exported": false,
+          "async": false,
+          "reactComponent": true
+        },
+        {
+          "kind": "interface",
+          "name": "TokenRetryModalProps",
           "exported": false
         }
       ]
@@ -1870,6 +1987,24 @@
       "declarations": [
         {
           "kind": "function",
+          "name": "readStorage",
+          "exported": false,
+          "async": false
+        },
+        {
+          "kind": "function",
+          "name": "writeStorage",
+          "exported": false,
+          "async": false
+        },
+        {
+          "kind": "function",
+          "name": "removeStorage",
+          "exported": false,
+          "async": false
+        },
+        {
+          "kind": "function",
           "name": "useDevMode",
           "exported": false,
           "async": false
@@ -2462,6 +2597,20 @@
           ]
         },
         {
+          "source": "../features/completion/TokenRetryModal",
+          "default": false,
+          "named": [
+            "TokenRetryModal"
+          ]
+        },
+        {
+          "source": "../services/api",
+          "default": false,
+          "named": [
+            "isAuthTokenExpiredError"
+          ]
+        },
+        {
           "source": "../hooks/useUnsavedChanges",
           "default": false,
           "named": [
@@ -2618,9 +2767,19 @@
         {
           "type": "named",
           "name": "api"
+        },
+        {
+          "type": "named",
+          "name": "isAuthTokenExpiredError"
         }
       ],
       "declarations": [
+        {
+          "kind": "function",
+          "name": "isAuthTokenExpiredError",
+          "exported": false,
+          "async": false
+        },
         {
           "kind": "class",
           "name": "ApiError",
@@ -4696,31 +4855,33 @@
   },
   "errors": [],
   "dependencyCount": {
-    "react": 45,
+    "react": 47,
     "./contexts/AuthContext": 2,
     "./pages/LoginPage": 1,
     "./pages/DashboardPage": 1,
     "./components/DevModeBadge": 1,
     "./components/DevModePanel": 1,
-    "./hooks/useDevMode": 1,
+    "./contexts/DevModeContext": 1,
     "@fullcalendar/react": 1,
     "@fullcalendar/daygrid": 1,
     "@fullcalendar/timegrid": 1,
     "@fullcalendar/interaction": 1,
     "@brkroutnxdle/shared": 51,
     "./ErrorFallback": 1,
-    "@brkroutnxdle/ui": 1,
+    "@brkroutnxdle/ui": 2,
     "./Header": 1,
     "./Sidebar": 1,
     "../contexts/SettingsContext": 5,
     "../features/tasks/TaskPanel": 1,
     "../features/blocks/BlockPanel": 1,
-    "../services/api": 5,
+    "../services/api": 6,
     "../services/localStorage": 3,
+    "../hooks/useDevMode": 1,
     "@brkroutnxdle/domain": 6,
     "../../hooks/useBlocks": 2,
     "./BlockCard": 1,
     "./BlockModal": 1,
+    "../../contexts/DevModeContext": 1,
     "./SaveButton": 1,
     "../../hooks/useTasks": 2,
     "./TaskCard": 1,
@@ -4759,6 +4920,7 @@
     "../features/preview/DeleteEventDialog": 1,
     "../features/completion/RefreshButton": 1,
     "../features/completion/ConflictDialog": 1,
+    "../features/completion/TokenRetryModal": 1,
     "../hooks/useUnsavedChanges": 1,
     "../features/shared/CreateActionModal": 1,
     "../features/tasks/TaskModal": 1,
@@ -4798,10 +4960,10 @@
   },
   "perPackage": {
     "apps/web": {
-      "files": 49,
-      "imports": 179,
-      "exports": 61,
-      "declarations": 139
+      "files": 51,
+      "imports": 186,
+      "exports": 65,
+      "declarations": 151
     },
     "apps/api": {
       "files": 11,
