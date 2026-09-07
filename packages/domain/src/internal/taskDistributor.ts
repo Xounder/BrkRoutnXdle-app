@@ -27,17 +27,21 @@ export function distributeTasks(
   const generatedEvents: GeneratedEvent[] = [];
   const failures: DistributionResult["failures"] = [];
 
-  // Build availability slot list from windows
+  // Build availability slot list from windows, tracking which window each slot
+  // belongs to so consecutive-slot allocations never span an occupied gap
+  // between two distinct availability windows.
   const slotMs = SLOT_DURATION_MINUTES * 60 * 1000;
-  let allSlots: Array<{ start: string; end: string }> = [];
+  let allSlots: Array<{ start: string; end: string; windowIndex: number }> = [];
 
-  for (const window of availableWindows) {
+  for (let wi = 0; wi < availableWindows.length; wi++) {
+    const window = availableWindows[wi];
     let cursor = new Date(window.start).getTime();
     const endMs = new Date(window.end).getTime();
     while (cursor + slotMs <= endMs) {
       allSlots.push({
         start: new Date(cursor).toISOString(),
         end: new Date(cursor + slotMs).toISOString(),
+        windowIndex: wi,
       });
       cursor += slotMs;
     }
@@ -117,10 +121,17 @@ export function distributeTasks(
           continue;
         }
 
-        // Verify all consecutive slots are available
+        // Verify all consecutive slots exist and belong to the same real
+        // availability window. Spanning across a window boundary would cross an
+        // occupied gap between two distinct windows, so such a candidate is
+        // rejected rather than allowed to span.
+        const candidateWindow = allSlots[consecutiveStart].windowIndex;
         let canAllocate = true;
         for (let i = consecutiveStart; i <= consecutiveEnd; i++) {
-          if (!allSlots[i]) { canAllocate = false; break; }
+          if (!allSlots[i] || allSlots[i].windowIndex !== candidateWindow) {
+            canAllocate = false;
+            break;
+          }
         }
 
         if (!canAllocate) {

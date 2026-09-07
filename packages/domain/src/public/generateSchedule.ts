@@ -88,7 +88,7 @@ function getMonday(date: Date): Date {
   return d;
 }
 
-function markSlotsOccupied(
+export function markSlotsOccupied(
   slots: import("../internal/types.js").WeekSlot[],
   event: CalendarEvent,
   now: string,
@@ -103,11 +103,10 @@ function markSlotsOccupied(
     // Mark occupied if event overlaps this slot
     if (slotStart < eventEnd && slotEnd > eventStart) {
       slot.occupied = true;
-    }
-
-    // Freeze if in the past or completed
-    if (event.end < now || event.isCompleted) {
-      slot.frozen = true;
+      // Freeze only overlapping slots when the event is in the past or completed
+      if (event.end < now || event.isCompleted) {
+        slot.frozen = true;
+      }
     }
   }
 }

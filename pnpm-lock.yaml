@@ -143,6 +143,10 @@ importers:
       '@brkroutnxdle/shared':
         specifier: workspace:*
         version: link:../shared
+    devDependencies:
+      vitest:
+        specifier: ^3.2.6
+        version: 3.2.7(@types/node@25.9.3)
 
   packages/shared: {}
 

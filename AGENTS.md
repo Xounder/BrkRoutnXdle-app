@@ -235,6 +235,12 @@ The shell environment rejects the following patterns:
 - Existing tests must not be modified — they represent verified acceptance criteria.
 - New tests must verify real functionality (assertions on state, output, or behavior). Trivial tests that pass without validating requirements are not allowed.
 
+### Test and implementation adjustment rule
+- Pre-existing tests must never be touched to make an implementation pass. If a pre-existing test fails, the implementation must be adjusted until it passes.
+- If a newly created test has a lint error, TypeScript error, or any other problem, both the test and the implementation must be adjusted until they pass.
+- Never modify project configuration (e.g. tsconfig, eslint, vitest, package.json scripts) to make tests or implementations pass.
+- Never create auxiliary files whose sole purpose is to verify or work around a test and that would be removed after verification. Verification must happen through the real tests and implementations that remain in the codebase.
+
 ### Standard Response Format
 All subagents MUST return results using the [standard agent response format](.opencode/skills/delivery-pipeline/references/agent-response-format.md):
 - `summary.changes` — files created or modified

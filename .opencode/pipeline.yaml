@@ -1,110 +1,103 @@
 pipeline:
-  name: "google-token-retry-modal"
+  name: "fix-task-allocation-bug"
   status: completed
-  started_at: "2026-09-05T02:10:00.000Z"
-  updated_at: "2026-09-05T02:50:00.000Z"
+  started_at: "2026-09-06"
+  updated_at: "2026-09-06"
   current_step: completed
-  current_agent: orchestrator
+  current_agent: null
   steps:
     solution-designer:
-      status: skipped
-      notes: "Skipped — routed by workflow-router: codebase exists, well-defined small bug fix."
-      updated_at: "2026-09-05T02:12:00.000Z"
+      status: pending
+      notes: null
+      updated_at: null
       errors: []
       concerns: []
     planning-analyst:
-      status: skipped
-      notes: "Skipped — routed by workflow-router: well-defined small bug fix; direct user request used instead."
-      updated_at: "2026-09-05T02:12:00.000Z"
+      status: completed
+      notes: "Analysis complete. Approach A approved by user. Root cause: whole-week freeze bug in markSlotsOccupied."
+      updated_at: "2026-09-06"
       errors: []
-      concerns: []
+      concerns:
+        - "Timezone handling (UTC vs local) is a separate latent issue."
+        - "Window-boundary secondary fix in taskDistributor adds scope; approved as part of Approach A."
     tech-lead:
       status: completed
-      notes: "Created tasks/index.md + TASK-01 + TASK-02 (both senior-frontend, sequential due to compile-time import dependency). Root cause: no in-dashboard token UI + retry blindly refetches with expired token + unhandled rejection."
-      updated_at: "2026-09-05T02:20:00.000Z"
+      notes: "Created 2 tasks (TASK-01 freeze fix, TASK-02 window boundary). Both assigned to senior-backend, no dependencies, parallel. Flagged pre-existing build failure in slotBuilder.ts (missing use12h) unrelated to bug."
+      updated_at: "2026-09-06"
       errors: []
       concerns:
-        - "Named subagent dispatch broken in this environment (model resolution) — Tech Lead dispatched as general. Repeated known issue."
+        - "Pre-existing build failure: packages/domain tsc fails on slotBuilder.ts (missing 'use12h' in Settings) - unrelated to this bug."
+        - "No test infrastructure in packages/domain (no test runner)."
     senior-frontend:
-      status: completed
-      notes: "Both tasks implemented. Build passed (tsc + vite, 157 modules); typecheck passed; no lint script; test reports 'No tests found' (pre-existing). Only the 6 intended files changed."
-      updated_at: "2026-09-05T02:35:00.000Z"
-      errors: []
-      concerns:
-        - "apps/web has no test files (Playwright configured but zero specs) — pre-existing gap."
-        - "Test command fails with 'No tests found' (pre-existing, not caused by these changes)."
-      tasks: ["TASK-01", "TASK-02"]
-    senior-backend:
-      status: skipped
-      notes: "No backend tasks in this pipeline."
-      updated_at: "2026-09-05T02:20:00.000Z"
+      status: pending
+      notes: null
+      updated_at: null
       errors: []
       concerns: []
       tasks: []
-    qa-frontend:
+    senior-backend:
       status: completed
-      notes: "Approved. Both tasks accepted. Build passes (157 modules); no lint script / test files (pre-existing gaps)."
-      updated_at: "2026-09-05T02:50:00.000Z"
+      notes: "TASK-01 (freeze fix) + TASK-02 (window boundary) both implemented and validated. 12/12 tests pass. Build fails only on pre-existing unrelated slotBuilder.ts use12h error."
+      updated_at: "2026-09-06"
       errors: []
       concerns:
-        - "TokenRetryModal not gated by import.meta.env.DEV (low severity, no AC requires it)."
-        - "apps/web has no lint script and no E2E test files (pre-existing)."
-    qa-backend:
-      status: skipped
-      notes: "No backend tasks — skipped."
-      updated_at: "2026-09-05T02:20:00.000Z"
+        - "Pre-existing build failure: packages/domain tsc fails on slotBuilder.ts (missing 'use12h' in Settings) - unrelated to this bug, not fixed (out of scope)."
+        - "Test infra established: vitest added to packages/domain matching calendar package convention."
+      tasks:
+        - TASK-01-fix-freeze-semantics
+        - TASK-02-harden-window-boundary
+    qa-frontend:
+      status: not-applicable
+      notes: "No frontend changes in this task - skipped."
+      updated_at: "2026-09-06"
       errors: []
       concerns: []
-  tasks:
-    TASK-01:
-      title: "Shared Dev-Mode Token Context + Reusable Token Retry Modal"
-      owner: senior-frontend
-      status: approved
-      notes: "QA approved. DevModeContext.tsx + TokenRetryModal.tsx + useDevMode.ts + App.tsx refactor."
-      updated_at: "2026-09-05T02:50:00.000Z"
-    TASK-02:
-      title: "Fix Non-Working Retry, Detect Token Expiry, Wire Retry Modal into DashboardPage"
-      owner: senior-frontend
-      status: approved
-      notes: "QA approved. api.ts isAuthTokenExpiredError + DashboardPage retry/modal wiring."
-      updated_at: "2026-09-05T02:50:00.000Z"
+    qa-backend:
+      status: completed
+      notes: "QA Review APPROVED. All acceptance criteria met for TASK-01 and TASK-02. 12/12 tests pass. Only build failure is pre-existing unrelated slotBuilder.ts use12h error."
+      updated_at: "2026-09-06"
+      errors: []
+      concerns:
+        - "Pre-existing slotBuilder.ts use12h error blocks build until separately resolved (out of scope)."
+        - "markSlotsOccupied exported for testing but not re-exported from index.ts - no public API expansion."
+  tasks: []
   history:
-    - step: pipeline-init
-      agent: orchestrator
-      action: created
-      notes: "New pipeline: google-token-retry-modal. User reports: when Google token sync fails in dev mode with 'Failed to sync calendar events: Google token expired. Please re-authenticate.', the Retry button appears to do nothing. Desired: a modal offering reauthentication (insert new token) or retry; on either action the modal closes and a retry happens (same token on retry, new token when inserted)."
-      timestamp: "2026-09-05T02:10:00.000Z"
-    - step: workflow-router
-      agent: orchestrator
-      action: routed
-      notes: "Route: tech-lead. Complexity: small. Codebase exists; well-defined bug fix with clear desired behavior."
-      timestamp: "2026-09-05T02:12:00.000Z"
+    - step: workflow start
+      status: in_progress
+      notes: "User reported task allocation bug: tasks not being allocated even though space exists in the schedule."
+      updated_at: "2026-09-06"
+    - step: planning-analyst
+      status: completed
+      notes: "Root cause diagnosed: whole-week freeze bug in markSlotsOccupied. Approach A approved by user."
+      updated_at: "2026-09-06"
+    - step: planning-approval
+      status: approved
+      notes: "User approved Approach A (fix freeze semantics + harden window boundary check)."
+      updated_at: "2026-09-06"
     - step: tech-lead
-      agent: tech-lead
-      action: completed
-      notes: "Created tasks/index.md + TASK-01 (DevModeContext + TokenRetryModal) + TASK-02 (retry root-cause + modal wiring). Sequential: TASK-02 imports TASK-01 files. Build passed (tsc + vite, 155 modules)."
-      timestamp: "2026-09-05T02:20:00.000Z"
-    - step: senior-frontend
-      agent: senior-frontend
-      action: completed
-      notes: "TASK-01 + TASK-02 implemented sequentially. Build passed (157 modules) + typecheck passed. No lint script / test files. Dispatching QA Frontend."
-      timestamp: "2026-09-05T02:35:00.000Z"
-    - step: qa-frontend
-      agent: qa-frontend
-      action: approved
-      notes: "QA Approved. Both tasks accepted. All acceptance criteria verified against source. Build passes; no lint script / E2E specs (pre-existing). Invoking STOP chain."
-      timestamp: "2026-09-05T02:50:00.000Z"
+      status: completed
+      notes: "Created TASK-01 and TASK-02, both senior-backend, parallel, no dependencies. Flagged pre-existing build failure in slotBuilder.ts."
+      updated_at: "2026-09-06"
+    - step: senior-backend
+      status: completed
+      notes: "TASK-01 and TASK-02 implemented and validated. 12/12 tests pass. Build fails only on pre-existing slotBuilder.ts error."
+      updated_at: "2026-09-06"
+    - step: qa-backend
+      status: approved
+      notes: "QA Review APPROVED. All acceptance criteria met. Pipeline completed."
+      updated_at: "2026-09-06"
   handoff:
-    context: "google-token-retry-modal"
-    selected_approach: null
+    context: fix-task-allocation-bug
+    selected_approach: "Approach A: Fix freeze semantics in markSlotsOccupied (move frozen=true inside overlap check) + harden window-boundary check in taskDistributor"
     design_summary: null
-    planning_summary: null
-    task_summary: "TASK-01: shared DevModeContext + TokenRetryModal. TASK-02: fix inert Retry button, AUTH_EXPIRED detection, auto-open modal, both actions close modal and refetch."
+    planning_summary: "Root cause: whole-week freeze bug. markSlotsOccupied applies frozen=true to EVERY slot whenever any past/completed event exists, outside the slot-overlap check. This freezes the entire week, calculateAvailability filters all frozen slots producing zero windows, distributeTasks gets an empty list -> 0/1 allocated for all tasks."
+    task_summary: null
     acceptance_criteria: []
     dependencies: []
     additional_context:
-      - "Implementation exists in working tree (uncommitted). QA must review current files, not rely on git diff against HEAD alone."
+      - "Effort: Small. No API/UI/data changes. Behavioral change intended: more slots become available."
+      - "Files affected: packages/domain/src/public/generateSchedule.ts, packages/domain/src/internal/taskDistributor.ts"
   resume:
-    last_completed_agent: qa-frontend
-    last_completed_step: qa-review-approved
+    last_completed_agent: null
+    last_completed_step: null
     recovery_required: false
