@@ -108,6 +108,8 @@ Responsible for:
 
 **Subagents** (Senior Frontend, Senior Backend, QA) use `mode: subagent` and are dispatched using their proper agent type name via `task` with `subagent_type` matching the agent name, with their task instructions inline.
 
+**QA dispatch naming:** "QA Frontend" and "QA Backend" are review AREAS, not agent type names. QA work is always dispatched as `subagent_type: "QA Reviewer"` — one instance per review area (frontend or backend). Dispatching `subagent_type: "QA Backend"` or `"QA Frontend"` directly is INVALID and fails with `Unknown agent type`. The review area is passed in the task prompt, not as the agent type.
+
 **Dispatch stalls/failures:** If a named agent dispatch fails or stalls (e.g., a model-resolution error such as `Model not found: opencode/...`), retry the SAME dispatch up to 3 consecutive attempts. If all 3 attempts fail, ABORT the step and REPORT the error — never fall back to dispatching as `general` or any other agent type to work around a failed dispatch.
 
 ### Orchestrator Must Never Do Agent Work

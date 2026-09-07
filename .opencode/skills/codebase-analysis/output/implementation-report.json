@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-06T13:59:51.134Z",
+  "generatedAt": "2026-09-07T01:09:22.038Z",
   "mode": "implementation",
   "parser": "regex",
   "summary": {
@@ -7,7 +7,7 @@
     "totalTsFiles": 47,
     "totalTsxFiles": 40,
     "totalImports": 267,
-    "totalExports": 166,
+    "totalExports": 167,
     "totalFunctions": 145,
     "totalClasses": 4,
     "totalInterfaces": 69,
@@ -4305,6 +4305,10 @@
         {
           "type": "named",
           "name": "generateSchedule"
+        },
+        {
+          "type": "named",
+          "name": "markSlotsOccupied"
         }
       ],
       "declarations": [
@@ -4980,7 +4984,7 @@
     "packages/domain": {
       "files": 11,
       "imports": 25,
-      "exports": 27,
+      "exports": 28,
       "declarations": 36
     },
     "packages/calendar": {

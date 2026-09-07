@@ -108,6 +108,8 @@ Verify:
 - Lint passes
 - Tests pass
 - When running `test` for `apps/web`, the tool returns Playwright E2E results with pass/fail counts and individual test names. Check that all E2E tests pass, not just the exit code.
+- E2E/unit tests contain real assertions on behavior or state — no empty/placeholder bodies or assertions against constant values
+- When tests mock `/api/v1/*` routes, the mocks use the `{ data: ... }` wrapper contract (`apiFetch` returns `json.data`)
 - No dead code
 - No unused imports
 - No unused variables

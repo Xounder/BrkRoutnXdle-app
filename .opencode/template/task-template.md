@@ -117,6 +117,13 @@ or
 - [ ] Validation step
 - [ ] Validation step
 
+### E2E Test Authoring Guidance (Playwright)
+
+- [ ] Avoid FullCalendar drag/select automation — use deterministic slot-click interactions or node-level unit specs instead
+- [ ] Every mocked API route responds `{ data: ... }` to satisfy the app's `apiFetch` contract
+- [ ] Tests assert on real UI state, network traffic, or behavior — no placeholders or empty assertions
+- [ ] When multiple tasks share `apps/web/e2e`, keep specs in separate files and report pass/fail per spec file
+
 ---
 
 ## Definition of Done

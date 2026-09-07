@@ -63,6 +63,13 @@ No business logic tests.
 | Integration tests | FullCalendar interaction, preview flow |
 | E2E tests | Critical user paths (login, generate, save) |
 
+#### Playwright E2E Authoring Rules
+
+- Mock every `/api/v1/*` route the flow triggers; every mocked response must use the `{ data: ... }` wrapper to satisfy the app's `apiFetch` contract (a bare payload yields `data is undefined` at runtime).
+- `page.route` intercepts in-browser before the Vite proxy — the proxy does NOT block interception; no backend is required when all `/api/v1/*` routes are mocked.
+- Prefer deterministic interactions (e.g. slot-click) over FullCalendar drag/select automation, which is unreliable in headless mode.
+- For pure logic, write node-level unit assertions in a Playwright spec (no `page` fixture) importing the real function — more durable than UI-driven drag flows.
+
 ---
 
 ### apps/api

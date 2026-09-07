@@ -258,6 +258,10 @@ The orchestrator must then re-dispatch the subagent with appropriate error conte
 ### Agent Dispatch Failure (retry then abort)
 If a named agent dispatch fails or stalls (e.g., a model-resolution error such as `Model not found: opencode/...`), retry the **same named dispatch** up to **3 consecutive attempts**. If all 3 attempts fail, **abort** the step and **report the error** to the user with the failure reason. Never fall back to dispatching as `general` or any other agent type to work around a failed dispatch.
 
+### Pipeline Closure Commit
+
+At the end of the delivery-pipeline, after completion and session saving (STOP chain: `learning-improvement` → `continuous-learning` → `session-save`), the last step is to commit all changes following the [commit pattern](.opencode/architecture/commit-pattern.md).
+
 ## References
 
 All project documentation is cataloged in:
