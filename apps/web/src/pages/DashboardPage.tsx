@@ -26,8 +26,9 @@ import { CreateActionModal } from "../features/shared/CreateActionModal";
 import { TaskModal } from "../features/tasks/TaskModal";
 import { BlockModal } from "../features/blocks/BlockModal";
 import { SaveButton } from "../features/preview/SaveButton";
+import { appendCalendarEventForTask } from "../utils/createCalendarEventFromTask";
 import { Priority as PriorityEnum, BlockType as BlockTypeEnum } from "@brkroutnxdle/shared";
-import type { ViewType, CalendarEvent, Task, BlockedSlot } from "@brkroutnxdle/shared";
+import type { ViewType, CalendarEvent, Task, BlockedSlot, Settings } from "@brkroutnxdle/shared";
 
 export function DashboardPage() {
   const { user, logout } = useAuth();
@@ -148,24 +149,17 @@ export function DashboardPage() {
         restrictions: [],
       });
 
-      setEvents((prev) => [
-        ...prev,
-        {
-          id: task.id,
-          title: task.title,
+      setEvents((prev) =>
+        appendCalendarEventForTask(prev, task, {
           start,
-          end,  // Use actual end from user selection, NOT start + duration
-          isAllDay: false,
-          isGenerated: true,
-          taskId: task.id,
-          isCompleted: false,
-          source: "brkroutnxdle",
-        },
-      ]);
+          end,
+          settings,
+        })
+      );
       setHasUnsavedChanges(true);
       setSelectedSlot(null);
     },
-    [createTask],
+    [createTask, setEvents, settings]
   );
 
   const handleRefresh = useCallback(async () => {

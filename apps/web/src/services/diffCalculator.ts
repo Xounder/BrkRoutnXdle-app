@@ -21,6 +21,11 @@ export interface DiffResult {
  * Builds a map from persisted events with two key strategies:
  * 1. By Google Calendar event ID (primary — used for freshly created events)
  * 2. By taskId (fallback — used for events created before we stored the real Google ID)
+ * 
+ * Pending events (source: "brkroutnxdle") are excluded from the byTaskId map
+ * because they don't exist on Google Calendar yet and should not be PATCHed.
+ * They remain in byId for potential ID-based matching, but the fallback to
+ * taskId matching will not find them, causing them to be treated as CREATEs.
  */
 function buildPersistedLookup(persistedEvents: CalendarEvent[]): {
   byId: Map<string, CalendarEvent>;
@@ -31,7 +36,9 @@ function buildPersistedLookup(persistedEvents: CalendarEvent[]): {
 
   for (const event of persistedEvents) {
     byId.set(event.id, event);
-    if (event.taskId) {
+    // Only add to byTaskId if the event is synced to Google Calendar (source: "google").
+    // Pending events (source: "brkroutnxdle") have local UUIDs and don't exist remotely yet.
+    if (event.taskId && event.source === "google") {
       byTaskId.set(event.taskId, event);
     }
   }
@@ -130,6 +137,11 @@ export function computeDiff(
   if (!options?.noDelete) {
     for (const [, persisted] of persistedById) {
       if (!matchedPersistedIds.has(persisted.id)) {
+        // Skip pending events (source: "brkroutnxdle") — they don't exist on Google Calendar
+        // and must never be remote-DELETEd. They are removed locally by user actions only.
+        if (persisted.source === "brkroutnxdle") {
+          continue;
+        }
         result.toDelete.push(persisted.id);
       }
     }
