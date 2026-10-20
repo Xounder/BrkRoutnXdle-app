@@ -1,7 +1,9 @@
 import React, { useState, useCallback } from "react";
+import { AppShell, AppShellHeader, AppShellNavbar, AppShellMain } from "@mantine/core";
 import { Header } from "./Header";
 import { Sidebar } from "./Sidebar";
-import type { ViewType, CalendarEvent } from "@brkroutnxdle/shared";
+import type { ViewType } from "@brkroutnxdle/shared";
+import { breakpoints } from "../theme/breakpoints";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -24,34 +26,53 @@ export function MainLayout({
   onViewChange,
   onSettingsClick,
 }: MainLayoutProps) {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   const toggleSidebar = useCallback(() => {
-    setSidebarCollapsed((prev) => !prev);
+    setMobileNavOpen((prev) => !prev);
   }, []);
 
+  const mainStyle: React.CSSProperties = {
+    height: "100%",
+    minHeight: 0,
+    overflow: "auto",
+  };
+
   return (
-    <div style={{
-      display: "flex",
-      flexDirection: "column",
-      height: "100vh",
-      background: "#EFF8F7",
-    }}>
-      <Header
-        currentDate={currentDate}
-        currentView={currentView}
-        onPrev={onPrev}
-        onNext={onNext}
-        onToday={onToday}
-        onViewChange={onViewChange}
-        onSettingsClick={onSettingsClick}
-      />
-      <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
-        <Sidebar isCollapsed={sidebarCollapsed} onToggle={toggleSidebar} onSettingsClick={onSettingsClick} />
-        <main style={{ flex: 1, overflow: "hidden" }}>
-          {children}
-        </main>
-      </div>
-    </div>
+    <AppShell
+      header={{ height: 64 }}
+      navbar={{
+        width: 280,
+        breakpoint: breakpoints.sm,
+        collapsed: { mobile: !mobileNavOpen },
+      }}
+      padding={0}
+      transitionDuration={200}
+      transitionTimingFunction="ease"
+      className="brk-app-shell"
+      style={{ overflow: "hidden" }}
+    >
+      <AppShellHeader>
+        <Header
+          currentDate={currentDate}
+          currentView={currentView}
+          onPrev={onPrev}
+          onNext={onNext}
+          onToday={onToday}
+          onViewChange={onViewChange}
+          onSettingsClick={onSettingsClick}
+        />
+      </AppShellHeader>
+      <AppShellNavbar>
+        <Sidebar
+          isCollapsed={mobileNavOpen}
+          onToggle={toggleSidebar}
+          onSettingsClick={onSettingsClick}
+        />
+      </AppShellNavbar>
+      <AppShellMain style={mainStyle}>
+        {children}
+      </AppShellMain>
+    </AppShell>
   );
 }

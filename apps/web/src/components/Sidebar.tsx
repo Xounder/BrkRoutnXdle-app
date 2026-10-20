@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Accordion, AccordionItem, AccordionControl, AccordionPanel, ActionIcon } from "@mantine/core";
 import { TaskPanel } from "../features/tasks/TaskPanel";
 import { BlockPanel } from "../features/blocks/BlockPanel";
 
@@ -30,80 +31,90 @@ export function Sidebar({ isCollapsed, onToggle, onSettingsClick }: SidebarProps
   ];
 
   return (
-    <div style={{ position: "relative" }}>
+    <>
+      {/* M7: Exactly one <aside> element in the document */}
       <aside
         style={{
-          width: isCollapsed ? "0px" : "280px",
-          minWidth: isCollapsed ? "0px" : "280px",
-          overflow: "hidden",
-          transition: "width 0.3s ease, min-width 0.3s ease",
-          background: "#fff",
-          borderRight: "1px solid #e0e0e0",
+          width: "100%",
+          height: "100%",
           display: "flex",
           flexDirection: "column",
+          background: "var(--brk-bg-raised)",
+          borderRight: "1px solid var(--brk-border-default)",
+          overflow: "hidden",
         }}
       >
-        {/* Sections */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "8px" }}>
+        {/* Accordion: single open section, panels unmount when closed (D-07) */}
+        <Accordion
+          multiple={false}
+          value={openSection}
+          onChange={setOpenSection}
+          style={{ flex: 1, overflowY: "auto", padding: "var(--space-xs)" }}
+        >
           {sections.map((section) => (
-            <div key={section.id} style={{ marginBottom: "8px" }}>
-              <button
-                onClick={() => {
-                  if (section.id === "settings") {
-                    onSettingsClick();
-                  } else {
-                    setOpenSection(openSection === section.id ? null : section.id);
-                  }
-                }}
+            <AccordionItem key={section.id} value={section.id}>
+              <AccordionControl
                 style={{
-                  width: "100%",
-                  padding: "10px 16px",
-                  border: "none",
-                  background: openSection === section.id ? "#E8F6F5" : "transparent",
-                  borderRadius: "8px",
-                  cursor: "pointer",
-                  textAlign: "left",
+                  padding: "var(--space-xs) var(--space-sm)",
+                  borderRadius: "var(--brk-radius-sm)",
                   fontWeight: 600,
-                  color: "#1E8C86",
-                  fontSize: "14px",
+                  fontSize: "var(--font-sm)",
+                  color: "var(--brk-text-brand)",
+                  background: openSection === section.id ? "var(--brk-bg-sunken)" : "transparent",
                 }}
               >
                 {section.label}
-              </button>
-              {openSection === section.id && (
-                <div style={{ padding: "12px 16px" }}>
-                  {section.content}
-                </div>
-              )}
-            </div>
+              </AccordionControl>
+              <AccordionPanel>
+                {section.id === "settings" ? (
+                  <button
+                    onClick={onSettingsClick}
+                    style={{
+                      width: "100%",
+                      padding: "var(--space-xs) var(--space-sm)",
+                      border: "none",
+                      background: "transparent",
+                      borderRadius: "var(--brk-radius-sm)",
+                      cursor: "pointer",
+                      textAlign: "left",
+                      fontWeight: 600,
+                      color: "var(--brk-text-brand)",
+                      fontSize: "var(--font-sm)",
+                    }}
+                  >
+                    Settings
+                  </button>
+                ) : (
+                  <div style={{ padding: "var(--space-xs) var(--space-sm)" }}>
+                    {section.content}
+                  </div>
+                )}
+              </AccordionPanel>
+            </AccordionItem>
           ))}
-        </div>
+        </Accordion>
       </aside>
-      <button
+
+      {/* Collapse toggle moved to ActionIcon with proper accessibility */}
+      <ActionIcon
         onClick={onToggle}
+        aria-label="Toggle sidebar"
+        aria-expanded={!isCollapsed}
+        size="lg"
+        variant="subtle"
         style={{
           position: "absolute",
-          top: "12px",
-          right: isCollapsed ? "0px" : "280px",
-          width: "24px",
-          height: "48px",
-          border: "1px solid #e0e0e0",
-          borderLeft: isCollapsed ? "1px solid #e0e0e0" : "none",
-          background: "#fff",
-          cursor: "pointer",
-          fontSize: "14px",
-          color: "#555",
-          zIndex: 10,
-          borderRadius: isCollapsed ? "0 8px 8px 0" : "8px 0 0 8px",
-          transition: "right 0.3s ease",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: 0,
+          top: "var(--space-md)",
+          right: "calc(var(--space-xs) * -1)",
+          zIndex: "var(--z-sticky)",
+          borderRadius: "var(--brk-radius-round)",
+          boxShadow: "var(--brk-shadow-md)",
+          background: "var(--brk-bg-raised)",
+          border: "1px solid var(--brk-border-default)",
         }}
       >
         {isCollapsed ? "▶" : "◀"}
-      </button>
-    </div>
+      </ActionIcon>
+    </>
   );
 }
