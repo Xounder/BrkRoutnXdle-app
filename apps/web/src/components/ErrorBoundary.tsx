@@ -1,5 +1,6 @@
 import React from "react";
 import { ErrorFallback } from "./ErrorFallback";
+import { ThemeProvider } from "../theme/ThemeProvider";
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -29,8 +30,14 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
   };
 
   render() {
-    if (this.state.hasError) {
-      return <ErrorFallback error={this.state.error!} onRetry={this.handleRetry} />;
+    if (this.state.hasError && this.state.error) {
+      // The boundary sits outside ThemeProvider in main.tsx, so its fallback
+      // needs its own provider to render Mantine controls (including the UI Button).
+      return (
+        <ThemeProvider>
+          <ErrorFallback error={this.state.error} onRetry={this.handleRetry} />
+        </ThemeProvider>
+      );
     }
     return this.props.children;
   }

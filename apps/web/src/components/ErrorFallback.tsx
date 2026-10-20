@@ -1,4 +1,4 @@
-import React from "react";
+import { Alert, Center, Stack, Text, Title } from "@mantine/core";
 import { Button } from "@brkroutnxdle/ui";
 
 interface ErrorFallbackProps {
@@ -32,34 +32,14 @@ function getErrorMessage(error: Error): string {
 
 export function ErrorFallback({ error, onRetry }: ErrorFallbackProps) {
   return (
-    <div
-      role="alert"
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100vh",
-        background: "var(--clr-surface)",
-      }}
-    >
-      <div
-        style={{
-          background: "var(--clr-card)",
-          borderRadius: "var(--radius-xl)",
-          padding: "48px",
-          maxWidth: "480px",
-          boxShadow: "var(--shadow-coral-glow)",
-          border: "2px solid var(--clr-coral)",
-        }}
-      >
-        <h2 style={{ color: "var(--clr-coral-dark)", margin: "0 0 12px" }}>Oops!</h2>
-        <p style={{ color: "#666", fontSize: "16px", margin: "0 0 24px" }}>
-          {getErrorMessage(error)}
-        </p>
-        <Button variant="danger" onClick={onRetry}>
-          Try Again
-        </Button>
-      </div>
-    </div>
+    <Center mih="100vh" p="md" role="alert">
+      <Alert color="red" variant="light" radius="lg" maw={480} w="100%">
+        <Stack gap="md" align="flex-start">
+          <Title order={2}>Oops!</Title>
+          <Text>{getErrorMessage(error)}</Text>
+          <Button variant="danger" onClick={onRetry}>Try Again</Button>
+        </Stack>
+      </Alert>
+    </Center>
   );
 }

@@ -1,4 +1,4 @@
-import React from "react";
+import { Center, Text } from "@mantine/core";
 import { useAuth } from "./contexts/AuthContext";
 import { LoginPage } from "./pages/LoginPage";
 import { DashboardPage } from "./pages/DashboardPage";
@@ -20,15 +20,7 @@ function AppContent() {
 
   if (loading) {
     return (
-      <div style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100vh",
-        background: "#EFF8F7",
-      }}>
-        <p>Loading...</p>
-      </div>
+      <Center mih="100vh"><Text>Loading...</Text></Center>
     );
   }
 
