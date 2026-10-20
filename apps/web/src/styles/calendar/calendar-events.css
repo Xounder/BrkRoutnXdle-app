@@ -1,0 +1,73 @@
+/* Content classes emitted by the project-owned event renderer. */
+.brk-calendar-google .fc .brk-event-content {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  width: 100%;
+}
+.brk-calendar-google .fc .brk-event-time {
+  color: var(--brk-text-on-brand);
+  font-size: 10px;
+  line-height: 1.2;
+}
+.brk-calendar-google .fc .brk-event-title {
+  color: var(--brk-text-on-brand);
+  font-size: var(--font-xs);
+  font-weight: 600;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+}
+.brk-calendar-google .fc .brk-event-check {
+  color: var(--brk-accent-success);
+  height: 14px;
+  width: 14px;
+}
+.brk-calendar-google .fc .brk-event-delete-btn {
+  position: absolute;
+  right: 2px;
+  top: 2px;
+  z-index: 2;
+}
+.brk-calendar-google .fc .fc-event {
+  border-radius: 4px;
+  font-size: var(--font-xs);
+  margin: 1px 0;
+  padding: 2px 4px;
+  transition: box-shadow 0.15s ease, transform 0.1s ease;
+}
+.brk-calendar-google .fc .fc-event:hover {
+  box-shadow: var(--brk-shadow-md);
+  transform: translateY(-1px);
+}
+.brk-calendar-google .fc .fc-event.brk-generated {
+  background: var(--brk-event-generated);
+  border: 0;
+  border-left: 4px solid var(--brk-accent-brand);
+  color: var(--brk-text-on-brand);
+}
+.brk-calendar-google .fc .fc-event.brk-external {
+  background: var(--brk-event-external);
+  border: 0;
+  border-left: 4px solid var(--brk-accent-brand);
+  color: var(--brk-text-on-brand);
+}
+.brk-calendar-google .fc .fc-event.brk-preview {
+  background: var(--brk-event-preview);
+  border: 2px dashed var(--brk-accent-brand);
+  border-left-width: 4px;
+  opacity: 1;
+}
+.brk-calendar-google .fc .fc-event.brk-block {
+  background: var(--brk-event-blocked);
+  border: 0;
+  border-left: 4px solid var(--brk-accent-danger);
+  color: var(--brk-text-on-brand);
+  pointer-events: none;
+}
+.brk-calendar-google .fc .fc-event.brk-completed { text-decoration: line-through; }
+.brk-calendar-google .fc .fc-event.is-past { filter: grayscale(0.3); }

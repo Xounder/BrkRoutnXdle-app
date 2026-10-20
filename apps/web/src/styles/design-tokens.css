@@ -1,73 +1,67 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   design-tokens.css — Single source of truth for design tokens
+   Three-tier architecture:
+   Tier 1: Primitives (--clr-*, --font-*, --space-*, --radius-*, --shadow-*, --z-*)
+   Tier 2: Semantic light (--brk-*) — resolves from Tier 1 via var()
+   Tier 3: Semantic dark — scoped to [data-mantine-color-scheme="dark"]
+   Mantine variable pinning — after Tier 2/3 so Mantine consumes semantic tier
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ──────────────────────────────────────────────────────────────────────────
+   TIER 1 — PRIMITIVES (retained where referenced by the app or semantic tiers)
+   ────────────────────────────────────────────────────────────────────────── */
+
 :root {
+  /* ── Colour primitives ── */
   --clr-primary: #2BA8A2;
   --clr-primary-light: #3CC4BD;
   --clr-primary-dark: #1E8C86;
   --clr-primary-bg: #E8F6F5;
   --clr-accent: #FFD23F;
-  --clr-accent-light: #FFE47A;
-  --clr-accent-dark: #E6B800;
   --clr-coral: #EF6C4A;
-  --clr-coral-light: #FF8A6A;
   --clr-coral-dark: #D45233;
-  --clr-cream: #FFF8E7;
   --clr-sky: #5DADE2;
   --clr-surface: #EFF8F7;
   --clr-card: #FFFFFF;
   --clr-success: #27AE60;
   --clr-error: #E74C3C;
 
+  /* ── Approved primitive additions ── */
+  --clr-border: #D1E5E3;
+  --clr-border-subtle: #E8F0EF;
+  --clr-text: #1A2E2D;
+  --clr-text-muted: #6B8A88;
+  --clr-text-subtle: #9AB3B1;
+
+  /* ── Typography ── */
   --font-stack: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  --font-display: 72px;
   --font-h1: 48px;
   --font-h2: 36px;
   --font-body: 16px;
   --font-sm: 14px;
   --font-xs: 12px;
 
+  /* ── Spacing ── */
   --space-xs: 8px;
   --space-sm: 16px;
   --space-md: 24px;
-  --space-lg: 32px;
-  --space-xl: 48px;
 
+  /* ── Radius ── */
   --radius-sm: 8px;
   --radius-md: 16px;
   --radius-lg: 24px;
-  --radius-xl: 32px;
   --radius-round: 9999px;
 
-  --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+  /* ── Shadows ── */
   --shadow-md: 0 4px 16px rgba(0,0,0,0.12);
-  --shadow-lg: 0 8px 32px rgba(0,0,0,0.16);
-  --shadow-card: 0 4px 20px rgba(43,168,162,0.10);
-  --shadow-coral-glow: 0 4px 20px rgba(239,108,74,0.35);
-  --shadow-teal-glow: 0 4px 20px rgba(43,168,162,0.30);
-  --shadow-accent-glow: 0 4px 20px rgba(255,210,63,0.40);
-  --shadow-sky-glow: 0 4px 16px rgba(93,173,226,0.30);
-  --shadow-focus: 0 0 0 4px rgba(43,168,162,0.15);
+
+  /* ── Sticky utility ── */
+  --z-sticky: 10;
 }
 
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  font-family: var(--font-stack);
-  font-size: var(--font-body);
-  color: #333;
-  background: var(--clr-surface);
-  -webkit-font-smoothing: antialiased;
-}
-
-h1, h2, h3, h4 {
-  letter-spacing: 0.08em;
-}
-
-:focus-visible {
-  outline: 3px solid var(--clr-primary);
-  outline-offset: 2px;
-}
+/* ──────────────────────────────────────────────────────────────────────────
+   GLOBAL KEYFRAMES & FOCUS (kept in token sheet — not part of reset)
+   ────────────────────────────────────────────────────────────────────────── */
 
 @keyframes spin {
   to { transform: rotate(360deg); }
@@ -82,3 +76,132 @@ h1, h2, h3, h4 {
   from { transform: translateY(20px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
+
+:focus-visible {
+  outline: 3px solid var(--clr-primary);
+  outline-offset: 2px;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   TIER 2 — SEMANTIC LIGHT (--brk-*)
+   All values resolve from Tier 1 primitives via var()
+   ────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* ── Background ── */
+  --brk-bg-canvas: var(--clr-surface);
+  --brk-bg-raised: var(--clr-card);
+  --brk-bg-sunken: var(--clr-primary-bg);
+  --brk-bg-subtle: var(--clr-primary-bg);
+
+  /* ── Border ── */
+  --brk-border-default: var(--clr-border);
+  --brk-border-subtle: var(--clr-border-subtle);
+
+  /* ── Text ── */
+  --brk-text-primary: var(--clr-text);
+  --brk-text-secondary: var(--clr-text-muted);
+  --brk-text-muted: var(--clr-text-subtle);
+  --brk-text-brand: var(--clr-primary-dark);
+  --brk-text-on-brand: #FFFFFF;
+
+  /* ── Accent / Status ── */
+  --brk-accent-brand: #16706B;
+  --brk-accent-danger: var(--clr-error);
+  --brk-accent-success: var(--clr-success);
+
+  /* Solid fills keep both event text and event boundary distinguishable. */
+  --brk-event-generated: #187E78;
+  --brk-event-external: #2E78AA;
+  --brk-event-preview: #187E78;
+  --brk-event-blocked: #BC4F30;
+
+  /* ── Calendar specific ── */
+  --brk-today-tint: color-mix(in srgb, var(--clr-accent) 8%, transparent);
+  --brk-now-indicator: #EA4335;
+  --brk-workday-tint: color-mix(in srgb, var(--clr-primary) 3%, var(--clr-card));
+
+  /* ── Radius aliases ── */
+  --brk-radius-sm: var(--radius-sm);
+  --brk-radius-md: var(--radius-md);
+  --brk-radius-lg: var(--radius-lg);
+  --brk-radius-round: var(--radius-round);
+
+  /* ── Shadow aliases ── */
+  --brk-shadow-md: var(--shadow-md);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   TIER 3 — SEMANTIC DARK
+   Scoped to [data-mantine-color-scheme="dark"]
+   B4 correction: event/brand fills use darker teal from approved tuple
+   (#2BA8A2 / #1E8C86) with white text — all pairs ≥ 4.5:1
+   ────────────────────────────────────────────────────────────────────────── */
+
+[data-mantine-color-scheme="dark"] {
+  /* ── Approved dark neutrals ── */
+  --brk-bg-canvas: #0E1618;
+  --brk-bg-raised: #16232B;
+  --brk-bg-sunken: #111C1C;
+  --brk-bg-subtle: #1A2E2D;
+
+  --brk-border-default: #2A3F3D;
+  --brk-border-subtle: #1E3230;
+
+  --brk-text-primary: #E6F0EF;
+  --brk-text-secondary: #A8BCBB;
+  --brk-text-muted: #7A9190;
+  --brk-text-brand: #3CC4BD;
+  --brk-text-on-brand: #FFFFFF;
+
+  /* ── Accent / Status (dark) ── */
+  --brk-accent-brand: #187E78;
+  --brk-accent-danger: #F46B6B;
+  --brk-accent-success: #4ADE80;
+
+  /* Contrast is measured against the calendar surface in the final audit. */
+  --brk-event-generated: #187E78;
+  --brk-event-external: #2E78AA;
+  --brk-event-preview: #187E78;
+  --brk-event-blocked: #BC4F30;
+
+  /* ── Calendar specific (dark) ── */
+  --brk-today-tint: color-mix(in srgb, var(--clr-accent) 12%, transparent);
+  --brk-now-indicator: #FF6B6B;
+  --brk-workday-tint: color-mix(in srgb, var(--clr-primary) 8%, var(--brk-bg-raised));
+
+  /* ── Radius aliases unchanged; shadow adjusted for dark surfaces ── */
+  --brk-radius-sm: var(--radius-sm);
+  --brk-radius-md: var(--radius-md);
+  --brk-radius-lg: var(--radius-lg);
+  --brk-radius-round: var(--radius-round);
+
+  --brk-shadow-md: 0 4px 16px rgba(0,0,0,0.45);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   MANTINE VARIABLE PINNING
+   Must come AFTER Tier 2/3 so Mantine consumes semantic tier (M13)
+   ────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  --mantine-color-body: var(--brk-bg-canvas);
+  --mantine-color-text: var(--brk-text-primary);
+  --mantine-color-default: var(--brk-bg-raised);
+  --mantine-color-default-border: var(--brk-border-default);
+  --mantine-color-dimmed: var(--brk-text-muted);
+}
+
+[data-mantine-color-scheme="dark"] {
+  --mantine-color-body: var(--brk-bg-canvas);
+  --mantine-color-text: var(--brk-text-primary);
+  --mantine-color-default: var(--brk-bg-raised);
+  --mantine-color-default-border: var(--brk-border-default);
+  --mantine-color-dimmed: var(--brk-text-muted);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   BREAKPOINT CONTRACT (M4)
+   xs: 36em  |  sm: 48em  |  md: 62em  |  lg: 75em
+   These values MUST match src/theme/mantineTheme.ts (TASK-03)
+   ────────────────────────────────────────────────────────────────────────── */

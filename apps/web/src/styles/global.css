@@ -1,35 +1,26 @@
-@import "./design-tokens.css";
+/* ═══════════════════════════════════════════════════════════════════════════
+   global.css — Global reset + screen-reader utility
+   Loads AFTER design-tokens.css (imported once in main.tsx — M2)
+   ────────────────────────────────────────────────────────────────────────── */
 
-/* Mobile responsive layout */
-@media (max-width: 768px) {
-  .sidebar-collapsed {
-    width: 0 !important;
-    min-width: 0 !important;
-  }
-
-  .header-view-switcher {
-    display: none;
-  }
-
-  .header-title {
-    font-size: 16px !important;
-  }
+/* ── Global reset (moved from design-tokens.css — M2) ── */
+* {
+  box-sizing: border-box;
 }
 
-@media (max-width: 480px) {
-  .calendar-toolbar {
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .modal-content {
-    width: 100% !important;
-    border-radius: var(--radius-md) !important;
-    margin: 8px;
-  }
+body {
+  margin: 0;
+  font-family: var(--font-stack);
+  font-size: var(--font-body);
+  color: var(--brk-text-primary);
+  background: var(--brk-bg-canvas);
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Screen reader only utility */
+/* Definite viewport height for FullCalendar; dvh replaces vh when supported. */
+.brk-app-shell { height: 100vh; height: 100dvh; }
+
+/* ── Screen reader only utility (preserved) ── */
 .sr-only {
   position: absolute;
   width: 1px;

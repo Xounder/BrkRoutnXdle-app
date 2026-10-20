@@ -1,0 +1,18 @@
+/* FullCalendar theme API mapped to semantic application tokens. */
+.brk-calendar-google {
+  --fc-border-color: var(--brk-border-default);
+  --fc-page-bg-color: var(--brk-bg-raised);
+  --fc-neutral-bg-color: var(--brk-bg-subtle);
+  --fc-neutral-text-color: var(--brk-text-secondary);
+  --fc-today-bg-color: var(--brk-today-tint);
+  --fc-non-business-color: var(--brk-bg-subtle);
+  --fc-now-indicator-color: var(--brk-now-indicator);
+  --fc-highlight-color: var(--brk-workday-tint);
+  --fc-event-bg-color: var(--brk-event-generated);
+  --fc-event-border-color: var(--brk-accent-brand);
+  --fc-event-text-color: var(--brk-text-on-brand);
+  --fc-event-resizer-thickness: 8px;
+  --fc-small-font-size: var(--font-xs);
+  --fc-daygrid-event-dot-width: 8px;
+  --fc-list-event-hover-bg-color: var(--brk-bg-subtle);
+}

@@ -1,0 +1,12 @@
+/* Dark event text inherits the high-contrast on-brand token. */
+[data-mantine-color-scheme="dark"] .brk-calendar-google {
+  --fc-event-text-color: var(--brk-text-on-brand);
+}
+[data-mantine-color-scheme="dark"] .brk-calendar-google .fc .fc-event.brk-generated,
+[data-mantine-color-scheme="dark"] .brk-calendar-google .fc .fc-event.brk-external,
+[data-mantine-color-scheme="dark"] .brk-calendar-google .fc .fc-event.brk-preview,
+[data-mantine-color-scheme="dark"] .brk-calendar-google .fc .fc-event.brk-block,
+[data-mantine-color-scheme="dark"] .brk-calendar-google .fc .brk-event-title,
+[data-mantine-color-scheme="dark"] .brk-calendar-google .fc .brk-event-time {
+  color: var(--brk-text-on-brand);
+}
