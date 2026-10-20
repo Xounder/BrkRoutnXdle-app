@@ -1,4 +1,4 @@
-import React from "react";
+import { Button, Group, Modal, Text } from "@mantine/core";
 
 interface DeleteEventDialogProps {
   isOpen: boolean;
@@ -7,64 +7,18 @@ interface DeleteEventDialogProps {
   onCancel: () => void;
 }
 
-export function DeleteEventDialog({
-  isOpen,
-  eventTitle,
-  onConfirm,
-  onCancel,
-}: DeleteEventDialogProps) {
+export function DeleteEventDialog({ isOpen, eventTitle, onConfirm, onCancel }: DeleteEventDialogProps) {
   if (!isOpen) return null;
 
   return (
-    <div
-      style={{
-        position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)",
-        display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1100,
-      }}
-      onClick={onCancel}
-    >
-      <div
-        style={{
-          background: "#fff", borderRadius: "24px", padding: "32px",
-          width: "360px", maxWidth: "90vw", textAlign: "center",
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h3 style={{ margin: "0 0 12px", color: "#EF6C4A" }}>Delete Event</h3>
-        <p style={{ fontSize: "14px", color: "#666", margin: "0 0 24px" }}>
-          Are you sure you want to delete "{eventTitle}"? This action cannot be undone until you save.
-        </p>
-        <div style={{ display: "flex", justifyContent: "center", gap: "12px" }}>
-          <button
-            onClick={onCancel}
-            style={{
-              padding: "10px 24px",
-              border: "2px solid #2BA8A2",
-              borderRadius: "9999px",
-              background: "transparent",
-              color: "#2BA8A2",
-              cursor: "pointer",
-              fontWeight: 600,
-            }}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            style={{
-              padding: "10px 24px",
-              background: "linear-gradient(135deg, #EF6C4A, #D45233)",
-              border: "none",
-              borderRadius: "9999px",
-              color: "#fff",
-              cursor: "pointer",
-              fontWeight: 700,
-            }}
-          >
-            Delete
-          </button>
-        </div>
-      </div>
-    </div>
+    <Modal opened={isOpen} onClose={onCancel} title="Delete Event" centered size="sm">
+      <Text size="sm" c="dimmed" mb="lg">
+        Are you sure you want to delete "{eventTitle}"? This action cannot be undone until you save.
+      </Text>
+      <Group justify="center">
+        <Button variant="outline" color="teal" radius="xl" onClick={onCancel}>Cancel</Button>
+        <Button color="red" radius="xl" onClick={onConfirm}>Delete</Button>
+      </Group>
+    </Modal>
   );
 }

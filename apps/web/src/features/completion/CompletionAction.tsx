@@ -1,4 +1,4 @@
-import React from "react";
+import { Button } from "@mantine/core";
 
 interface CompletionActionProps {
   eventId: string;
@@ -7,36 +7,19 @@ interface CompletionActionProps {
   onToggle: (eventId: string, isCompleted: boolean) => void;
 }
 
-export function CompletionAction({
-  eventId,
-  isCompleted,
-  isGenerated,
-  onToggle,
-}: CompletionActionProps) {
-  if (!isGenerated) return null; // Only BrkRoutnXdle events can be completed
+export function CompletionAction({ eventId, isCompleted, isGenerated, onToggle }: CompletionActionProps) {
+  if (!isGenerated) return null;
 
   return (
-    <button
-      onClick={(e) => {
-        e.stopPropagation();
-        onToggle(eventId, isCompleted);
-      }}
-      style={{
-        padding: "4px 12px",
-        borderRadius: "9999px",
-        border: "none",
-        cursor: "pointer",
-        fontSize: "12px",
-        fontWeight: 700,
-        background: isCompleted
-          ? "linear-gradient(135deg, #27AE60, #1E8449)"
-          : "transparent",
-        color: isCompleted ? "#fff" : "#27AE60",
-        outline: isCompleted ? "none" : "2px solid #27AE60",
-      }}
+    <Button
+      size="compact-xs"
+      radius="xl"
+      color="green"
+      variant={isCompleted ? "filled" : "outline"}
+      onClick={(e) => { e.stopPropagation(); onToggle(eventId, isCompleted); }}
       title={isCompleted ? "Mark as incomplete" : "Mark as completed"}
     >
       {isCompleted ? "✓ Done" : "Complete"}
-    </button>
+    </Button>
   );
 }

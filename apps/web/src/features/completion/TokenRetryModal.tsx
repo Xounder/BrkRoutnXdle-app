@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { Button, Group, Stack, Text, Textarea } from "@mantine/core";
 import { Modal } from "@brkroutnxdle/ui";
 import { useDevModeContext } from "../../contexts/DevModeContext";
 
@@ -7,30 +8,6 @@ interface TokenRetryModalProps {
   onClose: () => void;
   onRetry: () => void;
 }
-
-const primaryButtonStyle: React.CSSProperties = {
-  flex: 1,
-  padding: "8px 16px",
-  fontSize: "13px",
-  fontWeight: 700,
-  background: "#2BA8A2",
-  border: "none",
-  borderRadius: "8px",
-  color: "#fff",
-  cursor: "pointer",
-};
-
-const secondaryButtonStyle: React.CSSProperties = {
-  flex: 1,
-  padding: "8px 16px",
-  fontSize: "13px",
-  fontWeight: 700,
-  background: "transparent",
-  border: "2px solid #2BA8A2",
-  borderRadius: "8px",
-  color: "#2BA8A2",
-  cursor: "pointer",
-};
 
 export function TokenRetryModal({ isOpen, onClose, onRetry }: TokenRetryModalProps) {
   const { updateToken } = useDevModeContext();
@@ -57,58 +34,31 @@ export function TokenRetryModal({ isOpen, onClose, onRetry }: TokenRetryModalPro
     onClose();
   };
 
-  const canSubmit = draftToken.trim().length > 0;
-
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Google token expired">
       {insertMode ? (
-        <>
-          <p style={{ margin: "0 0 12px", fontSize: "14px", color: "#555" }}>
-            Insert a valid Google OAuth token to retry the calendar sync.
-          </p>
-          <textarea
+        <Stack gap="sm">
+          <Text size="sm" c="dimmed">Insert a valid Google OAuth token to retry the calendar sync.</Text>
+          <Textarea
             value={draftToken}
             onChange={(e) => setDraftToken(e.target.value)}
             placeholder="Paste your Google OAuth Playground token here..."
             rows={3}
-            style={{
-              width: "100%",
-              padding: "8px",
-              border: "2px solid #2BA8A2",
-              borderRadius: "8px",
-              fontFamily: "monospace",
-              fontSize: "12px",
-              resize: "none",
-              boxSizing: "border-box",
-            }}
+            autosize={false}
           />
-          <div style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
-            <button onClick={() => setInsertMode(false)} style={secondaryButtonStyle}>
-              Back
-            </button>
-            <button
-              onClick={handleApply}
-              disabled={!canSubmit}
-              style={{ ...primaryButtonStyle, opacity: canSubmit ? 1 : 0.5, cursor: canSubmit ? "pointer" : "not-allowed" }}
-            >
-              {"Apply & retry"}
-            </button>
-          </div>
-        </>
+          <Group grow>
+            <Button variant="outline" color="teal" onClick={() => setInsertMode(false)}>Back</Button>
+            <Button color="teal" onClick={handleApply} disabled={!draftToken.trim()}>Apply &amp; retry</Button>
+          </Group>
+        </Stack>
       ) : (
-        <>
-          <p style={{ margin: "0 0 16px", fontSize: "14px", fontWeight: 600, color: "#721c24" }}>
-            Google token expired. Please re-authenticate.
-          </p>
-          <div style={{ display: "flex", gap: "8px" }}>
-            <button onClick={() => setInsertMode(true)} style={primaryButtonStyle}>
-              Insert another token
-            </button>
-            <button onClick={handleRetry} style={secondaryButtonStyle}>
-              Retry
-            </button>
-          </div>
-        </>
+        <Stack gap="sm">
+          <Text size="sm" fw={600} c="red.9">Google token expired. Please re-authenticate.</Text>
+          <Group grow>
+            <Button color="teal" onClick={() => setInsertMode(true)}>Insert another token</Button>
+            <Button variant="outline" color="teal" onClick={handleRetry}>Retry</Button>
+          </Group>
+        </Stack>
       )}
     </Modal>
   );
