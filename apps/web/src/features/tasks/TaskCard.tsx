@@ -1,4 +1,4 @@
-import React from "react";
+import { ActionIcon, Badge, Card, Group, Stack, Text } from "@mantine/core";
 import type { Task, Priority } from "@brkroutnxdle/shared";
 
 interface TaskCardProps {
@@ -8,62 +8,45 @@ interface TaskCardProps {
 }
 
 const PRIORITY_COLORS: Record<Priority, string> = {
-  low: "#5DADE2",
-  medium: "#2BA8A2",
-  high: "#FFD23F",
-  critical: "#EF6C4A",
+  low: "blue",
+  medium: "teal",
+  high: "yellow",
+  critical: "red",
 };
 
 export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
-  const handleDragStart = (e: React.DragEvent) => {
-    e.dataTransfer.setData(
-      "application/json",
-      JSON.stringify({
-        type: "task",
-        taskId: task.id,
-        title: task.title,
-        duration: task.duration,
-      }),
-    );
-    e.dataTransfer.effectAllowed = "copy";
-  };
-
   return (
-    <div
-      draggable="true"
-      onDragStart={handleDragStart}
-      style={{
-        padding: "12px",
-        borderRadius: "16px",
-        background: "#fff",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-        borderLeft: `6px solid ${PRIORITY_COLORS[task.priority]}`,
-        marginBottom: "8px",
-        cursor: "grab",
-      }}
+    <Card
+      data-task-drag="true"
+      data-task-id={task.id}
+      data-task-title={task.title}
+      data-task-duration={task.duration}
+      p="sm"
+      radius="md"
+      shadow="xs"
+      withBorder
+      bd={`2px solid var(--mantine-color-${PRIORITY_COLORS[task.priority]}-6)`}
       onClick={() => onEdit(task)}
     >
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-        <div>
-          <strong style={{ fontSize: "14px", color: "#333" }}>{task.title}</strong>
-          <div style={{ fontSize: "12px", color: "#888", marginTop: "4px" }}>
-            {task.duration}min · {task.restrictions.length > 0 ? `${task.restrictions.length} restriction(s)` : "no restrictions"}
-          </div>
-        </div>
-        <button
+      <Group justify="space-between" align="flex-start" wrap="nowrap">
+        <Stack gap={4}>
+          <Text size="sm" fw={700}>{task.title}</Text>
+          <Group gap="xs">
+            <Badge size="xs" variant="light" color={PRIORITY_COLORS[task.priority]}>{task.duration}min</Badge>
+            <Text size="xs" c="dimmed">
+              {task.restrictions.length > 0 ? `${task.restrictions.length} restriction(s)` : "no restrictions"}
+            </Text>
+          </Group>
+        </Stack>
+        <ActionIcon
+          aria-label="Delete task"
+          variant="subtle"
+          color="red"
           onClick={(e) => { e.stopPropagation(); onDelete(task.id); }}
-          style={{
-            background: "none",
-            border: "none",
-            color: "#EF6C4A",
-            cursor: "pointer",
-            fontSize: "16px",
-            padding: "4px",
-          }}
         >
           ×
-        </button>
-      </div>
-    </div>
+        </ActionIcon>
+      </Group>
+    </Card>
   );
 }

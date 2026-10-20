@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import { Button, Group, Paper, ScrollArea, Stack, Text, Title } from "@mantine/core";
 import { useBlocks } from "../../hooks/useBlocks";
 import { BlockCard } from "./BlockCard";
 import { BlockModal } from "./BlockModal";
@@ -10,38 +11,34 @@ export function BlockPanel() {
   const [isCreating, setIsCreating] = useState(false);
 
   return (
-    <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-        <span style={{ fontWeight: 600, color: "#1E8C86", fontSize: "14px" }}>
-          Blocks ({blocks.length})
-        </span>
-        <button
-          onClick={() => setIsCreating(true)}
-          style={{
-            padding: "4px 12px", background: "#EF6C4A", color: "#fff",
-            border: "none", borderRadius: "9999px", cursor: "pointer", fontSize: "12px", fontWeight: 700,
-          }}
-        >
+    <Paper p="sm" radius="md">
+      <Group justify="space-between" mb="sm">
+        <Title order={4}>Blocks ({blocks.length})</Title>
+        <Button size="xs" radius="xl" color="red" onClick={() => setIsCreating(true)}>
           + Block
-        </button>
-      </div>
+        </Button>
+      </Group>
 
       {blocks.length === 0 && (
-        <p style={{ fontSize: "13px", color: "#999", textAlign: "center", padding: "16px" }}>
+        <Text size="sm" c="dimmed" ta="center" p="md">
           No blocked slots yet.
-        </p>
+        </Text>
       )}
 
-      <div style={{ maxHeight: "300px", overflowY: "auto" }}>
-        {blocks.map((block) => (
-          <BlockCard
-            key={block.id}
-            block={block}
-            onEdit={setEditingBlock}
-            onDelete={deleteBlock}
-          />
-        ))}
-      </div>
+      {blocks.length > 0 && (
+        <ScrollArea.Autosize mah={300}>
+          <Stack gap="xs">
+            {blocks.map((block) => (
+              <BlockCard
+                key={block.id}
+                block={block}
+                onEdit={setEditingBlock}
+                onDelete={deleteBlock}
+              />
+            ))}
+          </Stack>
+        </ScrollArea.Autosize>
+      )}
 
       {(isCreating || editingBlock) && (
         <BlockModal
@@ -49,6 +46,6 @@ export function BlockPanel() {
           onClose={() => { setIsCreating(false); setEditingBlock(null); }}
         />
       )}
-    </div>
+    </Paper>
   );
 }

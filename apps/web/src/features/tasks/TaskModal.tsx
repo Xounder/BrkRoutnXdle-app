@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import type { Task, Priority, CustomRange, TimeGroupPreset, RestrictedRange, TaskRestriction, Settings } from "@brkroutnxdle/shared";
+import { Button, Checkbox, Divider, Group, NumberInput, Stack, Text } from "@mantine/core";
+import { Modal } from "@brkroutnxdle/ui";
+import type { Task, Priority, CustomRange, TimeGroupPreset, RestrictedRange, TaskRestriction } from "@brkroutnxdle/shared";
 import { Priority as PriorityEnum, TIME_GROUP_PRESETS } from "@brkroutnxdle/shared";
 import { useTasks } from "../../hooks/useTasks";
 import { useCalendar } from "../../hooks/useCalendar";
@@ -157,186 +159,115 @@ export function TaskModal({ task, onClose, defaultDuration }: TaskModalProps) {
     onClose();
   };
 
-  const overlayStyle: React.CSSProperties = {
-    position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)",
-    display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000,
-  };
-
-  const modalStyle: React.CSSProperties = {
-    background: "#fff", borderRadius: "24px", padding: "32px",
-    width: "400px", maxWidth: "90vw",
-  };
-
   return (
-    <div style={overlayStyle} onClick={onClose}>
-      <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
-        <h3 style={{ margin: "0 0 20px", color: "#1E8C86" }}>
-          {isEditing ? "Edit Task" : "New Task"}
-        </h3>
-
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-          <label style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-            <span style={{ fontSize: "14px", fontWeight: 600 }}>Name</span>
+    <Modal isOpen onClose={onClose} title={isEditing ? "Edit Task" : "New Task"}>
+        <form onSubmit={handleSubmit}>
+          <Stack gap="md">
+          <Stack component="label" gap={4}>
+            <Text component="span" size="sm" fw={600}>Name</Text>
             <input
+              id="task-name"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g., Exercise, Reading, Practice"
-              style={inputStyle}
+              className="mantine-Input-input"
               autoFocus
             />
-          </label>
+          </Stack>
 
-          <label style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-            <span style={{ fontSize: "14px", fontWeight: 600 }}>Duration (minutes)</span>
-            <select value={duration} onChange={(e) => setDuration(Number(e.target.value))} style={inputStyle}>
+          <Stack component="label" gap={4}>
+            <Text component="span" size="sm" fw={600}>Duration (minutes)</Text>
+            <select id="task-duration" value={duration} onChange={(e) => setDuration(Number(e.target.value))} className="mantine-Input-input">
               {ALLOWED_DURATIONS.map((d) => (
                 <option key={d} value={d}>{d} min</option>
               ))}
             </select>
-          </label>
+          </Stack>
 
-          <label style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-            <span style={{ fontSize: "14px", fontWeight: 600 }}>Priority</span>
-            <select value={priority} onChange={(e) => setPriority(e.target.value as Priority)} style={inputStyle}>
+          <Stack component="label" gap={4}>
+            <Text component="span" size="sm" fw={600}>Priority</Text>
+            <select value={priority} onChange={(e) => setPriority(e.target.value as Priority)} className="mantine-Input-input">
               <option value="low">Low</option>
               <option value="medium">Medium</option>
               <option value="high">High</option>
               <option value="critical">Critical</option>
             </select>
-          </label>
+          </Stack>
 
-          {/* Time Groups */}
-          <fieldset style={{ border: "none", padding: 0, margin: 0 }}>
-            <legend style={{ fontSize: "14px", fontWeight: 600, marginBottom: "8px" }}>
-              Time Groups
-            </legend>
-            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+          <Divider label="Time Groups" labelPosition="left" />
+          <Stack gap="xs">
               {(Object.keys(TIME_GROUP_PRESETS) as TimeGroupPreset[]).map((preset) => (
-                <label
+                <Checkbox
                   key={preset}
-                  style={{
-                    display: "flex", alignItems: "center", gap: "8px",
-                    fontSize: "14px", cursor: "pointer",
-                  }}
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedTimeGroups.includes(preset)}
-                    onChange={() => handleTimeGroupToggle(preset)}
-                  />
-                  {TIME_GROUP_LABELS[preset]}
-                </label>
+                  label={TIME_GROUP_LABELS[preset]}
+                  checked={selectedTimeGroups.includes(preset)}
+                  onChange={() => handleTimeGroupToggle(preset)}
+                />
               ))}
-            </div>
-          </fieldset>
+          </Stack>
 
-          {/* Custom Ranges */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            <span style={{ fontSize: "14px", fontWeight: 600 }}>Custom Ranges</span>
+          <Divider label="Custom Ranges" labelPosition="left" />
+          <Stack gap="xs">
             {customRanges.map((range, index) => (
-              <div key={index} style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                <input
-                  type="number"
+              <Group key={index} gap="xs" wrap="nowrap">
+                <NumberInput
+                  aria-label="Start"
                   min={0}
                   max={23}
                   value={range.startHour}
-                  onChange={(e) => handleCustomRangeChange(index, "startHour", Number(e.target.value))}
-                  style={{ ...inputStyle, width: "70px" }}
+                  onChange={(value) => handleCustomRangeChange(index, "startHour", Number(value))}
+                  w={85}
                   placeholder="Start"
                 />
-                <span>&ndash;</span>
-                <input
-                  type="number"
+                <Text>&ndash;</Text>
+                <NumberInput
+                  aria-label="End"
                   min={0}
                   max={23}
                   value={range.endHour}
-                  onChange={(e) => handleCustomRangeChange(index, "endHour", Number(e.target.value))}
-                  style={{ ...inputStyle, width: "70px" }}
+                  onChange={(value) => handleCustomRangeChange(index, "endHour", Number(value))}
+                  w={85}
                   placeholder="End"
                 />
-                <button type="button" onClick={() => handleRemoveCustomRange(index)} style={removeBtnStyle}>
+                <Button type="button" size="xs" color="red" onClick={() => handleRemoveCustomRange(index)}>
                   Remove
-                </button>
-              </div>
+                </Button>
+              </Group>
             ))}
-            <button type="button" onClick={handleAddCustomRange} style={addBtnStyle}>
+            <Button type="button" size="xs" onClick={handleAddCustomRange}>
               + Add Range
-            </button>
-          </div>
+            </Button>
+          </Stack>
 
-          {/* Frequency */}
-          <label style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-            <span style={{ fontSize: "14px", fontWeight: 600 }}>Frequency (times per week)</span>
-            <input
-              type="number"
+          <NumberInput
+              label="Frequency (times per week)"
               min={1}
               max={7}
               value={frequency}
-              onChange={(e) => setFrequency(Math.min(7, Math.max(1, Number(e.target.value))))}
-              style={inputStyle}
+              onChange={(value) => setFrequency(Math.min(7, Math.max(1, Number(value))))}
             />
-          </label>
 
-          {/* Gap Between Days */}
-          <label style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-            <span style={{ fontSize: "14px", fontWeight: 600 }}>Gap Between Days</span>
-            <input
-              type="number"
+          <NumberInput
+              label="Gap Between Days"
               min={0}
               max={6}
               value={gapDays}
-              onChange={(e) => setGapDays(Math.min(6, Math.max(0, Number(e.target.value))))}
-              style={inputStyle}
+              onChange={(value) => setGapDays(Math.min(6, Math.max(0, Number(value))))}
             />
-          </label>
 
-          {/* Allow Same Day */}
-          <label
-            style={{
-              display: "flex", alignItems: "center", gap: "8px",
-              fontSize: "14px", cursor: "pointer",
-            }}
-          >
-            <input
-              type="checkbox"
-              checked={allowSameDay}
-              onChange={(e) => setAllowSameDay(e.target.checked)}
-            />
-            Allow Same Day
-          </label>
+          <Checkbox label="Allow Same Day" checked={allowSameDay} onChange={(e) => setAllowSameDay(e.target.checked)} />
 
-          {error && <p style={{ color: "#EF6C4A", fontSize: "13px", margin: 0 }}>{error}</p>}
+          {error && <Text c="red" size="sm">{error}</Text>}
 
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", marginTop: "8px" }}>
-            <button type="button" onClick={onClose} style={secondaryBtnStyle}>Cancel</button>
-            <button type="submit" style={primaryBtnStyle}>
+          <Divider />
+          <Group justify="flex-end" mt="xs">
+            <Button type="button" variant="default" onClick={onClose}>Cancel</Button>
+            <Button type="submit">
               {isEditing ? "Save" : "Create"}
-            </button>
-          </div>
+            </Button>
+          </Group>
+          </Stack>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 }
-
-const inputStyle: React.CSSProperties = {
-  padding: "8px 12px", border: "2px solid #ddd", borderRadius: "8px", fontSize: "14px",
-};
-const primaryBtnStyle: React.CSSProperties = {
-  padding: "10px 24px", background: "linear-gradient(135deg, #FFD23F, #E6B800)",
-  border: "none", borderRadius: "9999px", fontWeight: 700, cursor: "pointer", color: "#1E8C86",
-};
-const secondaryBtnStyle: React.CSSProperties = {
-  padding: "10px 24px", border: "2px solid #2BA8A2", borderRadius: "9999px",
-  background: "transparent", color: "#2BA8A2", cursor: "pointer", fontWeight: 600,
-};
-
-const removeBtnStyle: React.CSSProperties = {
-  padding: "4px 8px", background: "#EF6C4A", color: "#fff",
-  border: "none", borderRadius: "4px", cursor: "pointer", fontSize: "12px",
-};
-
-const addBtnStyle: React.CSSProperties = {
-  padding: "6px 12px", background: "#2BA8A2", color: "#fff",
-  border: "none", borderRadius: "9999px", cursor: "pointer", fontSize: "12px", fontWeight: 600,
-};

@@ -1,53 +1,55 @@
-import React, { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Draggable } from "@fullcalendar/interaction";
+import { Button, Group, Paper, ScrollArea, Stack, Text, Title } from "@mantine/core";
 import { useTasks } from "../../hooks/useTasks";
 import { TaskCard } from "./TaskCard";
 import { TaskModal } from "./TaskModal";
 import type { Task } from "@brkroutnxdle/shared";
 
 export function TaskPanel() {
+  const dragContainer = useRef<HTMLDivElement>(null);
   const { tasks, deleteTask } = useTasks();
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [isCreating, setIsCreating] = useState(false);
 
+  useEffect(() => {
+    if (!dragContainer.current) return;
+    const draggable = new Draggable(dragContainer.current, {
+      itemSelector: '[data-task-drag="true"]',
+      eventData: (element) => ({ title: element.dataset.taskTitle, create: false }),
+    });
+    return () => draggable.destroy();
+  }, [tasks.length]);
+
   return (
-    <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-        <span style={{ fontWeight: 600, color: "#1E8C86", fontSize: "14px" }}>
-          Tasks ({tasks.length})
-        </span>
-        <button
-          onClick={() => setIsCreating(true)}
-          style={{
-            padding: "4px 12px",
-            background: "#2BA8A2",
-            color: "#fff",
-            border: "none",
-            borderRadius: "9999px",
-            cursor: "pointer",
-            fontSize: "12px",
-            fontWeight: 700,
-          }}
-        >
+    <Paper p="sm" radius="md">
+      <Group justify="space-between" mb="sm">
+        <Title order={4}>Tasks ({tasks.length})</Title>
+        <Button size="xs" radius="xl" onClick={() => setIsCreating(true)}>
           + New
-        </button>
-      </div>
+        </Button>
+      </Group>
 
       {tasks.length === 0 && (
-        <p style={{ fontSize: "13px", color: "#999", textAlign: "center", padding: "16px" }}>
+        <Text size="sm" c="dimmed" ta="center" p="md">
           No tasks yet. Click "+ New" to create one.
-        </p>
+        </Text>
       )}
 
-      <div style={{ maxHeight: "300px", overflowY: "auto" }}>
-        {tasks.map((task) => (
-          <TaskCard
-            key={task.id}
-            task={task}
-            onEdit={setEditingTask}
-            onDelete={deleteTask}
-          />
-        ))}
-      </div>
+      {tasks.length > 0 && (
+        <ScrollArea.Autosize mah={300}>
+          <Stack gap="xs" ref={dragContainer}>
+            {tasks.map((task) => (
+              <TaskCard
+                key={task.id}
+                task={task}
+                onEdit={setEditingTask}
+                onDelete={deleteTask}
+              />
+            ))}
+          </Stack>
+        </ScrollArea.Autosize>
+      )}
 
       {(isCreating || editingTask) && (
         <TaskModal
@@ -55,6 +57,6 @@ export function TaskPanel() {
           onClose={() => { setIsCreating(false); setEditingTask(null); }}
         />
       )}
-    </div>
+    </Paper>
   );
 }
