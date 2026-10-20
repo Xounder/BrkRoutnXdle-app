@@ -5,6 +5,7 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import { ViewType, BlockType } from "@brkroutnxdle/shared";
 import type { CalendarEvent, BlockedSlot } from "@brkroutnxdle/shared";
+import { EventContent } from "./calendar/EventContent";
 
 interface CalendarViewProps {
   events: CalendarEvent[];
@@ -155,12 +156,17 @@ export function CalendarView({
         ? new Date(e.end).getTime()
         : new Date(e.start).getTime() + 30 * 60000;
       const isPast = eventEnd < now;
+      const classNames = [
+        e.isGenerated ? "brk-generated" : "brk-external",
+        e.isCompleted ? "brk-completed" : null,
+        isPast ? "is-past" : null,
+      ].filter(Boolean) as string[];
       return {
         id: e.id,
         title: e.title,
         start: e.start,
         end: e.end,
-        classNames: e.isGenerated ? ["brk-generated"] : ["brk-external"],
+        classNames,
         extendedProps: {
           isGenerated: e.isGenerated,
           isCompleted: e.isCompleted,
@@ -176,12 +182,15 @@ export function CalendarView({
         ? new Date(e.end).getTime()
         : new Date(e.start).getTime() + 30 * 60000;
       const isPast = eventEnd < now;
+      const classNames = ["brk-preview", isPast ? "is-past" : null].filter(
+        Boolean
+      ) as string[];
       return {
         id: e.id,
         title: e.title,
         start: e.start,
         end: e.end,
-        classNames: ["brk-preview"],
+        classNames,
         display: "auto" as const,
         extendedProps: {
           isPreview: true,
@@ -197,16 +206,33 @@ export function CalendarView({
       if (block.start && block.end) {
         const blockEnd = new Date(block.end).getTime();
         const isPast = blockEnd < now;
+        const classNames = [
+          ...(Array.isArray(block.classNames) ? block.classNames : []),
+          isPast ? "is-past" : null,
+        ].filter(Boolean) as string[];
         return {
           ...block,
-          extendedProps: { ...block.extendedProps, isPast },
+          classNames,
+          extendedProps: {
+            ...block.extendedProps,
+            isPast,
+          },
           eventStartEditable: !isPast,
           eventDurationEditable: !isPast,
         };
       }
       // Recurring blocks: FC renders each occurrence individually,
       // so editable is left as default (true) — defense-in-depth in callbacks
-      return block;
+      const classNames = [
+        ...(Array.isArray(block.classNames) ? block.classNames : []),
+      ].filter(Boolean) as string[];
+      return {
+        ...block,
+        classNames,
+        extendedProps: {
+          ...block.extendedProps,
+        },
+      };
     });
 
     return [...taskEvents, ...previewMapped, ...blockMapped];
@@ -259,76 +285,22 @@ export function CalendarView({
     onEventDragStart?.(info);
   };
 
-  const handleEventDragStop = (info: any) => {
-    onEventDragStop?.(info);
-  };
-
   const handleExternalDrop = (info: any) => {
     const jsEvent = info.jsEvent as DragEvent;
     const rawData = jsEvent.dataTransfer?.getData("application/json");
-    if (!rawData) return;
-    const dragData = JSON.parse(rawData);
+    const dragged = info.draggedEl as HTMLElement | undefined;
+    const dragData = dragged?.dataset.taskId ? {
+      type: "task",
+      taskId: dragged.dataset.taskId,
+      title: dragged.dataset.taskTitle,
+      duration: Number(dragged.dataset.taskDuration),
+    } : rawData ? JSON.parse(rawData) : null;
+    if (!dragData) return;
     onExternalDrop?.({ dateStr: info.dateStr, allDay: info.allDay, dragData });
   };
 
   const handleEventAllow = (dropInfo: any, draggedEvent: any): boolean => {
     return validateDrop?.(dropInfo.startStr, dropInfo.endStr, draggedEvent?.id) ?? true;
-  };
-
-  const handleEventDidMount = (info: any) => {
-    if (!onDeleteRequest) return;
-    const props = info.event.extendedProps;
-    if (!props.isGenerated && !props.isBlock && !props.isPreview) return;
-
-    // Hide × button for past events
-    if (props.isPast) return;
-
-    // Runtime past check for events without isPast (e.g., recurring blocks)
-    const endMs = info.event.endStr
-      ? new Date(info.event.endStr).getTime()
-      : new Date(info.event.startStr).getTime() + 30 * 60000;
-    if (endMs < Date.now()) return;
-
-    const el = info.el as HTMLElement;
-    el.style.position = "relative";
-
-    const deleteBtn = document.createElement("button");
-    deleteBtn.innerHTML = "×";
-    Object.assign(deleteBtn.style, {
-      position: "absolute",
-      top: "2px",
-      right: "2px",
-      cursor: "pointer",
-      background: "rgba(0,0,0,0.3)",
-      color: "#fff",
-      border: "none",
-      borderRadius: "50%",
-      width: "18px",
-      height: "18px",
-      fontSize: "14px",
-      lineHeight: "18px",
-      textAlign: "center",
-      padding: "0",
-      zIndex: "15",
-      pointerEvents: "auto",
-      userSelect: "none",
-    });
-    deleteBtn.className = "brk-event-delete-btn";
-    deleteBtn.onclick = (e) => {
-      e.stopPropagation();
-      // Guard against double-click — event.detail > 1 means multi-click
-      if (e.detail > 1) return;
-      onDeleteRequest(info.event.id, info.event.title);
-    };
-    el.appendChild(deleteBtn);
-  };
-
-  const handleEventWillUnmount = (info: any) => {
-    const el = info.el as HTMLElement;
-    const deleteBtn = el.querySelector<HTMLButtonElement>(".brk-event-delete-btn");
-    if (deleteBtn) {
-      deleteBtn.remove();
-    }
   };
 
   return (
@@ -360,13 +332,41 @@ export function CalendarView({
         eventDrop={(info) => onEventDrop?.(info)}
         eventResize={(info) => onEventResize?.(info)}
         eventDragStart={handleEventDragStart}
-        eventDragStop={handleEventDragStop}
+        eventDragStop={onEventDragStop}
         droppable={true}
         drop={handleExternalDrop}
         eventAllow={handleEventAllow}
         datesSet={handleDatesSet}
-        eventDidMount={handleEventDidMount}
-        eventWillUnmount={handleEventWillUnmount}
+        eventContent={(arg: any) => {
+          const props = arg.event?.extendedProps || {};
+          const isPast = Boolean(props.isPast);
+          let computedIsPast = isPast;
+          if (!isPast && (props.isBlock || props.isPreview || props.isGenerated)) {
+            const endStr = arg.event?.endStr;
+            const startStr = arg.event?.startStr;
+            const now = Date.now();
+            if (endStr) {
+              const endMs = new Date(endStr).getTime();
+              if (!Number.isNaN(endMs) && endMs < now) {
+                computedIsPast = true;
+              }
+            }
+            if (!computedIsPast && startStr) {
+              const startMs = new Date(startStr).getTime();
+              if (!Number.isNaN(startMs) && startMs + 30 * 60000 < now) {
+                computedIsPast = true;
+              }
+            }
+          }
+          const showDelete = Boolean(props.isGenerated || props.isBlock || props.isPreview) && !computedIsPast;
+          return (
+            <EventContent
+              arg={arg}
+              showDelete={showDelete}
+              onDelete={onDeleteRequest}
+            />
+          );
+        }}
       />
     </div>
   );
