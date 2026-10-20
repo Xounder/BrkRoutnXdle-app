@@ -1,7 +1,18 @@
 import React from "react";
+import { ActionIcon, Button, Group, useMantineColorScheme } from "@mantine/core";
 import type { ViewType } from "@brkroutnxdle/shared";
-import { ViewType as ViewTypeEnum } from "@brkroutnxdle/shared";
 
+/**
+ * AppShell header — app-level actions only (`M15`).
+ *
+ * Calendar control ownership moved to `components/calendar/CalendarToolbar`:
+ * the `‹`/`›` date step, the single `Today` button and the `Day`/`Week`/`Month`
+ * view switcher all live there now (exactly one owner per control).
+ *
+ * The prop surface is kept identical to what `MainLayout` passes
+ * (`MainLayoutProps` is TASK-05's contract and must not change); the calendar
+ * navigation props are intentionally declared but unused here.
+ */
 interface HeaderProps {
   currentDate: Date;
   currentView: ViewType;
@@ -12,102 +23,35 @@ interface HeaderProps {
   onSettingsClick: () => void;
 }
 
-const VIEW_LABELS: Record<ViewType, string> = {
-  [ViewTypeEnum.Day]: "Day",
-  [ViewTypeEnum.Week]: "Week",
-  [ViewTypeEnum.Month]: "Month",
-};
-
-const VIEWS: ViewType[] = [ViewTypeEnum.Day, ViewTypeEnum.Week, ViewTypeEnum.Month];
-
-export function Header({
-  currentDate,
-  currentView,
-  onPrev,
-  onNext,
-  onToday,
-  onViewChange,
-  onSettingsClick,
-}: HeaderProps) {
-  const dateTitle = currentDate.toLocaleDateString("en-US", {
-    month: "long",
-    year: "numeric",
-    ...(currentView === ViewTypeEnum.Day ? { day: "numeric" } : {}),
-  });
+export function Header({ onSettingsClick }: HeaderProps) {
+  const { toggleColorScheme } = useMantineColorScheme();
 
   return (
-    <header style={{
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      padding: "12px 24px",
-      background: "#fff",
-      borderBottom: "1px solid #e0e0e0",
-    }}>
-      {/* Navigation */}
-      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-        <button onClick={onPrev} style={navButtonStyle}>‹</button>
-        <button onClick={onToday} style={todayButtonStyle}>Today</button>
-        <button onClick={onNext} style={navButtonStyle}>›</button>
-        <h2 style={{ margin: "0 16px", fontSize: "20px", color: "#1E8C86" }}>{dateTitle}</h2>
-      </div>
-
-      {/* View Switcher */}
-      <div style={{ display: "flex", gap: "4px" }}>
-        {VIEWS.map((view) => (
-          <button
-            key={view}
-            onClick={() => onViewChange(view)}
-            style={{
-              padding: "6px 16px",
-              borderRadius: "8px",
-              border: "none",
-              cursor: "pointer",
-              fontWeight: currentView === view ? 700 : 500,
-              background: currentView === view ? "#2BA8A2" : "transparent",
-              color: currentView === view ? "#fff" : "#555",
-              transition: "all 0.2s",
-            }}
-          >
-            {VIEW_LABELS[view]}
-          </button>
-        ))}
-      </div>
-
+    <header
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "flex-end",
+        padding: "var(--space-xs) var(--space-md)",
+        height: "100%",
+        background: "var(--brk-bg-raised)",
+        borderBottom: "1px solid var(--brk-border-default)",
+      }}
+    >
       {/* Actions */}
-      <button onClick={onSettingsClick} style={{
-        padding: "8px 20px",
-        border: "2px solid #2BA8A2",
-        borderRadius: "9999px",
-        background: "transparent",
-        color: "#2BA8A2",
-        cursor: "pointer",
-        fontWeight: 600,
-      }}>
-        Settings
-      </button>
+      <Group gap="var(--space-xs)">
+        <Button onClick={onSettingsClick} variant="outline" size="sm" radius="xl">
+          Settings
+        </Button>
+        <ActionIcon
+          onClick={toggleColorScheme}
+          aria-label="Toggle color scheme"
+          variant="subtle"
+          size="sm"
+        >
+          🌓
+        </ActionIcon>
+      </Group>
     </header>
   );
 }
-
-const navButtonStyle: React.CSSProperties = {
-  width: 36,
-  height: 36,
-  borderRadius: "50%",
-  border: "1px solid #ddd",
-  background: "#fff",
-  cursor: "pointer",
-  fontSize: "18px",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-};
-
-const todayButtonStyle: React.CSSProperties = {
-  padding: "6px 16px",
-  borderRadius: "8px",
-  border: "1px solid #ddd",
-  background: "#fff",
-  cursor: "pointer",
-  fontSize: "14px",
-};

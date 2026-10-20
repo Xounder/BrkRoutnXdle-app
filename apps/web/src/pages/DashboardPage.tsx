@@ -1,43 +1,70 @@
-import React, { useState, useMemo, useCallback, useEffect } from "react";
-import { useAuth } from "../contexts/AuthContext";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useSettings } from "../contexts/SettingsContext";
 import { useTaskContext } from "../contexts/TaskContext";
+import { useBlockContext } from "../contexts/BlockContext";
 import { useCalendar, useCalendarEvents } from "../hooks/useCalendar";
 import { useScheduleGeneration } from "../hooks/useScheduleGeneration";
 import { useScheduleEditing } from "../hooks/useScheduleEditing";
 import { useSaveSchedule } from "../hooks/useSaveSchedule";
 import { usePreview } from "../contexts/PreviewContext";
-import { useCompletion } from "../hooks/useCompletion";
 import { useCalendarRefresh } from "../hooks/useCalendarRefresh";
 import { MainLayout } from "../components/MainLayout";
+import { StatusBar } from "../components/StatusBar";
+import { CalendarToolbar } from "../components/calendar/CalendarToolbar";
 import { CalendarView } from "../components/CalendarView";
-import { SettingsModal } from "../components/SettingsModal";
 import { CalculateWeekButton } from "../features/preview/CalculateWeekButton";
 import { PreviewToolbar } from "../features/preview/PreviewToolbar";
-import { AllocationFailurePanel } from "../features/preview/AllocationFailurePanel";
-import { DeleteEventDialog } from "../features/preview/DeleteEventDialog";
+import { SaveButton } from "../features/preview/SaveButton";
 import { RefreshButton } from "../features/completion/RefreshButton";
-import { ConflictDialog } from "../features/completion/ConflictDialog";
-import { TokenRetryModal } from "../features/completion/TokenRetryModal";
 import { isAuthTokenExpiredError } from "../services/api";
 import { useUnsavedChanges } from "../hooks/useUnsavedChanges";
-import { useBlockContext } from "../contexts/BlockContext";
-import { CreateActionModal } from "../features/shared/CreateActionModal";
-import { TaskModal } from "../features/tasks/TaskModal";
-import { BlockModal } from "../features/blocks/BlockModal";
-import { SaveButton } from "../features/preview/SaveButton";
 import { appendCalendarEventForTask } from "../utils/createCalendarEventFromTask";
-import { Priority as PriorityEnum, BlockType as BlockTypeEnum } from "@brkroutnxdle/shared";
-import type { ViewType, CalendarEvent, Task, BlockedSlot, Settings } from "@brkroutnxdle/shared";
+import { Priority as PriorityEnum } from "@brkroutnxdle/shared";
+import type { CalendarEvent } from "@brkroutnxdle/shared";
+import { DashboardModals } from "./dashboard/DashboardModals";
+import { useCalendarNavigation } from "./dashboard/useCalendarNavigation";
+import { useDashboardModals } from "./dashboard/useDashboardModals";
+import { useExternalDrop } from "./dashboard/useExternalDrop";
+import { getWeekEnd, getWeekStart } from "./dashboard/weekRange";
+import type { DashboardConflictState } from "./dashboard/dashboardTypes";
+
+/**
+ * DashboardPage — the ONE and ONLY owner of this file for the entire delivery (`M9`, `P-8`).
+ *
+ * Later phases and TASK-07 MUST extend `pages/dashboard/dashboardTypes.ts` and the
+ * extracted hooks (`useCalendarNavigation`, `useDashboardModals`, `useExternalDrop`,
+ * `DashboardModals`) instead of re-inlining logic here. Keep this file a pure
+ * orchestrator: context/hook wiring -> MainLayout -> action row -> StatusBar ->
+ * CalendarToolbar -> calendar scroll container + CalendarView -> DashboardModals.
+ */
 
 export function DashboardPage() {
-  const { user, logout } = useAuth();
   const { settings } = useSettings();
   const { tasks, createTask } = useTaskContext();
   const { blocks, createBlock } = useBlockContext();
   const { generateWeek, generateAgain, discard, isGenerating } = useScheduleGeneration();
   const { isPreviewActive, previewEvents, allocationFailures, clearPreview } = usePreview();
   const { events, setEvents } = useCalendar();
+
+  const [failurePanelOpen, setFailurePanelOpen] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [conflictState, setConflictState] = useState<DashboardConflictState>({
+    hasConflicts: false,
+    changedEvents: [],
+  });
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  const nav = useCalendarNavigation();
+  const modals = useDashboardModals();
+  const {
+    setSelectedSlot,
+    setEditingTask,
+    setEditingBlock,
+    setCreatingBlockPrefill,
+    setTokenModalOpen,
+    openSettings,
+  } = modals;
+
   const handleExternalEventChange = useCallback(
     (id: string, startStr: string, endStr: string) => {
       setEvents((prev) =>
@@ -45,21 +72,13 @@ export function DashboardPage() {
       );
       setHasUnsavedChanges(true);
     },
-    [],
+    [setEvents],
   );
+
   const editing = useScheduleEditing(handleExternalEventChange);
   const { saveState, save, resetSaveState } = useSaveSchedule();
-  const [currentView, setCurrentView] = useState<ViewType>("week" as ViewType);
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [failurePanelOpen, setFailurePanelOpen] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [conflictState, setConflictState] = useState<{
-    hasConflicts: boolean;
-    changedEvents: string[];
-  }>({ hasConflicts: false, changedEvents: [] });
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [tokenModalOpen, setTokenModalOpen] = useState(false);
+  const calendarRefresh = useCalendarRefresh();
+  useUnsavedChanges(isPreviewActive);
 
   useEffect(() => {
     if (saveState.status === "success") {
@@ -67,36 +86,12 @@ export function DashboardPage() {
     }
   }, [saveState.status]);
 
-  // Modal state for empty-slot creation
-  const [selectedSlot, setSelectedSlot] = useState<{
-    start: string;
-    end: string;
-  } | null>(null);
-
-  // Modal state for editing existing items
-  const [editingTask, setEditingTask] = useState<Task | null>(null);
-  const [editingBlock, setEditingBlock] = useState<BlockedSlot | null>(null);
-
-  // State for creating a block from a slot click (pre-filled values)
-  const [creatingBlockPrefill, setCreatingBlockPrefill] = useState<{
-    startDate: string;
-    endDate: string;
-    startTime: string;
-    endTime: string;
-  } | null>(null);
-
-
-
-  const { toggleCompletion } = useCompletion();
-  const calendarRefresh = useCalendarRefresh();
-  useUnsavedChanges(isPreviewActive);
-
   // Handle empty slot selection — show CreateActionModal
   const handleSelect = useCallback(
     (info: { start: string; end: string }) => {
       setSelectedSlot(info);
     },
-    [],
+    [setSelectedSlot],
   );
 
   // Handle click on existing event — open edit modal
@@ -117,7 +112,7 @@ export function DashboardPage() {
         }
       }
     },
-    [blocks, tasks],
+    [blocks, tasks, setEditingBlock, setEditingTask],
   );
 
   // CreateActionModal: user chose to create a Block
@@ -131,7 +126,7 @@ export function DashboardPage() {
       const endTime = end.slice(11, 16);
       setCreatingBlockPrefill({ startDate, endDate, startTime, endTime });
     },
-    [],
+    [setSelectedSlot, setCreatingBlockPrefill],
   );
 
   // CreateActionModal: inline task creation from slot
@@ -159,7 +154,7 @@ export function DashboardPage() {
       setHasUnsavedChanges(true);
       setSelectedSlot(null);
     },
-    [createTask, setEvents, settings]
+    [createTask, setEvents, settings, setSelectedSlot],
   );
 
   const handleRefresh = useCallback(async () => {
@@ -183,23 +178,12 @@ export function DashboardPage() {
   }, [clearPreview]);
 
   // Fetch events (will run on mount and when date changes)
-  const getWeekStart = (date: Date) => {
-    const d = new Date(date);
-    d.setDate(d.getDate() - d.getDay()); // Sunday
-    d.setHours(0, 0, 0, 0);
-    return d;
-  };
-  const getWeekEnd = (date: Date) => {
-    const d = new Date(date);
-    d.setDate(d.getDate() + (6 - d.getDay())); // Saturday
-    d.setHours(23, 59, 59, 999);
-    return d;
-  };
-  const prevWeekStart = getWeekStart(new Date(currentDate.getTime() - 7 * 86400_000));
-  const nextWeekEnd = getWeekEnd(new Date(currentDate.getTime() + 7 * 86400_000));
-  const timeMin = prevWeekStart.toISOString();
-  const timeMax = nextWeekEnd.toISOString();
-  const calendarQuery = useCalendarEvents(timeMin, timeMax);
+  const prevWeekStart = getWeekStart(new Date(nav.currentDate.getTime() - 7 * 86400_000));
+  const nextWeekEnd = getWeekEnd(new Date(nav.currentDate.getTime() + 7 * 86400_000));
+  const calendarQuery = useCalendarEvents(
+    prevWeekStart.toISOString(),
+    nextWeekEnd.toISOString(),
+  );
 
   const handleCalendarRetry = useCallback(() => {
     if (calendarQuery.isFetching) return;
@@ -212,7 +196,7 @@ export function DashboardPage() {
     } else if (!calendarQuery.isError) {
       setTokenModalOpen(false);
     }
-  }, [calendarQuery.isError, calendarQuery.error]);
+  }, [calendarQuery.isError, calendarQuery.error, setTokenModalOpen]);
 
   // Map GeneratedEvent[] to CalendarEvent[] for the CalendarView
   const mappedPreviewEvents: CalendarEvent[] = useMemo(() => {
@@ -232,85 +216,13 @@ export function DashboardPage() {
     });
   }, [previewEvents, tasks]);
 
-  const handlePrev = () => {
-    const d = new Date(currentDate);
-    if (currentView === "day") d.setDate(d.getDate() - 1);
-    else if (currentView === "week") d.setDate(d.getDate() - 7);
-    else d.setMonth(d.getMonth() - 1);
-    setCurrentDate(d);
-  };
-
-  const handleNext = () => {
-    const d = new Date(currentDate);
-    if (currentView === "day") d.setDate(d.getDate() + 1);
-    else if (currentView === "week") d.setDate(d.getDate() + 7);
-    else d.setMonth(d.getMonth() + 1);
-    setCurrentDate(d);
-  };
-
-  const handleToday = () => setCurrentDate(new Date());
-
-  const handleExternalDrop = useCallback(
-    (info: { dateStr: string; allDay: boolean; dragData: any }) => {
-      const { dateStr, allDay, dragData } = info;
-      const workStartHour = settings.workStartHour;
-      const start = allDay || !dateStr.includes("T")
-        ? `${dateStr.slice(0, 10)}T${String(workStartHour).padStart(2, "0")}:00:00`
-        : dateStr;
-      const startDate = new Date(start);
-      let end: string;
-
-      if (dragData.type === "task") {
-        const duration = dragData.duration || 30;
-        const endDate = new Date(startDate.getTime() + duration * 60000);
-        const endYear = endDate.getFullYear();
-        const endMonth = String(endDate.getMonth() + 1).padStart(2, "0");
-        const endDay = String(endDate.getDate()).padStart(2, "0");
-        const endHours = String(endDate.getHours()).padStart(2, "0");
-        const endMinutes = String(endDate.getMinutes()).padStart(2, "0");
-        end = `${endYear}-${endMonth}-${endDay}T${endHours}:${endMinutes}:00`;
-      } else if (dragData.type === "block") {
-        const endDate = new Date(startDate.getTime() + 60 * 60000);
-        const endYear = endDate.getFullYear();
-        const endMonth = String(endDate.getMonth() + 1).padStart(2, "0");
-        const endDay = String(endDate.getDate()).padStart(2, "0");
-        const endHours = String(endDate.getHours()).padStart(2, "0");
-        const endMinutes = String(endDate.getMinutes()).padStart(2, "0");
-        end = `${endYear}-${endMonth}-${endDay}T${endHours}:${endMinutes}:00`;
-      } else {
-        return;
-      }
-
-      if (!editing.canDropAt(start, end)) return;
-
-      if (dragData.type === "task") {
-        setEvents((prev) => [
-          ...prev,
-          {
-            id: crypto.randomUUID(),
-            title: dragData.title,
-            start,
-            end,
-            isAllDay: false,
-            isGenerated: true,
-            taskId: dragData.taskId,
-            isCompleted: false,
-            source: "brkroutnxdle",
-          },
-        ]);
-        setHasUnsavedChanges(true);
-      } else if (dragData.type === "block") {
-        createBlock({
-          title: dragData.title || "Blocked",
-          blockType: BlockTypeEnum.SingleDay,
-          startDate: start,
-          endDate: end,
-        });
-        setHasUnsavedChanges(true);
-      }
-    },
-    [editing.canDropAt, setEvents, createBlock, settings],
-  );
+  const handleExternalDrop = useExternalDrop({
+    settings,
+    editing,
+    setEvents,
+    createBlock,
+    setHasUnsavedChanges,
+  });
 
   const handleSave = () => {
     if (saveState.status === "error") {
@@ -322,13 +234,13 @@ export function DashboardPage() {
   return (
     <>
       <MainLayout
-        currentDate={currentDate}
-        currentView={currentView}
-        onPrev={handlePrev}
-        onNext={handleNext}
-        onToday={handleToday}
-        onViewChange={setCurrentView}
-        onSettingsClick={() => setSettingsOpen(true)}
+        currentDate={nav.currentDate}
+        currentView={nav.currentView}
+        onPrev={nav.onPrev}
+        onNext={nav.onNext}
+        onToday={nav.onToday}
+        onViewChange={nav.setCurrentView}
+        onSettingsClick={openSettings}
       >
         <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
           <div style={{ padding: "12px 16px 0", display: "flex", gap: "12px", alignItems: "center" }}>
@@ -359,119 +271,35 @@ export function DashboardPage() {
             <RefreshButton onClick={handleRefresh} isLoading={isRefreshing} />
           </div>
 
-          {saveState.status === "success" && (
-            <div
-              style={{
-                margin: "8px 16px 0",
-                padding: "10px 16px",
-                background: "#d4edda",
-                borderRadius: "8px",
-                color: "#155724",
-                fontSize: "14px",
-                fontWeight: 600,
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-              }}
-            >
-              Schedule saved successfully!
-            </div>
-          )}
+          <StatusBar
+            saveStatus={saveState.status}
+            saveError={saveState.error}
+            calendarIsError={calendarQuery.isError}
+            calendarError={calendarQuery.error ?? null}
+            calendarIsLoading={calendarQuery.isLoading}
+            calendarIsFetching={calendarQuery.isFetching}
+            isPreviewActive={isPreviewActive}
+            failurePanelOpen={failurePanelOpen}
+            allocationFailures={allocationFailures}
+            onSaveRetry={handleSave}
+            onCalendarRetry={
+              isAuthTokenExpiredError(calendarQuery.error)
+                ? () => setTokenModalOpen(true)
+                : handleCalendarRetry
+            }
+            onDismissFailures={() => setFailurePanelOpen(false)}
+          />
 
-          {saveState.status === "error" && (
-            <div
-              style={{
-                margin: "8px 16px 0",
-                padding: "10px 16px",
-                background: "#f8d7da",
-                borderRadius: "8px",
-                color: "#721c24",
-                fontSize: "14px",
-                fontWeight: 600,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
-              <span>Error: {saveState.error ?? "An unknown error occurred"}</span>
-              <button
-                onClick={handleSave}
-                style={{
-                  padding: "4px 16px",
-                  border: "2px solid #721c24",
-                  borderRadius: "9999px",
-                  background: "transparent",
-                  color: "#721c24",
-                  cursor: "pointer",
-                  fontWeight: 700,
-                  fontSize: "12px",
-                }}
-              >
-                Retry
-              </button>
-            </div>
-          )}
-
-          {calendarQuery.isError && (
-            <div
-              style={{
-                margin: "8px 16px 0",
-                padding: "10px 16px",
-                background: "#f8d7da",
-                borderRadius: "8px",
-                color: "#721c24",
-                fontSize: "14px",
-                fontWeight: 600,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
-              <span>Failed to sync calendar events: {calendarQuery.error?.message ?? "Unknown error"}</span>
-              <button
-                onClick={isAuthTokenExpiredError(calendarQuery.error) ? () => setTokenModalOpen(true) : handleCalendarRetry}
-                disabled={calendarQuery.isFetching}
-                style={{
-                  padding: "4px 16px",
-                  border: "2px solid #721c24",
-                  borderRadius: "9999px",
-                  background: "transparent",
-                  color: "#721c24",
-                  cursor: "pointer",
-                  fontWeight: 700,
-                  fontSize: "12px",
-                  opacity: calendarQuery.isFetching ? 0.5 : 1,
-                }}
-              >
-                Retry
-              </button>
-            </div>
-          )}
-
-          {calendarQuery.isLoading && (
-            <div
-              style={{
-                margin: "8px 16px 0",
-                padding: "10px 16px",
-                borderRadius: "8px",
-                fontSize: "14px",
-                fontWeight: 500,
-                color: "#555",
-                background: "#e8f4fd",
-              }}
-            >
-              Loading calendar events...
-            </div>
-          )}
-
-          {isPreviewActive && failurePanelOpen && (
-            <div style={{ padding: "0 16px" }}>
-              <AllocationFailurePanel
-                failures={allocationFailures}
-                onDismiss={() => setFailurePanelOpen(false)}
-              />
-            </div>
-          )}
+          <CalendarToolbar
+            currentDate={nav.currentDate}
+            currentView={nav.currentView}
+            onPrev={nav.onPrev}
+            onNext={nav.onNext}
+            onToday={nav.onToday}
+            onViewChange={nav.setCurrentView}
+            hasUnsavedChanges={hasUnsavedChanges}
+            settings={settings}
+          />
 
           <div style={{ flex: 1, overflow: "auto", minHeight: 0 }}>
             <CalendarView
@@ -479,10 +307,10 @@ export function DashboardPage() {
               previewEvents={mappedPreviewEvents}
               blocks={blocks}
               use12h={settings.use12h}
-              currentView={currentView}
-              currentDate={currentDate}
-              onViewChange={setCurrentView}
-              onDateChange={setCurrentDate}
+              currentView={nav.currentView}
+              currentDate={nav.currentDate}
+              onViewChange={nav.setCurrentView}
+              onDateChange={nav.setCurrentDate}
               onEventDrop={editing.handleEventDrop}
               onEventResize={editing.handleEventResize}
               onDeleteRequest={editing.requestDelete}
@@ -502,65 +330,15 @@ export function DashboardPage() {
         </div>
       </MainLayout>
 
-      {/* CreateActionModal: appears when an empty calendar slot is selected */}
-      {selectedSlot && (
-        <CreateActionModal
-          start={selectedSlot.start}
-          end={selectedSlot.end}
-          onCreateBlock={handleCreateBlockFromSlot}
-          onCreateTaskInline={handleCreateTaskInline}
-          onClose={() => setSelectedSlot(null)}
-        />
-      )}
-
-      {/* BlockModal: creating a block from a slot click */}
-      {creatingBlockPrefill !== null && (
-        <BlockModal
-          block={null}
-          defaultStartDate={creatingBlockPrefill.startDate}
-          defaultEndDate={creatingBlockPrefill.endDate}
-          defaultStartTime={creatingBlockPrefill.startTime}
-          defaultEndTime={creatingBlockPrefill.endTime}
-          onClose={() => setCreatingBlockPrefill(null)}
-        />
-      )}
-
-      {/* TaskModal: editing an existing task */}
-      {editingTask && (
-        <TaskModal
-          task={editingTask}
-          onClose={() => setEditingTask(null)}
-        />
-      )}
-
-      {/* BlockModal: editing an existing block */}
-      {editingBlock && (
-        <BlockModal
-          block={editingBlock}
-          onClose={() => setEditingBlock(null)}
-        />
-      )}
-
-      <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
-
-      <DeleteEventDialog
-        isOpen={editing.deleteTarget !== null}
-        eventTitle={editing.deleteTarget?.title ?? ""}
-        onConfirm={editing.confirmDelete}
-        onCancel={editing.cancelDelete}
-      />
-
-      <ConflictDialog
-        isOpen={conflictState.hasConflicts}
-        changedEventCount={conflictState.changedEvents.length}
+      <DashboardModals
+        modals={modals}
+        editing={editing}
+        conflictState={conflictState}
+        onCreateBlockFromSlot={handleCreateBlockFromSlot}
+        onCreateTaskInline={handleCreateTaskInline}
+        onCalendarRetry={handleCalendarRetry}
         onReload={handleReload}
         onDiscardPreview={handleDiscardPreview}
-      />
-
-      <TokenRetryModal
-        isOpen={tokenModalOpen}
-        onClose={() => setTokenModalOpen(false)}
-        onRetry={handleCalendarRetry}
       />
     </>
   );
