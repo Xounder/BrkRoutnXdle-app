@@ -5,6 +5,12 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BrkRoutnXdle</title>
+    <script type="module">
+      import { ColorSchemeScript } from "@mantine/core";
+      // ColorSchemeScript MUST execute before the app renders to prevent white flash
+      // on dark mode reload. It sets data-mantine-color-scheme on <html> before paint.
+      document.write(`<${ColorSchemeScript} />`);
+    </script>
   </head>
   <body>
     <div id="root"></div>
