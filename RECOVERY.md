@@ -31,3 +31,16 @@ original contents or constitute a new independent QA approval.
 - Implementation commit: `bf431be` (contract dependency for frontend placement).
 - Fresh calendar tests: **5/5 passed**, including three pin roundtrip cases.
 - Fresh API build passed. Real Google-account validation remains outstanding.
+
+## TASK-02 — Definition-only creation
+
+- Sidebar creation stores a task definition without scheduling an event.
+- Explicit slot placement creates a unique local occurrence with exact times
+  and a pin. Editing a definition preserves occurrence IDs, times and pins.
+- Implementation commit: `531a905`.
+- The user explicitly superseded automatic sidebar placement. Prior QA accepted
+  the delivery with an exception limited to four immutable `TASK-02.spec.ts`
+  cases at lines 59, 90, 118 and 170.
+- Retained independent web evidence: **32 passed, 4 failed**, no retries, exit
+  code **1**. This suite was not rerun during commit closure and is not green.
+- Existing tests remain unchanged; no skipping, filtering or conditional gating.
