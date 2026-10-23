@@ -56,3 +56,15 @@ original contents or constitute a new independent QA approval.
   wires TASK-04 save and TASK-05 refresh; their dependent commits follow.
 - New lifecycle coverage passed in the retained independent frontend QA run.
 - Fresh full web build passed before staging; no source changes since that build.
+
+## TASK-04 — Authoritative occurrence saves
+
+- Require a successful authoritative GET before writing. Match occurrences by
+  remote ID or exact task/time slot, never by task identity alone.
+- Normalize API-origin events at trusted GET/POST boundaries; pending UUIDs
+  remain local. The backend's `brkroutnxdle` source is not proof of a local draft.
+- Save pinned placements alongside proposals; reject changed remote baselines
+  and journal confirmed POST/PATCH/DELETE writes for partial retry.
+- Implementation commit: `d465245`.
+- Occurrence, pin reload, failed-GET and retry coverage passed in prior QA.
+- Validation uses mocked API/Google contracts; live Google remains unverified.
