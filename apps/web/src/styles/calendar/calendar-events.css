@@ -3,46 +3,60 @@
   align-items: flex-start;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
   min-width: 0;
   width: 100%;
 }
 .brk-calendar-google .fc .brk-event-time {
   color: var(--brk-text-on-brand);
-  font-size: 10px;
-  line-height: 1.2;
+  font-size: var(--font-xs);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
 }
 .brk-calendar-google .fc .brk-event-title {
   color: var(--brk-text-on-brand);
-  font-size: var(--font-xs);
-  font-weight: 600;
-  line-height: 1.25;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   width: 100%;
 }
 .brk-calendar-google .fc .brk-event-check {
-  color: var(--brk-accent-success);
+  color: var(--brk-text-on-brand);
   height: 14px;
   width: 14px;
 }
 .brk-calendar-google .fc .brk-event-delete-btn {
   position: absolute;
-  right: 2px;
-  top: 2px;
+  right: 4px;
+  top: 4px;
   z-index: 2;
 }
+.brk-calendar-google .fc .brk-event-content:has(.brk-event-delete-btn) .brk-event-time,
+.brk-calendar-google .fc .brk-event-content:has(.brk-event-delete-btn) .brk-event-title {
+  padding-right: 18px;
+}
 .brk-calendar-google .fc .fc-event {
-  border-radius: 4px;
+  border-radius: var(--brk-radius-sm);
   font-size: var(--font-xs);
-  margin: 1px 0;
-  padding: 2px 4px;
-  transition: box-shadow 0.15s ease, transform 0.1s ease;
+  margin: 2px 1px;
+  padding: 5px 7px;
+  transition: box-shadow 0.15s ease;
 }
 .brk-calendar-google .fc .fc-event:hover {
   box-shadow: var(--brk-shadow-md);
-  transform: translateY(-1px);
+}
+.brk-calendar-google .fc .fc-event:focus-visible,
+.brk-calendar-google .fc .brk-event-delete-btn:focus-visible {
+  outline: 3px solid var(--brk-text-brand);
+  outline-offset: 2px;
 }
 .brk-calendar-google .fc .fc-event.brk-generated {
   background: var(--brk-event-generated);
@@ -58,7 +72,7 @@
 }
 .brk-calendar-google .fc .fc-event.brk-preview {
   background: var(--brk-event-preview);
-  border: 2px dashed var(--brk-accent-brand);
+  border: 2px dashed var(--brk-text-on-brand);
   border-left-width: 4px;
   opacity: 1;
 }
@@ -70,4 +84,18 @@
   pointer-events: none;
 }
 .brk-calendar-google .fc .fc-event.brk-completed { text-decoration: line-through; }
-.brk-calendar-google .fc .fc-event.is-past { filter: grayscale(0.3); }
+.brk-calendar-google .fc .fc-event.is-past { filter: saturate(0.8); }
+
+/* Retain the event's native hit area for narrow or short overlapping events. */
+.brk-calendar-google .fc .fc-timegrid-event.fc-event-short .brk-event-content {
+  flex-direction: row;
+  gap: 5px;
+}
+.brk-calendar-google .fc .fc-timegrid-event.fc-event-short .brk-event-time {
+  flex: 0 1 auto;
+  width: auto;
+}
+.brk-calendar-google .fc .fc-timegrid-event.fc-event-short .brk-event-title {
+  flex: 1;
+  width: auto;
+}

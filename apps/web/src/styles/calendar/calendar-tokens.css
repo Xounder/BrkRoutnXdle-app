@@ -1,6 +1,9 @@
 /* FullCalendar theme API mapped to semantic application tokens. */
 .brk-calendar-google {
-  --fc-border-color: var(--brk-border-default);
+  --brk-calendar-grid-major: var(--brk-border-default);
+  --brk-calendar-grid-minor: color-mix(in srgb, var(--brk-border-default) 35%, var(--brk-bg-raised));
+  --brk-calendar-grid-vertical: var(--brk-border-subtle);
+  --fc-border-color: var(--brk-calendar-grid-vertical);
   --fc-page-bg-color: var(--brk-bg-raised);
   --fc-neutral-bg-color: var(--brk-bg-subtle);
   --fc-neutral-text-color: var(--brk-text-secondary);

@@ -2,6 +2,9 @@
 [data-mantine-color-scheme="dark"] .brk-calendar-google {
   --fc-event-text-color: var(--brk-text-on-brand);
 }
+[data-mantine-color-scheme="dark"] .brk-calendar-google .fc .fc-day-today .fc-col-header-cell-cushion {
+  color: var(--brk-text-brand);
+}
 [data-mantine-color-scheme="dark"] .brk-calendar-google .fc .fc-event.brk-generated,
 [data-mantine-color-scheme="dark"] .brk-calendar-google .fc .fc-event.brk-external,
 [data-mantine-color-scheme="dark"] .brk-calendar-google .fc .fc-event.brk-preview,
