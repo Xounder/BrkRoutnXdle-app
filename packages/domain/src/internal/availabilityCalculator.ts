@@ -1,5 +1,4 @@
 import type { WeekSlot, AvailabilityWindow } from "./types.js";
-import { SLOT_DURATION_MINUTES } from "@brkroutnxdle/shared";
 
 /**
  * Filters out occupied, blocked, or frozen slots and returns
@@ -8,27 +7,28 @@ import { SLOT_DURATION_MINUTES } from "@brkroutnxdle/shared";
 export function calculateAvailability(slots: WeekSlot[]): AvailabilityWindow[] {
   const windows: AvailabilityWindow[] = [];
   let currentWindowStart: string | null = null;
-  const slotMs = SLOT_DURATION_MINUTES * 60 * 1000;
+  let previousEnd: string | null = null;
+  const close = () => {
+    if (currentWindowStart !== null && previousEnd !== null) {
+      windows.push({ start: currentWindowStart, end: previousEnd });
+      currentWindowStart = null;
+    }
+  };
 
   for (const slot of slots) {
     if (!slot.occupied && !slot.blocked && !slot.frozen) {
+      if (currentWindowStart !== null && previousEnd !== slot.start) close();
       if (currentWindowStart === null) {
         currentWindowStart = slot.start;
       }
+      previousEnd = slot.end;
     } else {
-      if (currentWindowStart !== null) {
-        // Close the window (end is the slot before this occupied one)
-        const prevEnd = new Date(new Date(slot.start).getTime() - slotMs).toISOString();
-        windows.push({ start: currentWindowStart, end: prevEnd });
-        currentWindowStart = null;
-      }
+      close();
     }
   }
 
   // Close the last window if still open
-  if (currentWindowStart !== null && slots.length > 0) {
-    windows.push({ start: currentWindowStart, end: slots[slots.length - 1].end });
-  }
+  close();
 
   return windows;
 }

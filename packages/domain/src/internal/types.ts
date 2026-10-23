@@ -42,6 +42,18 @@ export interface ScheduleResult {
   generatedEvents: GeneratedEvent[];
   failures: AllocationFailure[];
   generatedAt: string;
+  /** An unchanged preview must not be presented as a new alternative. */
+  outcome?: "generated" | "alternative" | "no-alternative" | "infeasible";
+  message?: string;
+}
+
+export interface ScheduleOptions {
+  /** Any ISO date/time in the viewed local week (an offset-qualified instant). */
+  targetWeekStart?: string;
+  /** Previous preview of this SAME week; not the prior-week shuffle history. */
+  previousResult?: ScheduleResult;
+  /** Optional deterministic tie-break seed for repeat attempts. */
+  generationAttempt?: number;
 }
 
 /** Snapshot of the previous week's generation. */

@@ -1,6 +1,7 @@
 import type { Settings } from "@brkroutnxdle/shared";
 import { SLOT_DURATION_MINUTES } from "@brkroutnxdle/shared";
 import type { WeekSlot } from "./types.js";
+import { localParts, localWeekday } from "./localTime.js";
 
 /**
  * Generates all 30-minute time slots for the target week,
@@ -18,17 +19,19 @@ export function buildWeekSlots(
 
   let current = startMs;
   while (current + slotMs <= endMs) {
-    const date = new Date(current);
-    const hour = date.getUTCHours();
+    const local = localParts(current, settings.timezone);
+    const hour = local.hour + local.minute / 60;
+    const endLocal = localParts(current + slotMs - 1, settings.timezone);
 
     // Only generate slots within available hours
-    if (hour >= settings.workStartHour && hour < settings.workEndHour) {
+    if (hour >= settings.workStartHour && hour < settings.workEndHour &&
+        endLocal.hour + endLocal.minute / 60 < settings.workEndHour) {
       // Only generate slots on work days
-      if (settings.workDays.includes(date.getUTCDay())) {
+      if (settings.workDays.includes(localWeekday(current, settings.timezone))) {
         slots.push({
-          start: date.toISOString(),
+          start: new Date(current).toISOString(),
           end: new Date(current + slotMs).toISOString(),
-          dayOfWeek: date.getUTCDay(),
+          dayOfWeek: localWeekday(current, settings.timezone),
           occupied: false,
           blocked: false,
           frozen: false,
@@ -61,5 +64,6 @@ export function buildSlotsForRange(
     timezone: "UTC",
     shuffleEnabled: false,
     weekStartDay: 1,
+    use12h: false,
   });
 }

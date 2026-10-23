@@ -1,5 +1,7 @@
 import type { Task, BlockedSlot, CalendarEvent, Settings } from "@brkroutnxdle/shared";
 import type { GeneratedEvent } from "./types.js";
+import { localParts, localWeekday } from "./localTime.js";
+import { permittedInterval } from "./timeRestrictions.js";
 
 export interface ValidationError {
   code: string;
@@ -36,8 +38,8 @@ export function validateSchedule(
 
   // Check 2: Events within available hours
   for (const ev of generatedEvents) {
-    const startHour = new Date(ev.start).getUTCHours();
-    const endHour = new Date(ev.end).getUTCHours();
+    const startHour = localParts(ev.start, settings.timezone).hour;
+    const endHour = localParts(ev.end, settings.timezone).hour;
     if (startHour < settings.workStartHour || endHour > settings.workEndHour) {
       errors.push({
         code: "OUTSIDE_AVAILABLE_HOURS",
@@ -49,7 +51,7 @@ export function validateSchedule(
 
   // Check 3: No events on non-work days
   for (const ev of generatedEvents) {
-    const dayOfWeek = new Date(ev.start).getUTCDay();
+    const dayOfWeek = localWeekday(ev.start, settings.timezone);
     if (!settings.workDays.includes(dayOfWeek)) {
       errors.push({
         code: "NON_WORK_DAY",
@@ -63,7 +65,7 @@ export function validateSchedule(
   for (const ev of generatedEvents) {
     const durationMs = new Date(ev.end).getTime() - new Date(ev.start).getTime();
     const durationMin = durationMs / 60000;
-    if (durationMin % 30 !== 0 || durationMin < 30) {
+    if (durationMin % 30 !== 0 || durationMin < 30 || (taskMap.get(ev.taskId) && durationMin !== taskMap.get(ev.taskId)?.duration)) {
       errors.push({
         code: "INVALID_DURATION",
         message: `Event ${ev.id} has invalid duration: ${durationMin}min (must be multiple of 30, min 30)`,
@@ -75,7 +77,6 @@ export function validateSchedule(
   // Check 5: No overlap with existing calendar events
   for (const ev of generatedEvents) {
     for (const existing of events) {
-      if (existing.isCompleted) continue;
       if (eventsOverlap(ev, existing)) {
         errors.push({
           code: "CONFLICT_WITH_EXISTING",
@@ -90,10 +91,13 @@ export function validateSchedule(
   for (const ev of generatedEvents) {
     const task = taskMap.get(ev.taskId);
     if (!task) continue;
+    if (!permittedInterval(ev.start, ev.end, task, settings)) {
+      errors.push({ code: "RESTRICTION_VIOLATION", message: `Event ${ev.id} violates local time restrictions`, eventId: ev.id });
+    }
 
     for (const restriction of task.restrictions) {
       if (restriction.type === "no-weekends") {
-        const day = new Date(ev.start).getUTCDay();
+        const day = localWeekday(ev.start, settings.timezone);
         if (day === 0 || day === 6) {
           errors.push({
             code: "WEEKEND_VIOLATION",
@@ -103,7 +107,7 @@ export function validateSchedule(
         }
       }
       if (restriction.type === "morning-only") {
-        const hour = new Date(ev.start).getUTCHours();
+        const hour = localParts(ev.start, settings.timezone).hour;
         if (hour >= 12) {
           errors.push({
             code: "MORNING_ONLY_VIOLATION",
@@ -113,7 +117,7 @@ export function validateSchedule(
         }
       }
       if (restriction.type === "afternoon-only") {
-        const hour = new Date(ev.start).getUTCHours();
+        const hour = localParts(ev.start, settings.timezone).hour;
         if (hour < 12) {
           errors.push({
             code: "AFTERNOON_ONLY_VIOLATION",
@@ -123,7 +127,7 @@ export function validateSchedule(
         }
       }
       if (restriction.type === "weekdays-only") {
-        const day = new Date(ev.start).getUTCDay();
+        const day = localWeekday(ev.start, settings.timezone);
         if (day === 0 || day === 6) {
           errors.push({
             code: "WEEKEND_VIOLATION",
@@ -133,7 +137,7 @@ export function validateSchedule(
         }
       }
       if (restriction.type === "specific-days" && restriction.days) {
-        const day = new Date(ev.start).getUTCDay();
+        const day = localWeekday(ev.start, settings.timezone);
         if (!restriction.days.includes(day)) {
           errors.push({
             code: "SPECIFIC_DAYS_VIOLATION",
