@@ -1,49 +1,32 @@
 import type { CalendarEvent, Task, Settings } from "@brkroutnxdle/shared";
 
+interface ExplicitPlacement {
+  start: string;
+  end: string;
+  // Accepted for existing slot callers; settings never selects a placement time.
+  settings?: Settings;
+}
+
 /**
- * Builds a CalendarEvent from a Task.
- * If explicit start/end are provided (e.g., from inline slot selection), uses those.
- * Otherwise, defaults to the current day at workStartHour with defaultTaskDuration.
+ * Build one local pending occurrence only after an intentional slot selection.
+ * Definition creation must never call this helper.
  */
 export function buildCalendarEventFromTask(
   task: Task,
-  options: {
-    start?: string;
-    end?: string;
-    settings: Settings;
-    currentDate?: Date;
-  }
+  options: ExplicitPlacement
 ): CalendarEvent {
-  const { start: explicitStart, end: explicitEnd, settings, currentDate = new Date() } = options;
-
-  let start: string;
-  let end: string;
-
-  if (explicitStart && explicitEnd) {
-    // Inline "Create in this slot" - use the exact slot times
-    start = explicitStart;
-    end = explicitEnd;
-  } else {
-    // Sidebar creation - default to today at workStartHour with defaultTaskDuration
-    const workStartHour = settings.workStartHour ?? 8;
-    const defaultDuration = settings.defaultTaskDuration ?? 60;
-
-    const startDate = new Date(currentDate);
-    startDate.setHours(workStartHour, 0, 0, 0);
-
-    const endDate = new Date(startDate.getTime() + defaultDuration * 60000);
-
-    start = startDate.toISOString();
-    end = endDate.toISOString();
+  if (!options.start || !options.end) {
+    throw new Error("Explicit start and end are required to place a task");
   }
 
   return {
-    id: task.id,
+    id: crypto.randomUUID(),
     title: task.title,
-    start,
-    end,
+    start: options.start,
+    end: options.end,
     isAllDay: false,
     isGenerated: true,
+    isPinned: true,
     taskId: task.id,
     isCompleted: false,
     source: "brkroutnxdle",
@@ -51,61 +34,35 @@ export function buildCalendarEventFromTask(
 }
 
 /**
- * Checks if a CalendarEvent for the given task already exists in the events array.
- * Used for idempotency - prevents duplicate events on re-save/re-render.
+ * Checks whether a task has any placed occurrence, not whether it may be placed again.
  */
 export function hasCalendarEventForTask(events: CalendarEvent[], taskId: string): boolean {
   return events.some((event) => event.taskId === taskId || event.id === taskId);
 }
 
 /**
- * Appends a CalendarEvent for a Task to the events array if one doesn't already exist.
- * Returns the updated events array.
+ * Appends exactly one pending occurrence per explicit placement action.
+ * Multiple independent placements of the same definition are allowed.
  */
 export function appendCalendarEventForTask(
   events: CalendarEvent[],
   task: Task,
-  options: {
-    start?: string;
-    end?: string;
-    settings: Settings;
-    currentDate?: Date;
-  }
+  options: ExplicitPlacement
 ): CalendarEvent[] {
-  if (hasCalendarEventForTask(events, task.id)) {
-    return events; // Idempotent: event already exists
-  }
-
-  const newEvent = buildCalendarEventFromTask(task, options);
-  return [...events, newEvent];
+  return [...events, buildCalendarEventFromTask(task, options)];
 }
 
 /**
- * Updates an existing CalendarEvent for a Task in the events array.
- * If no event exists for the task, appends a new one.
- * Returns the updated events array.
+ * Reflect definition metadata on existing occurrences only. Never change their
+ * identity, source, time, or persistence status; never insert a new occurrence.
  */
 export function updateCalendarEventForTask(
   events: CalendarEvent[],
-  task: Task,
-  options: {
-    start?: string;
-    end?: string;
-    settings: Settings;
-    currentDate?: Date;
-  }
+  task: Task
 ): CalendarEvent[] {
-  const eventIndex = events.findIndex((event) => event.taskId === task.id || event.id === task.id);
-  
-  const updatedEvent = buildCalendarEventFromTask(task, options);
-  
-  if (eventIndex >= 0) {
-    // Update existing event
-    const newEvents = [...events];
-    newEvents[eventIndex] = { ...newEvents[eventIndex], ...updatedEvent };
-    return newEvents;
-  } else {
-    // No existing event - append new one
-    return [...events, updatedEvent];
-  }
+  return events.map((event) =>
+    event.taskId === task.id || event.id === task.id
+      ? { ...event, title: task.title }
+      : event,
+  );
 }

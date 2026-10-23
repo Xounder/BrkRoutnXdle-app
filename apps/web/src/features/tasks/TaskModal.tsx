@@ -5,8 +5,7 @@ import type { Task, Priority, CustomRange, TimeGroupPreset, RestrictedRange, Tas
 import { Priority as PriorityEnum, TIME_GROUP_PRESETS } from "@brkroutnxdle/shared";
 import { useTasks } from "../../hooks/useTasks";
 import { useCalendar } from "../../hooks/useCalendar";
-import { useSettings } from "../../contexts/SettingsContext";
-import { appendCalendarEventForTask, updateCalendarEventForTask } from "../../utils/createCalendarEventFromTask";
+import { updateCalendarEventForTask } from "../../utils/createCalendarEventFromTask";
 
 // --- Restriction helpers ---
 
@@ -47,7 +46,6 @@ interface TaskModalProps {
 export function TaskModal({ task, onClose, defaultDuration }: TaskModalProps) {
   const { createTask, updateTask } = useTasks();
   const { setEvents } = useCalendar();
-  const { settings } = useSettings();
   const isEditing = task !== null;
 
   const [title, setTitle] = useState(task?.title ?? "");
@@ -129,31 +127,21 @@ export function TaskModal({ task, onClose, defaultDuration }: TaskModalProps) {
     };
 
     if (isEditing) {
+      const updatedTask = { ...task!, ...baseTaskData, restrictions: buildRestrictions(task!.restrictions) };
       updateTask(task!.id, {
         ...baseTaskData,
-        restrictions: buildRestrictions(task!.restrictions),
+        restrictions: updatedTask.restrictions,
       });
 
-      // Update corresponding CalendarEvent for sidebar-edited tasks
-      setEvents((prev) =>
-        updateCalendarEventForTask(prev, { ...task!, ...baseTaskData, restrictions: buildRestrictions(task!.restrictions) }, {
-          settings,
-        })
-      );
+      // Reflect definition metadata on all existing placements, without scheduling another.
+      setEvents((prev) => updateCalendarEventForTask(prev, updatedTask));
     } else {
-      const newTask = createTask({
+      createTask({
         ...baseTaskData,
         description: undefined,
         isActive: true,
         restrictions: buildRestrictions([]),
       });
-
-      // Create corresponding CalendarEvent for sidebar-created tasks
-      setEvents((prev) =>
-        appendCalendarEventForTask(prev, newTask, {
-          settings,
-        })
-      );
     }
 
     onClose();
