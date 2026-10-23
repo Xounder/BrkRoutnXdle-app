@@ -39,5 +39,9 @@ Thumbs.db
 # Test coverage
 coverage
 
+# Playwright generated results and reports
+/apps/web/test-results/
+/apps/web/playwright-report/
+
 # Turbo
 .turbo
