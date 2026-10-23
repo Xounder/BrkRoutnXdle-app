@@ -2,6 +2,7 @@ import React from "react";
 import { Alert, Button, Paper, Skeleton, Text } from "@mantine/core";
 import { AllocationFailurePanel } from "../features/preview/AllocationFailurePanel";
 import type { DashboardStatusBarProps } from "../pages/dashboard/dashboardTypes";
+import { calendarErrorMessage } from "../services/api";
 
 /**
  * StatusBar — the single status region rendered above the calendar.
@@ -23,6 +24,8 @@ export function StatusBar({
   calendarError,
   calendarIsLoading,
   calendarIsFetching,
+  refreshStatus,
+  onRefreshRetry,
   isPreviewActive,
   failurePanelOpen,
   allocationFailures,
@@ -50,6 +53,10 @@ export function StatusBar({
         </div>
       </Alert>
     );
+  } else if (refreshStatus?.kind === "error") {
+    content = <Alert color="red" style={{ margin: "8px 16px 0" }}>
+      {refreshStatus.message} <Button variant="outline" color="red" size="xs" onClick={onRefreshRetry}>Retry</Button>
+    </Alert>;
   } else if (calendarIsError) {
     content = (
       <Alert color="red" style={{ margin: "8px 16px 0" }}>
@@ -62,7 +69,7 @@ export function StatusBar({
           }}
         >
           <span>
-            Failed to sync calendar events: {calendarError?.message ?? "Unknown error"}
+            Failed to sync calendar events: {calendarErrorMessage(calendarError)}
           </span>
           <Button
             color="red"
@@ -76,6 +83,9 @@ export function StatusBar({
         </div>
       </Alert>
     );
+  } else if (refreshStatus) {
+    content = <Alert color={refreshStatus.kind === "loading" ? "blue" : refreshStatus.kind === "conflict" || refreshStatus.kind === "partial" ? "yellow" : "green"}
+      style={{ margin: "8px 16px 0" }}>{refreshStatus.message}</Alert>;
   } else if (saveStatus === "success") {
     content = (
       <Alert color="green" style={{ margin: "8px 16px 0" }}>

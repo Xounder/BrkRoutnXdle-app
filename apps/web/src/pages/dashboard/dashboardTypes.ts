@@ -87,6 +87,8 @@ export interface DashboardStatusState {
   calendarError: Error | null;
   calendarIsLoading: boolean;
   calendarIsFetching: boolean;
+  refreshStatus?: { kind: "loading" | "success" | "partial" | "conflict" | "error"; message: string } | null;
+  onRefreshRetry?: () => void;
   isPreviewActive: boolean;
   failurePanelOpen: boolean;
   allocationFailures: AllocationFailure[];

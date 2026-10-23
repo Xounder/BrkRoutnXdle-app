@@ -30,13 +30,13 @@ export function getCalendarCache(): CalendarEvent[] | null {
 
     const entry: CacheEntry = JSON.parse(raw);
     if (Date.now() > entry.expiresAt) {
-      localStorage.removeItem(CACHE_KEY);
+      clearCalendarCache();
       return null;
     }
 
-    return entry.data;
+    return Array.isArray(entry.data) ? entry.data : null;
   } catch {
-    localStorage.removeItem(CACHE_KEY);
+    clearCalendarCache();
     return null;
   }
 }
@@ -45,7 +45,11 @@ export function getCalendarCache(): CalendarEvent[] | null {
  * Clears the calendar cache.
  */
 export function clearCalendarCache(): void {
-  localStorage.removeItem(CACHE_KEY);
+  try {
+    localStorage.removeItem(CACHE_KEY);
+  } catch {
+    // Storage can be disabled; the authoritative query still determines the calendar state.
+  }
 }
 
 /**

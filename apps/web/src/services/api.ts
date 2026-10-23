@@ -32,13 +32,26 @@ export async function apiFetch<T>(
     ...(devToken ? { "X-Dev-Access-Token": devToken } : {}),
   };
 
-  const response = await fetch(url, {
-    ...fetchOptions,
-    headers,
-    credentials: "include", // sends HttpOnly cookies
-  });
+  const controller = new AbortController();
+  const onAbort = () => controller.abort();
+  fetchOptions.signal?.addEventListener("abort", onAbort, { once: true });
+  const timeout = setTimeout(() => controller.abort(), 15_000);
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      ...fetchOptions,
+      headers,
+      signal: controller.signal,
+      credentials: "include", // sends HttpOnly cookies
+    });
+  } catch {
+    throw new ApiError("NETWORK_ERROR", "Cannot reach the calendar API. Check the server and your connection, then retry.", 0);
+  } finally {
+    clearTimeout(timeout);
+    fetchOptions.signal?.removeEventListener("abort", onAbort);
+  }
 
-  let json: any;
+  let json: unknown;
   try {
     json = await response.json();
   } catch {
@@ -53,15 +66,19 @@ export async function apiFetch<T>(
   }
 
   if (!response.ok) {
+    const envelope = json as { error?: { code?: string; message?: string; details?: Record<string, unknown> } } | null;
     throw new ApiError(
-      json.error?.code ?? "UNKNOWN_ERROR",
-      json.error?.message ?? "An unknown error occurred",
+      envelope?.error?.code ?? "HTTP_ERROR",
+      envelope?.error?.message ?? `Request failed with status ${response.status}`,
       response.status,
-      json.error?.details,
+      envelope?.error?.details,
     );
   }
 
-  return json.data as T;
+  if (typeof json !== "object" || json === null || !Object.prototype.hasOwnProperty.call(json, "data")) {
+    throw new ApiError("PARSE_ERROR", "Calendar API returned an invalid response. Retry after checking the server.", response.status);
+  }
+  return (json as { data: T }).data;
 }
 
 export class ApiError extends Error {
@@ -102,4 +119,14 @@ export const api = {
 
 export function isAuthTokenExpiredError(error: unknown): boolean {
   return error instanceof ApiError && error.code === "AUTH_EXPIRED";
+}
+
+export function calendarErrorMessage(error: unknown): string {
+  if (!(error instanceof ApiError)) return error instanceof Error ? error.message : "Unknown error. Retry.";
+  if (error.code === "NETWORK_ERROR") return "Cannot reach the calendar API. Check your connection and that the server is running, then retry.";
+  if (error.status === 401) return "Session expired or unauthorized. Sign in again or enter a valid development token, then retry.";
+  if (error.status === 403) return "Google Calendar access denied. Check calendar permissions and reconnect Google, then retry.";
+  if (error.status === 404) return "Calendar not found. Check the selected calendar and reconnect Google, then retry.";
+  if (error.status === 502) return "Google Calendar is temporarily unavailable. Retry shortly or check the upstream service.";
+  return error.message;
 }

@@ -1,71 +1,63 @@
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCalendar } from "../contexts/CalendarContext";
-import { usePreview } from "../contexts/PreviewContext";
-import { getCalendarCache, setCalendarCache, clearCalendarCache } from "../services/calendarCache";
 import { api } from "../services/api";
+import { clearCalendarCache } from "../services/calendarCache";
+import { confirmRemoteEvents, reconcileCalendarEvents } from "../services/calendarReconciliation";
+import type { CalendarRange } from "../services/calendarReconciliation";
 import type { CalendarEvent } from "@brkroutnxdle/shared";
+
+export function calendarEventsKey(range: CalendarRange) {
+  return ["calendar", "events", range.timeMin, range.timeMax] as const;
+}
+
+/** Compare the confirmed remote snapshot, not the preview overlay or pending local placements. */
+export function remoteChanges(before: CalendarEvent[], after: CalendarEvent[]): string[] {
+  const old = new Map(before.map(event => [event.id, event]));
+  const next = new Map(after.map(event => [event.id, event]));
+  return [...new Set([
+    ...before.filter(event => !next.has(event.id)).map(event => event.id),
+    ...after.filter(event => {
+      const previous = old.get(event.id);
+      return !previous || previous.start !== event.start || previous.end !== event.end ||
+        previous.title !== event.title || previous.isCompleted !== event.isCompleted;
+    }).map(event => event.id),
+  ])];
+}
 
 export function useCalendarRefresh() {
   const queryClient = useQueryClient();
-  const { events, setEvents } = useCalendar();
-  const { isPreviewActive } = usePreview();
+  const { setEvents } = useCalendar();
+  const inFlight = useRef(new Set<string>());
 
-  /** Fetches fresh data from the API and updates cache + context. */
-  const refreshFromApi = useCallback(async () => {
-    const timeMin = new Date(Date.now() - 7 * 86400_000).toISOString();
-    const timeMax = new Date(Date.now() + 14 * 86400_000).toISOString();
-
-    const freshEvents = await api.get<CalendarEvent[]>("/events", {
-      timeMin,
-      timeMax,
-    });
-
-    setCalendarCache(freshEvents);
-    setEvents((prev) => {
-      const apiIds = new Set(freshEvents.map((e) => e.id));
-      return [...prev.filter((e) => !apiIds.has(e.id)), ...freshEvents];
-    });
-    return freshEvents;
-  }, [setEvents]);
-
-  /** Detects conflicts between preview state and latest API data. */
-  const detectConflicts = useCallback(
-    async (): Promise<{ hasConflicts: boolean; changedEvents: string[] }> => {
-      if (!isPreviewActive) return { hasConflicts: false, changedEvents: [] };
-
-      const freshEvents = await refreshFromApi();
-      const changedEvents: string[] = [];
-
-      for (const fresh of freshEvents) {
-        const local = events.find((e) => e.id === fresh.id);
-        if (local && (local.start !== fresh.start || local.end !== fresh.end)) {
-          changedEvents.push(fresh.id);
-        }
-      }
-
-      return {
-        hasConflicts: changedEvents.length > 0,
-        changedEvents,
-      };
-    },
-    [events, isPreviewActive, refreshFromApi],
-  );
-
-  /** Loads from cache first, then fetches fresh data in background. */
-  const loadWithCache = useCallback(() => {
-    const cached = getCalendarCache();
-    if (cached) {
-      setEvents(cached);
+  const refresh = useCallback(async (range: CalendarRange, previewActive: boolean,
+    isCurrent: () => boolean = () => true) => {
+    const requestKey = `${range.timeMin}/${range.timeMax}`;
+    if (inFlight.current.has(requestKey)) return null;
+    inFlight.current.add(requestKey);
+    const key = calendarEventsKey(range);
+    const baseline = queryClient.getQueryData<CalendarEvent[]>(key);
+    try {
+      await queryClient.invalidateQueries({ queryKey: key, exact: true, refetchType: "none" });
+      const fresh = await queryClient.fetchQuery({
+        queryKey: key,
+        queryFn: async () => confirmRemoteEvents(await api.get<CalendarEvent[]>("/events", {
+          timeMin: range.timeMin, timeMax: range.timeMax,
+        })),
+        staleTime: 0,
+        retry: false,
+      });
+      if (!isCurrent()) return null;
+      const changedEvents = baseline ? remoteChanges(baseline, fresh) : [];
+      setEvents(current => isCurrent() ? reconcileCalendarEvents(current, fresh, range,
+        new Set(baseline?.map(event => event.id) ?? [])) : current);
+      clearCalendarCache();
+      return { hasConflicts: previewActive && changedEvents.length > 0, changedEvents,
+        baselineKnown: baseline !== undefined };
+    } finally {
+      inFlight.current.delete(requestKey);
     }
-    // Always fetch fresh data in background
-    refreshFromApi().catch(console.error);
-  }, [setEvents, refreshFromApi]);
+  }, [queryClient, setEvents]);
 
-  return {
-    refreshFromApi,
-    detectConflicts,
-    loadWithCache,
-    clearCache: clearCalendarCache,
-  };
+  return { refresh };
 }
