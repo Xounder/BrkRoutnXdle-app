@@ -22,3 +22,12 @@ original contents or constitute a new independent QA approval.
   ended at this run. The implementation correctly excludes elapsed slots.
 - This additional failure is outside the four-case frontend acceptance exception
   and requires explicit acceptance review. The existing test was not modified.
+
+## TASK-07 — Persistent manual placement
+
+- Shared events and creation payloads expose an optional `isPinned` marker.
+- POST/PATCH persist it in Google private metadata; normalized GET returns it.
+- A PATCH without the marker preserves the stored value.
+- Implementation commit: `bf431be` (contract dependency for frontend placement).
+- Fresh calendar tests: **5/5 passed**, including three pin roundtrip cases.
+- Fresh API build passed. Real Google-account validation remains outstanding.
