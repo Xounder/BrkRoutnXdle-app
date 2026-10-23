@@ -44,3 +44,15 @@ original contents or constitute a new independent QA approval.
 - Retained independent web evidence: **32 passed, 4 failed**, no retries, exit
   code **1**. This suite was not rerun during commit closure and is not green.
 - Existing tests remain unchanged; no skipping, filtering or conditional gating.
+
+## TASK-03 — Preview lifecycle
+
+- Generate against the viewed civil week, timezone and configured week start.
+- Keep the base calendar separate from the overlay and capture an immutable
+  remote replacement baseline. Discard/navigation remove proposals only.
+- Preserve the current preview when no alternative exists; prevent edits to
+  base events during preview and reject stale asynchronous generation results.
+- Implementation commit: `b7ac695`. Shared dashboard/calendar integration also
+  wires TASK-04 save and TASK-05 refresh; their dependent commits follow.
+- New lifecycle coverage passed in the retained independent frontend QA run.
+- Fresh full web build passed before staging; no source changes since that build.
