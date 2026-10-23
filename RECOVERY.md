@@ -78,3 +78,26 @@ original contents or constitute a new independent QA approval.
 - Navigation releases loading and prevents obsolete results from being applied.
 - Implementation commit: `3056d4b`; dashboard wiring is in TASK-03's commit.
 - New refresh/diagnostic tests passed in retained frontend QA evidence.
+
+## TASK-06 — Calendar readability
+
+- Use quieter minor grid lines, clearer headers and tabular hour labels.
+- Improve event typography, spacing, focus indication and short-event layout.
+- Keep light/dark theme tokens and verify text contrast in narrow/wide layouts.
+- Implementation commit: `994b2c2`.
+- Contrast/readability browser coverage passed in the prior independent QA run.
+
+## Commit closure status
+
+- Implementation and documentation are committed separately for all seven tasks.
+  These commits form one dependent delivery; shared dashboard integration is
+  committed with TASK-03 and depends on the subsequent TASK-04/TASK-05 commits.
+- Current web/API builds passed; calendar tests passed 5/5; domain tests passed
+  23/24 with the additional clock-dependent failure described under TASK-01.
+- Historical acceptance covered only four legacy web cases. Final acceptance
+  needs reassessment for the newly observed domain failure; no waiver is inferred.
+- The current `.opencode` revision and its package changes are intentionally
+  excluded from these commits, as are generated Playwright reports.
+- The missing original pipeline state cannot be marked updated or recovered by
+  this reconstructed record. Reconcile it against the intended submodule history
+  before claiming full operational closure. No push was performed.

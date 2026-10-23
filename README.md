@@ -4,6 +4,9 @@ Smart weekly schedule generator that distributes recurring tasks across availabl
 
 ## Overview
 
+For the scheduling recovery behavior, per-task commits and validation limitations,
+see [Calendar Scheduling Recovery](RECOVERY.md).
+
 BrkRoutnXdle connects to Google Calendar, reads existing events and blocked time, and generates an optimized weekly schedule from user-defined tasks. Each task can carry restrictions (weekdays-only, morning-only, afternoon-only, specific days) and priority levels. An internal domain algorithm distributes tasks across free slots, shuffles for variety, and validates the result against all constraints.
 
 ## Architecture
