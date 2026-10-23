@@ -1,15 +1,22 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
-import type { GeneratedEvent, AllocationFailure } from "@brkroutnxdle/domain";
+import type { GeneratedEvent, AllocationFailure, ScheduleResult } from "@brkroutnxdle/domain";
+import type { CalendarEvent } from "@brkroutnxdle/shared";
 
 interface PreviewState {
   previewEvents: GeneratedEvent[];
   isPreviewActive: boolean;
   allocationFailures: AllocationFailure[];
   isGenerating: boolean;
+  result: ScheduleResult | null;
+  message: string | null;
+  /** Immutable replacement snapshot captured when this proposal was generated. */
+  replacementBaseline: ReadonlyArray<Readonly<CalendarEvent>>;
 }
 
 interface PreviewContextValue extends PreviewState {
   setPreview: (events: GeneratedEvent[], failures: AllocationFailure[]) => void;
+  setResult: (result: ScheduleResult, replacementBaseline?: CalendarEvent[]) => void;
+  setMessage: (message: string | null) => void;
   clearPreview: () => void;
   setGenerating: (generating: boolean) => void;
 }
@@ -22,16 +29,20 @@ export function PreviewProvider({ children }: { children: React.ReactNode }) {
     isPreviewActive: false,
     allocationFailures: [],
     isGenerating: false,
+    result: null,
+    message: null,
+    replacementBaseline: [],
   });
 
   const setPreview = useCallback(
     (events: GeneratedEvent[], failures: AllocationFailure[]) => {
-      setState({
+      setState(prev => ({
+        ...prev,
         previewEvents: events,
         isPreviewActive: true,
         allocationFailures: failures,
         isGenerating: false,
-      });
+      }));
     },
     [],
   );
@@ -42,6 +53,9 @@ export function PreviewProvider({ children }: { children: React.ReactNode }) {
       isPreviewActive: false,
       allocationFailures: [],
       isGenerating: false,
+      result: null,
+      message: null,
+      replacementBaseline: [],
     });
   }, []);
 
@@ -49,8 +63,20 @@ export function PreviewProvider({ children }: { children: React.ReactNode }) {
     setState((prev) => ({ ...prev, isGenerating: generating }));
   }, []);
 
+  const setResult = useCallback((result: ScheduleResult, replacementBaseline: CalendarEvent[] = []) => {
+    setState(prev => ({ ...prev, result, previewEvents: result.generatedEvents,
+      replacementBaseline: Object.freeze(replacementBaseline.map(event => Object.freeze({ ...event }))),
+      allocationFailures: result.failures, isPreviewActive: true,
+      isGenerating: false, message: result.message ?? (result.outcome === "alternative"
+        ? "A different schedule was found." : null) }));
+  }, []);
+
+  const setMessage = useCallback((message: string | null) => {
+    setState(prev => ({ ...prev, message, isGenerating: false }));
+  }, []);
+
   return (
-    <PreviewContext.Provider value={{ ...state, setPreview, clearPreview, setGenerating }}>
+    <PreviewContext.Provider value={{ ...state, setPreview, setResult, setMessage, clearPreview, setGenerating }}>
       {children}
     </PreviewContext.Provider>
   );

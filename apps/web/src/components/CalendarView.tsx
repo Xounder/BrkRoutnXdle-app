@@ -12,6 +12,7 @@ interface CalendarViewProps {
   previewEvents: CalendarEvent[];
   blocks?: BlockedSlot[];
   use12h?: boolean;
+  weekStartDay?: number;
   currentView: ViewType;
   currentDate: Date;
   onViewChange: (view: ViewType) => void;
@@ -47,6 +48,7 @@ export function CalendarView({
   previewEvents,
   blocks,
   use12h = false,
+  weekStartDay = 1,
   currentView,
   currentDate,
   onViewChange,
@@ -169,6 +171,7 @@ export function CalendarView({
         classNames,
         extendedProps: {
           isGenerated: e.isGenerated,
+          taskId: e.taskId,
           isCompleted: e.isCompleted,
           isPast,
         },
@@ -194,6 +197,8 @@ export function CalendarView({
         display: "auto" as const,
         extendedProps: {
           isPreview: true,
+          isGenerated: true,
+          taskId: e.taskId,
           isPast,
         },
         eventStartEditable: !isPast,
@@ -248,6 +253,7 @@ export function CalendarView({
         end: info.event.endStr,
         isAllDay: info.event.allDay,
         isGenerated: props.isGenerated ?? false,
+        taskId: props.taskId as string | undefined,
         isCompleted: props.isCompleted ?? false,
         isBlock: props.isBlock ?? false,
         source: props.isGenerated ? "brkroutnxdle" : "google",
@@ -276,7 +282,8 @@ export function CalendarView({
     }
 
     // Report date change back to parent
-    if (onDateChange) {
+    if (onDateChange && (currentDate.getTime() < info.start.getTime() ||
+      currentDate.getTime() >= info.end.getTime())) {
       onDateChange(info.start);
     }
   };
@@ -313,6 +320,7 @@ export function CalendarView({
         headerToolbar={false}
         height="100%"
         timeZone="local"
+        firstDay={weekStartDay}
         slotMinTime={slotMinTime}
         slotMaxTime={slotMaxTime}
         slotDuration="00:30:00"

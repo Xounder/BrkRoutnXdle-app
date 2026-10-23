@@ -4,6 +4,7 @@ import { useCalendar } from "../contexts/CalendarContext";
 import { useSettings } from "../contexts/SettingsContext";
 import { useBlockContext } from "../contexts/BlockContext";
 import { BlockType as BlockTypeEnum } from "@brkroutnxdle/shared";
+import { isReplaceable } from "../pages/dashboard/previewSchedule";
 
 interface FcEventInfo {
   event: {
@@ -44,7 +45,7 @@ function timeToMinutes(time: string): number {
 export function useScheduleEditing(
   onExternalEventChange?: (id: string, startStr: string, endStr: string) => void,
 ) {
-  const { previewEvents, allocationFailures, setPreview } = usePreview();
+  const { previewEvents, allocationFailures, setPreview, isPreviewActive, result } = usePreview();
   const { events, setEvents } = useCalendar();
   const { settings } = useSettings();
   const { blocks, updateBlock, deleteBlock, getBlock } = useBlockContext();
@@ -73,11 +74,19 @@ export function useScheduleEditing(
 
       // Must not overlap existing events
       for (const ev of events) {
+        if (ev.id === excludeEventId) continue;
+        if (isPreviewActive && result && isReplaceable(ev,
+          { timeMin: result.weekStart, timeMax: result.weekEnd }, Date.now())) continue;
         const evStart = new Date(ev.start).getTime();
         const evEnd = new Date(ev.end).getTime();
         if (newStart < evEnd && newEnd > evStart) {
           return false;
         }
+      }
+
+      for (const ev of previewEvents) {
+        if (ev.id === excludeEventId) continue;
+        if (newStart < Date.parse(ev.end) && newEnd > Date.parse(ev.start)) return false;
       }
 
       // Must not overlap existing blocks (exclude the one being dragged)
@@ -118,7 +127,7 @@ export function useScheduleEditing(
 
       return true;
     },
-    [events, settings, blocks],
+    [events, previewEvents, settings, blocks, isPreviewActive, result],
   );
 
   /** Handle event drop (drag-and-drop). */
@@ -131,6 +140,7 @@ export function useScheduleEditing(
       }
 
       const extProps = info.event.extendedProps ?? {};
+      if (isPreviewActive && !extProps.isPreview) { info.revert?.(); return; }
 
       // Validate drop position
       if (!canDropAt(info.event.startStr, info.event.endStr, info.event.id)) {
@@ -179,7 +189,7 @@ export function useScheduleEditing(
       // --- External task event ---
       onExternalEventChange?.(info.event.id, info.event.startStr, info.event.endStr);
     },
-    [previewEvents, allocationFailures, setPreview, blocks, updateBlock, getBlock, onExternalEventChange, canDropAt],
+    [previewEvents, allocationFailures, setPreview, blocks, updateBlock, getBlock, onExternalEventChange, canDropAt, isPreviewActive],
   );
 
   /** Handle event resize. */
@@ -192,6 +202,7 @@ export function useScheduleEditing(
       }
 
       const extProps = info.event.extendedProps ?? {};
+      if (isPreviewActive && !extProps.isPreview) { info.revert?.(); return; }
 
       const newDuration =
         (new Date(info.event.endStr).getTime() - new Date(info.event.startStr).getTime()) /
@@ -243,7 +254,7 @@ export function useScheduleEditing(
       // --- External task event ---
       onExternalEventChange?.(info.event.id, info.event.startStr, info.event.endStr);
     },
-    [previewEvents, allocationFailures, setPreview, blocks, updateBlock, getBlock, onExternalEventChange, canDropAt],
+    [previewEvents, allocationFailures, setPreview, blocks, updateBlock, getBlock, onExternalEventChange, canDropAt, isPreviewActive],
   );
 
   /** Handle event delete. */
@@ -254,6 +265,10 @@ export function useScheduleEditing(
   const confirmDelete = useCallback(() => {
     if (!editing.deleteTarget) return;
     const { id } = editing.deleteTarget;
+    if (isPreviewActive && !previewEvents.some(e => e.id === id)) {
+      setEditing(prev => ({ ...prev, deleteTarget: null }));
+      return;
+    }
     if (id.startsWith("block-")) {
       const blockId = id.slice(6);
       deleteBlock(blockId);
@@ -264,7 +279,7 @@ export function useScheduleEditing(
       setPreview(updatedEvents, allocationFailures);
     }
     setEditing((prev) => ({ ...prev, deleteTarget: null }));
-  }, [editing.deleteTarget, events, setEvents, previewEvents, allocationFailures, setPreview, deleteBlock]);
+  }, [editing.deleteTarget, events, setEvents, previewEvents, allocationFailures, setPreview, deleteBlock, isPreviewActive]);
 
   const cancelDelete = useCallback(() => {
     setEditing((prev) => ({ ...prev, deleteTarget: null }));

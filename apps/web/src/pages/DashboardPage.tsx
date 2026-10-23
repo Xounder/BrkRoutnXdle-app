@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useSettings } from "../contexts/SettingsContext";
 import { useTaskContext } from "../contexts/TaskContext";
 import { useBlockContext } from "../contexts/BlockContext";
@@ -16,7 +16,7 @@ import { CalculateWeekButton } from "../features/preview/CalculateWeekButton";
 import { PreviewToolbar } from "../features/preview/PreviewToolbar";
 import { SaveButton } from "../features/preview/SaveButton";
 import { RefreshButton } from "../features/completion/RefreshButton";
-import { isAuthTokenExpiredError } from "../services/api";
+import { calendarErrorMessage, isAuthTokenExpiredError } from "../services/api";
 import { useUnsavedChanges } from "../hooks/useUnsavedChanges";
 import { appendCalendarEventForTask } from "../utils/createCalendarEventFromTask";
 import { Priority as PriorityEnum } from "@brkroutnxdle/shared";
@@ -25,7 +25,7 @@ import { DashboardModals } from "./dashboard/DashboardModals";
 import { useCalendarNavigation } from "./dashboard/useCalendarNavigation";
 import { useDashboardModals } from "./dashboard/useDashboardModals";
 import { useExternalDrop } from "./dashboard/useExternalDrop";
-import { getWeekEnd, getWeekStart } from "./dashboard/weekRange";
+import { previewOverlay, viewedWeek } from "./dashboard/previewSchedule";
 import type { DashboardConflictState } from "./dashboard/dashboardTypes";
 
 /**
@@ -42,19 +42,35 @@ export function DashboardPage() {
   const { settings } = useSettings();
   const { tasks, createTask } = useTaskContext();
   const { blocks, createBlock } = useBlockContext();
-  const { generateWeek, generateAgain, discard, isGenerating } = useScheduleGeneration();
-  const { isPreviewActive, previewEvents, allocationFailures, clearPreview } = usePreview();
+  const nav = useCalendarNavigation();
+  const previewRange = useMemo(() => viewedWeek(nav.currentDate, settings.timezone, settings.weekStartDay),
+    [nav.currentDate, settings.timezone, settings.weekStartDay]);
+  const calendarRange = useMemo(() => {
+    if (nav.currentView !== "month") return previewRange;
+    const first = viewedWeek(new Date(nav.currentDate.getFullYear(), nav.currentDate.getMonth(), 1),
+      settings.timezone, settings.weekStartDay);
+    const last = viewedWeek(new Date(nav.currentDate.getFullYear(), nav.currentDate.getMonth() + 1, 0),
+      settings.timezone, settings.weekStartDay);
+    return { timeMin: first.timeMin, timeMax: last.timeMax };
+  }, [nav.currentView, nav.currentDate, previewRange, settings.timezone, settings.weekStartDay]);
+  const { generateWeek, generateAgain, discard, isGenerating } = useScheduleGeneration(previewRange);
+  const { isPreviewActive: active, previewEvents, allocationFailures, result, message, replacementBaseline } = usePreview();
+  const isPreviewActive = active && result?.weekStart === previewRange.timeMin && result?.weekEnd === previewRange.timeMax;
   const { events, setEvents } = useCalendar();
 
   const [failurePanelOpen, setFailurePanelOpen] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [refreshStatus, setRefreshStatus] = useState<{ kind: "loading" | "success" | "partial" | "conflict" | "error"; message: string } | null>(null);
+  const refreshRequest = useRef(0);
+  const refreshing = useRef(false);
+  const currentRefreshRange = useRef("");
+  currentRefreshRange.current = `${calendarRange.timeMin}/${calendarRange.timeMax}/${nav.currentView}/${nav.currentDate.getTime()}`;
   const [conflictState, setConflictState] = useState<DashboardConflictState>({
     hasConflicts: false,
     changedEvents: [],
   });
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  const nav = useCalendarNavigation();
   const modals = useDashboardModals();
   const {
     setSelectedSlot,
@@ -76,7 +92,7 @@ export function DashboardPage() {
   );
 
   const editing = useScheduleEditing(handleExternalEventChange);
-  const { saveState, save, resetSaveState } = useSaveSchedule();
+  const { saveState, save, resetSaveState } = useSaveSchedule({ range: previewRange });
   const calendarRefresh = useCalendarRefresh();
   useUnsavedChanges(isPreviewActive);
 
@@ -106,7 +122,7 @@ export function DashboardPage() {
         }
       } else if (event.isGenerated) {
         // Task event: find task by id
-        const task = tasks.find((t) => t.id === event.id);
+        const task = tasks.find((t) => t.id === event.taskId);
         if (task) {
           setEditingTask(task);
         }
@@ -158,32 +174,52 @@ export function DashboardPage() {
   );
 
   const handleRefresh = useCallback(async () => {
+    if (refreshing.current) return;
+    refreshing.current = true;
+    const request = ++refreshRequest.current;
+    const requestedRange = currentRefreshRange.current;
     setIsRefreshing(true);
+    setRefreshStatus({ kind: "loading", message: "Refreshing viewed calendar range..." });
     try {
-      const conflicts = await calendarRefresh.detectConflicts();
+      const conflicts = await calendarRefresh.refresh(calendarRange, isPreviewActive,
+        () => refreshRequest.current === request && currentRefreshRange.current === requestedRange);
+      if (request !== refreshRequest.current || !conflicts) return;
       setConflictState(conflicts);
+      setRefreshStatus(conflicts.hasConflicts
+        ? { kind: "conflict", message: `${conflicts.changedEvents.length} remote calendar change(s) conflict with this preview. Reload or discard the preview; manual placements are preserved.` }
+        : !conflicts.baselineKnown && isPreviewActive
+          ? { kind: "partial", message: "Calendar refreshed, but no prior remote snapshot was available to compare this preview. Regenerate the preview before saving." }
+        : { kind: "success", message: "Viewed calendar range refreshed successfully. Pending placements were preserved." });
+    } catch (error) {
+      if (request === refreshRequest.current) setRefreshStatus({ kind: "error", message: calendarErrorMessage(error) });
     } finally {
-      setIsRefreshing(false);
+      if (request === refreshRequest.current) {
+        refreshing.current = false;
+        setIsRefreshing(false);
+      }
     }
-  }, [calendarRefresh]);
+  }, [calendarRefresh, calendarRange, isPreviewActive]);
 
   const handleReload = useCallback(() => {
-    calendarRefresh.refreshFromApi();
+    discard();
     setConflictState({ hasConflicts: false, changedEvents: [] });
-  }, [calendarRefresh]);
+  }, [discard]);
 
   const handleDiscardPreview = useCallback(() => {
-    clearPreview();
+    discard();
     setConflictState({ hasConflicts: false, changedEvents: [] });
-  }, [clearPreview]);
+  }, [discard]);
 
   // Fetch events (will run on mount and when date changes)
-  const prevWeekStart = getWeekStart(new Date(nav.currentDate.getTime() - 7 * 86400_000));
-  const nextWeekEnd = getWeekEnd(new Date(nav.currentDate.getTime() + 7 * 86400_000));
-  const calendarQuery = useCalendarEvents(
-    prevWeekStart.toISOString(),
-    nextWeekEnd.toISOString(),
-  );
+  const calendarQuery = useCalendarEvents(calendarRange.timeMin, calendarRange.timeMax);
+
+  useEffect(() => {
+    refreshRequest.current++;
+    refreshing.current = false;
+    setIsRefreshing(false);
+    setRefreshStatus(null);
+    setConflictState({ hasConflicts: false, changedEvents: [] });
+  }, [calendarRange.timeMin, calendarRange.timeMax, nav.currentView, nav.currentDate]);
 
   const handleCalendarRetry = useCallback(() => {
     if (calendarQuery.isFetching) return;
@@ -191,16 +227,19 @@ export function DashboardPage() {
   }, [calendarQuery]);
 
   useEffect(() => {
-    if (calendarQuery.isError && isAuthTokenExpiredError(calendarQuery.error)) {
+    if (calendarQuery.isError && isAuthTokenExpiredError(calendarQuery.error) && !refreshStatus) {
       setTokenModalOpen(true);
-    } else if (!calendarQuery.isError) {
+    } else {
       setTokenModalOpen(false);
     }
-  }, [calendarQuery.isError, calendarQuery.error, setTokenModalOpen]);
+  }, [calendarQuery.isError, calendarQuery.error, refreshStatus, setTokenModalOpen]);
 
   // Map GeneratedEvent[] to CalendarEvent[] for the CalendarView
+  const overlay = useMemo(() => isPreviewActive
+    ? previewOverlay(events, previewEvents, previewRange, Date.now(), replacementBaseline)
+    : { base: events, proposals: [] }, [events, previewEvents, previewRange, isPreviewActive, replacementBaseline]);
   const mappedPreviewEvents: CalendarEvent[] = useMemo(() => {
-    return previewEvents.map((ge) => {
+    return overlay.proposals.map((ge) => {
       const task = tasks.find((t) => t.id === ge.taskId);
       return {
         id: ge.id,
@@ -214,7 +253,7 @@ export function DashboardPage() {
         source: "brkroutnxdle" as const,
       };
     });
-  }, [previewEvents, tasks]);
+  }, [overlay.proposals, tasks]);
 
   const handleExternalDrop = useExternalDrop({
     settings,
@@ -225,6 +264,7 @@ export function DashboardPage() {
   });
 
   const handleSave = () => {
+    if (active && !isPreviewActive) return;
     if (saveState.status === "error") {
       resetSaveState();
     }
@@ -248,7 +288,7 @@ export function DashboardPage() {
               <>
                 <CalculateWeekButton
                   onClick={generateWeek}
-                  disabled={false}
+                  disabled={isGenerating}
                   isLoading={isGenerating}
                 />
                 <SaveButton
@@ -271,6 +311,8 @@ export function DashboardPage() {
             <RefreshButton onClick={handleRefresh} isLoading={isRefreshing} />
           </div>
 
+          {message && <div role="alert" style={{ margin: "8px 16px 0" }}>{message}</div>}
+
           <StatusBar
             saveStatus={saveState.status}
             saveError={saveState.error}
@@ -278,6 +320,8 @@ export function DashboardPage() {
             calendarError={calendarQuery.error ?? null}
             calendarIsLoading={calendarQuery.isLoading}
             calendarIsFetching={calendarQuery.isFetching}
+            refreshStatus={refreshStatus}
+            onRefreshRetry={handleRefresh}
             isPreviewActive={isPreviewActive}
             failurePanelOpen={failurePanelOpen}
             allocationFailures={allocationFailures}
@@ -303,20 +347,21 @@ export function DashboardPage() {
 
           <div style={{ flex: 1, overflow: "auto", minHeight: 0 }}>
             <CalendarView
-              events={events}
+              events={overlay.base}
               previewEvents={mappedPreviewEvents}
               blocks={blocks}
               use12h={settings.use12h}
               currentView={nav.currentView}
               currentDate={nav.currentDate}
+              weekStartDay={settings.weekStartDay}
               onViewChange={nav.setCurrentView}
               onDateChange={nav.setCurrentDate}
               onEventDrop={editing.handleEventDrop}
               onEventResize={editing.handleEventResize}
               onDeleteRequest={editing.requestDelete}
               onEventClick={handleEventClick}
-              onSelect={handleSelect}
-              onExternalDrop={handleExternalDrop}
+              onSelect={isPreviewActive ? undefined : handleSelect}
+              onExternalDrop={isPreviewActive ? undefined : handleExternalDrop}
               onEventDragStart={editing.handleEventDragStart}
               onEventDragStop={editing.handleEventDragStop}
               validateDrop={(startStr, endStr, draggedEventId) =>
