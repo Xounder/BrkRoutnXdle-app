@@ -68,3 +68,13 @@ original contents or constitute a new independent QA approval.
 - Implementation commit: `d465245`.
 - Occurrence, pin reload, failed-GET and retry coverage passed in prior QA.
 - Validation uses mocked API/Google contracts; live Google remains unverified.
+
+## TASK-05 — Viewed-range refresh
+
+- Refresh fetches the displayed range even outside preview, preserving pending
+  placements and removing confirmed remote occurrences deleted in that range.
+- Detect remote changes against the earlier confirmed snapshot. Distinguish
+  network, authentication, permission, missing-calendar and upstream failures.
+- Navigation releases loading and prevents obsolete results from being applied.
+- Implementation commit: `3056d4b`; dashboard wiring is in TASK-03's commit.
+- New refresh/diagnostic tests passed in retained frontend QA evidence.
