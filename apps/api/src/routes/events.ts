@@ -34,6 +34,7 @@ const createEventSchema = z
     start: flexibleDateTimeSchema,
     end: flexibleDateTimeSchema,
     taskId: z.string().optional(),
+    isPinned: z.boolean().optional(),
   })
   .refine((data) => data.title || data.summary, {
     message: "Either 'title' or 'summary' must be provided",
@@ -46,6 +47,7 @@ const updateEventSchema = z.object({
   description: z.string().optional(),
   start: flexibleDateTimeSchema.optional(),
   end: flexibleDateTimeSchema.optional(),
+  isPinned: z.boolean().optional(),
 });
 
 /** GET /events — Fetch events in a time range. */
@@ -100,6 +102,7 @@ eventsRouter.post("/", requireAuth, asyncHandler(async (req: Request, res: Respo
     description: parsed.data.description,
     start,
     end,
+    isPinned: parsed.data.isPinned ?? false,
     extendedProperties: {
       private: {
         taskId: parsed.data.taskId ?? "",
@@ -129,6 +132,7 @@ eventsRouter.patch("/:id", requireAuth, asyncHandler(async (req: Request, res: R
   if (d.end) {
     updateData.end = typeof d.end === "string" ? { dateTime: d.end } : d.end;
   }
+  if (d.isPinned !== undefined) updateData.isPinned = d.isPinned;
 
   const event = await calendarClient.updateEvent(authReq.accessToken!, id, updateData);
   res.json({ success: true, data: event });

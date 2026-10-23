@@ -20,6 +20,7 @@ export interface GoogleCalendarEvent {
 export interface BrkRoutnXdleMetadata {
   app: string;
   generated: string;
+  pinned: string;
   completed: string;
   taskId?: string;
   createdAt: string;
@@ -29,6 +30,8 @@ export interface BrkRoutnXdleMetadata {
 /** Payload for creating a new event in Google Calendar. */
 export interface CreateEventPayload {
   summary: string;
+  /** Manual placement marker; omitted creates an unpinned event. */
+  isPinned?: boolean;
   description?: string;
   start: { dateTime: string; timeZone?: string };
   end: { dateTime: string; timeZone?: string };

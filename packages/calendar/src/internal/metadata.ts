@@ -3,11 +3,12 @@ import type { BrkRoutnXdleMetadata, GoogleCalendarEvent } from "./types.js";
 const APP_NAME = "BrkRoutnXdle";
 
 /** Creates the standard BrkRoutnXdle metadata for a new event. */
-export function createMetadata(taskId?: string): BrkRoutnXdleMetadata {
+export function createMetadata(taskId?: string, isPinned = false): BrkRoutnXdleMetadata {
   const now = new Date().toISOString();
   return {
     app: APP_NAME,
     generated: "true",
+    pinned: String(isPinned),
     completed: "false",
     ...(taskId ? { taskId } : {}),
     createdAt: now,
@@ -32,6 +33,7 @@ export function extractMetadata(event: GoogleCalendarEvent): BrkRoutnXdleMetadat
   return {
     app: priv.app,
     generated: priv.generated ?? "false",
+    pinned: priv.pinned === "true" ? "true" : "false",
     completed: priv.completed ?? "false",
     taskId: priv.taskId,
     createdAt: priv.createdAt ?? new Date().toISOString(),

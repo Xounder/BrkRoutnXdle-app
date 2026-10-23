@@ -26,6 +26,7 @@ export function normalizeEvent(
     end: raw.end?.dateTime ?? raw.end?.date ?? "",
     isAllDay: !raw.start?.dateTime,
     isGenerated,
+    isPinned: meta?.pinned === "true",
     taskId: meta?.taskId,
     isCompleted: meta?.completed === "true",
     source: isBrkCalendar ? BRKROUTNXDLE_CALENDAR_SOURCE : PRIMARY_CALENDAR_SOURCE,

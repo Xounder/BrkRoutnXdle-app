@@ -145,7 +145,7 @@ export async function createEvent(
 ): Promise<CalendarEvent> {
   const brkCalId = await getBrkCalendarId(accessToken);
   const client = createClient(accessToken);
-  const meta = createMetadata(payload.extendedProperties?.private?.taskId);
+  const meta = createMetadata(payload.extendedProperties?.private?.taskId, payload.isPinned);
 
   const { data: created } = await client.events.insert({
     calendarId: brkCalId,
@@ -158,6 +158,7 @@ export async function createEvent(
         private: {
           ...meta,
           ...payload.extendedProperties?.private,
+          pinned: meta.pinned,
         },
       },
     },
@@ -189,6 +190,7 @@ export async function updateEvent(
     ...existingMeta,
     updatedAt: new Date().toISOString(),
     ...(payload.extendedProperties?.private ?? {}),
+    ...(payload.isPinned !== undefined ? { pinned: String(payload.isPinned) } : {}),
   };
 
   const { data: updated } = await client.events.update({
