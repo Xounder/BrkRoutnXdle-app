@@ -9,6 +9,12 @@ see [Calendar Scheduling Recovery](RECOVERY.md).
 
 BrkRoutnXdle connects to Google Calendar, reads existing events and blocked time, and generates an optimized weekly schedule from user-defined tasks. Each task can carry restrictions (weekdays-only, morning-only, afternoon-only, specific days) and priority levels. An internal domain algorithm distributes tasks across free slots, shuffles for variety, and validates the result against all constraints.
 
+## Delivery Pipeline (.opencode submodule)
+
+BrkRoutnXdle uses the Delivery Pipeline harness through the `.opencode` Git submodule. It provides the development workflow, agents, skills, and documentation entry points.
+
+For instructions on initializing the submodule, selecting this project's branch, configuring remote tracking, and pulling updates, see the [submodule setup guide](https://github.com/Xounder/delivery-pipeline/blob/master/.docs/07-submodule-install.md#cloning-a-codebase-that-contains-the-submodule). The guide also links to the required OpenCode plugin-dependency installation steps.
+
 ## Architecture
 
 Monorepo managed with pnpm workspaces:
