@@ -6,6 +6,9 @@ import { DeleteEventDialog } from "../../features/preview/DeleteEventDialog";
 import { ConflictDialog } from "../../features/completion/ConflictDialog";
 import { TokenRetryModal } from "../../features/completion/TokenRetryModal";
 import type { DashboardModalsProps } from "./dashboardTypes";
+import { OccurrenceReviewModal } from "./OccurrenceReviewModal";
+import { Modal } from "@brkroutnxdle/ui";
+import { BlockPanel } from "../../features/blocks/BlockPanel";
 
 /**
  * Renders every dashboard modal in a fixed order. Adds NO state and NO copy —
@@ -24,6 +27,7 @@ export function DashboardModals({
   onCalendarRetry,
   onReload,
   onDiscardPreview,
+  range, confirmedOccurrence,
 }: DashboardModalsProps) {
   return (
     <>
@@ -57,6 +61,12 @@ export function DashboardModals({
           onClose={() => modals.setEditingTask(null)}
         />
       )}
+      {modals.creatingTask && <TaskModal task={null} onClose={() => modals.setCreatingTask(false)} />}
+      <Modal isOpen={modals.reviewingBlocks} onClose={() => modals.setReviewingBlocks(false)} title="Review blocked slots">
+        <BlockPanel />
+      </Modal>
+      {confirmedOccurrence && <OccurrenceReviewModal event={confirmedOccurrence} range={range}
+        onClose={() => modals.setReviewOccurrence(null)} />}
 
       {/* BlockModal: editing an existing block */}
       {modals.editingBlock && (

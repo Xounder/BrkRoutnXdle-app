@@ -1,14 +1,12 @@
 import { test, expect } from "@playwright/test";
 
 /**
- * TASK-02 E2E Tests: Sidebar task creation adds CalendarEvent
+ * TASK-02 E2E Tests: task definitions are separate from explicit calendar placements
  *
  * These tests verify that:
- * 1. Creating a task from the sidebar Tasks panel appends a CalendarEvent
- * 2. The created task appears on the calendar immediately
- * 3. Saving/re-rendering does not duplicate the CalendarEvent
- * 4. Inline slot creation and sidebar creation both produce single events
- * 5. Editing a task does not create a second CalendarEvent
+ * 1. Sidebar create/edit/delete change definitions without implicitly placing or saving events
+ * 2. Rerendering does not invent an occurrence for a task definition
+ * 3. Explicit inline slot creation places one pending occurrence without a calendar API write
  *
  * Tests mock authentication by intercepting /api/v1/auth/me
  * All API responses must be wrapped in { data: ... } because apiFetch returns json.data
@@ -21,8 +19,10 @@ const TEST_USER = {
   picture: "",
 };
 
-test.describe("TASK-02: Sidebar task creation adds CalendarEvent", () => {
+test.describe("TASK-02: Definitions require explicit placement", () => {
+  let calendarWrites: string[];
   test.beforeEach(async ({ page }) => {
+    calendarWrites = [];
     // Mock authentication endpoint - must return { data: ... }
     await page.route("**/api/v1/auth/me", async (route) => {
       await route.fulfill({
@@ -42,7 +42,8 @@ test.describe("TASK-02: Sidebar task creation adds CalendarEvent", () => {
           body: JSON.stringify({ data: [] }),
         });
       } else {
-        await route.continue();
+        calendarWrites.push(route.request().method());
+        await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ data: {} }) });
       }
     });
 
@@ -56,7 +57,7 @@ test.describe("TASK-02: Sidebar task creation adds CalendarEvent", () => {
     await expect(page.locator("text=Tasks (0)")).toBeVisible({ timeout: 10000 });
   });
 
-  test("creating a task from sidebar Tasks panel shows event on calendar", async ({ page }) => {
+  test("creating a task from sidebar defines it without scheduling or saving it", async ({ page }) => {
     // Click "+ New" button in the Tasks panel
     await page.click('button:has-text("+ New")');
 
@@ -82,12 +83,11 @@ test.describe("TASK-02: Sidebar task creation adds CalendarEvent", () => {
     const sidebarTaskName = page.locator("aside").locator("text=Sidebar Test Task");
     await expect(sidebarTaskName).toBeVisible();
 
-    // Verify the event appears on the calendar (FullCalendar renders events as .fc-event)
-    // The event should be visible in the week view at the default work start hour (8am)
-    await expect(page.locator(".fc-event:has-text('Sidebar Test Task')")).toBeVisible({ timeout: 10000 });
+    await expect(page.locator(".fc-event:has-text('Sidebar Test Task')")).toHaveCount(0);
+    expect(calendarWrites).toEqual([]);
   });
 
-  test("sidebar-created task event is not duplicated on re-render", async ({ page }) => {
+  test("rerendering a definition does not invent an event", async ({ page }) => {
     // First create a task via sidebar
     await page.click('button:has-text("+ New")');
     await expect(page.locator("text=New Task")).toBeVisible();
@@ -96,9 +96,9 @@ test.describe("TASK-02: Sidebar task creation adds CalendarEvent", () => {
     await page.click('button:has-text("Create")');
     await expect(page.locator("text=New Task")).toBeHidden();
 
-    // Verify initial event count on calendar
+    // Definitions are not calendar occurrences, even after a view change.
     const initialEvents = await page.locator(".fc-event:has-text('Idempotency Test')").count();
-    expect(initialEvents).toBe(1);
+    expect(initialEvents).toBe(0);
 
     // Trigger a re-render by changing view and back
     // View buttons are in Header with text "Day", "Week", "Month"
@@ -107,12 +107,13 @@ test.describe("TASK-02: Sidebar task creation adds CalendarEvent", () => {
     await page.click('button:has-text("Week")');
     await page.waitForTimeout(500);
 
-    // Verify event count is still 1 (no duplication)
+    // Verify no implicit event appears on re-render.
     const eventsAfterRerender = await page.locator(".fc-event:has-text('Idempotency Test')").count();
-    expect(eventsAfterRerender).toBe(1);
+    expect(eventsAfterRerender).toBe(0);
 
     // Also verify Tasks panel still shows only 1 task
     await expect(page.locator("text=Tasks (1)")).toBeVisible();
+    expect(calendarWrites).toEqual([]);
   });
 
   test("inline slot creation and sidebar creation both produce single events (no duplicates)", async ({ page }) => {
@@ -124,8 +125,7 @@ test.describe("TASK-02: Sidebar task creation adds CalendarEvent", () => {
     await page.click('button:has-text("Create")');
     await expect(page.locator("text=New Task")).toBeHidden();
 
-    // Verify sidebar task event exists
-    await expect(page.locator(".fc-event:has-text('Sidebar Task')")).toBeVisible();
+    await expect(page.locator(".fc-event:has-text('Sidebar Task')")).toHaveCount(0);
 
     // 2. Create a task inline using the PROVEN approach from TASK-01.spec.ts
     // Click on a specific time slot to trigger the "Create in this slot" modal
@@ -156,18 +156,19 @@ test.describe("TASK-02: Sidebar task creation adds CalendarEvent", () => {
     // Wait for modal to close
     await expect(page.locator("text=Create in this slot")).toBeHidden({ timeout: 10000 });
 
-    // Verify both events exist on calendar (no duplicates)
+    // Only explicitly selected slots create local occurrences.
     const sidebarEvents = await page.locator(".fc-event:has-text('Sidebar Task')").count();
     const inlineEvents = await page.locator(".fc-event:has-text('Inline Slot Task')").count();
 
-    expect(sidebarEvents).toBe(1);
+    expect(sidebarEvents).toBe(0);
     expect(inlineEvents).toBe(1);
 
     // Verify Tasks panel shows 2 tasks
     await expect(page.locator("text=Tasks (2)")).toBeVisible();
+    expect(calendarWrites).toEqual([]);
   });
 
-  test("editing an existing sidebar task does not create a second CalendarEvent", async ({ page }) => {
+  test("editing and deleting a sidebar definition do not create calendar events", async ({ page }) => {
     // Create a task via sidebar
     await page.click('button:has-text("+ New")');
     await expect(page.locator("text=New Task")).toBeVisible();
@@ -176,12 +177,11 @@ test.describe("TASK-02: Sidebar task creation adds CalendarEvent", () => {
     await page.click('button:has-text("Create")');
     await expect(page.locator("text=New Task")).toBeHidden();
 
-    // Verify initial event count
+    // Editing an existing definition must not require a fabricated calendar event.
     const initialEvents = await page.locator(".fc-event:has-text('Editable Task')").count();
-    expect(initialEvents).toBe(1);
+    expect(initialEvents).toBe(0);
 
-    // Click on the event to edit it
-    await page.click(".fc-event:has-text('Editable Task')");
+    await page.locator('[data-task-drag="true"]:has-text("Editable Task")').click();
 
     // Wait for Edit Task modal - heading is "Edit Task"
     await expect(page.locator("text=Edit Task")).toBeVisible();
@@ -196,12 +196,16 @@ test.describe("TASK-02: Sidebar task creation adds CalendarEvent", () => {
     await expect(page.locator("text=Edit Task")).toBeHidden();
     await page.waitForTimeout(500); // Allow state propagation
 
-    // Verify only one event exists (no duplicate created)
+    await expect(page.locator('[data-task-drag="true"]:has-text("Edited Task")')).toHaveCount(1);
     const eventsAfterEdit = await page.locator(".fc-event:has-text('Edited Task')").count();
-    expect(eventsAfterEdit).toBe(1);
+    expect(eventsAfterEdit).toBe(0);
 
     // Verify no old event remains
     const oldEvents = await page.locator(".fc-event:has-text('Editable Task')").count();
     expect(oldEvents).toBe(0);
+    await page.locator('[data-task-drag="true"]:has-text("Edited Task")').getByRole("button", { name: "Delete task" }).click();
+    await expect(page.locator("text=Tasks (0)")).toBeVisible();
+    await expect(page.locator(".fc-event:has-text('Edited Task')")).toHaveCount(0);
+    expect(calendarWrites).toEqual([]);
   });
 });

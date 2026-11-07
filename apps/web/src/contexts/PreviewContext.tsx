@@ -11,11 +11,12 @@ interface PreviewState {
   message: string | null;
   /** Immutable replacement snapshot captured when this proposal was generated. */
   replacementBaseline: ReadonlyArray<Readonly<CalendarEvent>>;
+  inputKey: string | null;
 }
 
 interface PreviewContextValue extends PreviewState {
   setPreview: (events: GeneratedEvent[], failures: AllocationFailure[]) => void;
-  setResult: (result: ScheduleResult, replacementBaseline?: CalendarEvent[]) => void;
+  setResult: (result: ScheduleResult, replacementBaseline?: CalendarEvent[], inputKey?: string) => void;
   setMessage: (message: string | null) => void;
   clearPreview: () => void;
   setGenerating: (generating: boolean) => void;
@@ -32,6 +33,7 @@ export function PreviewProvider({ children }: { children: React.ReactNode }) {
     result: null,
     message: null,
     replacementBaseline: [],
+    inputKey: null,
   });
 
   const setPreview = useCallback(
@@ -56,6 +58,7 @@ export function PreviewProvider({ children }: { children: React.ReactNode }) {
       result: null,
       message: null,
       replacementBaseline: [],
+      inputKey: null,
     });
   }, []);
 
@@ -63,8 +66,9 @@ export function PreviewProvider({ children }: { children: React.ReactNode }) {
     setState((prev) => ({ ...prev, isGenerating: generating }));
   }, []);
 
-  const setResult = useCallback((result: ScheduleResult, replacementBaseline: CalendarEvent[] = []) => {
+  const setResult = useCallback((result: ScheduleResult, replacementBaseline: CalendarEvent[] = [], inputKey = "") => {
     setState(prev => ({ ...prev, result, previewEvents: result.generatedEvents,
+      inputKey,
       replacementBaseline: Object.freeze(replacementBaseline.map(event => Object.freeze({ ...event }))),
       allocationFailures: result.failures, isPreviewActive: true,
       isGenerating: false, message: result.message ?? (result.outcome === "alternative"

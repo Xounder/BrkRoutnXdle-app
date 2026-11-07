@@ -36,6 +36,70 @@ function createClient(accessToken: string): calendar_v3.Calendar {
   return google.calendar({ version: "v3", auth });
 }
 
+/** Collects an entire range before exposing any events to callers. */
+async function listAllEvents(
+  client: calendar_v3.Calendar,
+  calendarId: string,
+  timeMin: string,
+  timeMax: string,
+): Promise<GoogleCalendarEvent[]> {
+  const events: GoogleCalendarEvent[] = [];
+  const pageTokens = new Set<string>();
+  const eventIds = new Set<string>();
+  let pageToken: string | undefined;
+
+  do {
+    const response: unknown = await client.events.list({
+      calendarId,
+      timeMin,
+      timeMax,
+      singleEvents: true,
+      orderBy: ORDER_BY_START_TIME,
+      ...(pageToken === undefined ? {} : { pageToken }),
+    });
+    if (!response || typeof response !== "object" || !("data" in response)) {
+      throw new Error("Invalid Google Calendar events.list response");
+    }
+    const data = response.data;
+    if (!data || typeof data !== "object" || Array.isArray(data)) {
+      throw new Error("Invalid Google Calendar events.list page data");
+    }
+    const page = data as { items?: unknown; nextPageToken?: unknown };
+    if (page.items !== undefined && !Array.isArray(page.items)) {
+      throw new Error("Invalid Google Calendar events.list page items");
+    }
+    if (page.nextPageToken != null &&
+        (typeof page.nextPageToken !== "string" || !page.nextPageToken.trim())) {
+      throw new Error("Invalid Google Calendar events.list nextPageToken");
+    }
+
+    for (const item of (page.items ?? []) as unknown[]) {
+      if (!item || typeof item !== "object" || Array.isArray(item)) {
+        throw new Error("Invalid Google Calendar events.list event item");
+      }
+      const event = item as GoogleCalendarEvent;
+      if (event.id != null) {
+        if (typeof event.id !== "string" || eventIds.has(event.id)) {
+          // A repeated remote ID could conceal contradictory occurrences; fail the read.
+          throw new Error("Invalid or duplicate Google Calendar event ID");
+        }
+        eventIds.add(event.id);
+      }
+      events.push(event);
+    }
+
+    pageToken = (page.nextPageToken ?? undefined) as string | undefined;
+    if (pageToken !== undefined) {
+      if (pageTokens.has(pageToken)) {
+        throw new Error("Repeated Google Calendar events.list page token");
+      }
+      pageTokens.add(pageToken);
+    }
+  } while (pageToken !== undefined);
+
+  return events;
+}
+
 /**
  * Discovers (or creates) the BrkRoutnXdle calendar ID with caching.
  *
@@ -102,14 +166,8 @@ export async function fetchEvents(
 ): Promise<CalendarEvent[]> {
   const brkCalId = await getBrkCalendarId(accessToken);
   const client = createClient(accessToken);
-  const { data } = await client.events.list({
-    calendarId: brkCalId,
-    timeMin,
-    timeMax,
-    singleEvents: true,
-    orderBy: ORDER_BY_START_TIME,
-  });
-  return normalizeEvents((data.items ?? []) as GoogleCalendarEvent[], brkCalId, true);
+  const events = await listAllEvents(client, brkCalId, timeMin, timeMax);
+  return normalizeEvents(events, brkCalId, true);
 }
 
 /**
@@ -122,15 +180,9 @@ export async function fetchEventsFromCalendar(
   timeMax: string,
 ): Promise<CalendarEvent[]> {
   const client = createClient(accessToken);
-  const { data } = await client.events.list({
-    calendarId,
-    timeMin,
-    timeMax,
-    singleEvents: true,
-    orderBy: ORDER_BY_START_TIME,
-  });
+  const events = await listAllEvents(client, calendarId, timeMin, timeMax);
   return normalizeEvents(
-    (data.items ?? []) as GoogleCalendarEvent[],
+    events,
     calendarId,
     calendarId.includes("brkroutnxdle"), // heuristic: if ID contains "brkroutnxdle"
   );

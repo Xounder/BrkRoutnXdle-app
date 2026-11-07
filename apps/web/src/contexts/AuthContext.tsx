@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
 import type { User } from "@brkroutnxdle/shared";
 import { api } from "../services/api";
+import { setRemoteAccount } from "../services/remoteConfirmation";
 
 interface AuthState {
   user: User | null;
@@ -17,6 +18,7 @@ interface AuthContextValue extends AuthState {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const sessionVersion = useRef(0);
   const [state, setState] = useState<AuthState>({
     user: null,
     authenticated: false,
@@ -24,10 +26,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   });
 
   const refreshSession = useCallback(async () => {
+    const version = ++sessionVersion.current;
+    // Until /auth/me settles, neither the previous identity nor its calendar is visible.
+    setRemoteAccount(null);
+    setState({ user: null, authenticated: false, loading: true });
     try {
       const user = await api.get<User>("/auth/me");
+      if (version !== sessionVersion.current) return;
+      setRemoteAccount(user.id);
       setState({ user, authenticated: true, loading: false });
     } catch {
+      if (version !== sessionVersion.current) return;
+      setRemoteAccount(null);
       setState({ user: null, authenticated: false, loading: false });
     }
   }, []);
@@ -41,11 +51,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const logout = useCallback(async () => {
-    try {
-      await api.post("/auth/logout");
-    } finally {
-      setState({ user: null, authenticated: false, loading: false });
-    }
+    ++sessionVersion.current;
+    setRemoteAccount(null);
+    setState({ user: null, authenticated: false, loading: false });
+    await api.post("/auth/logout");
   }, []);
 
   return (

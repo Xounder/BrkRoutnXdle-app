@@ -1,11 +1,20 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
-import { CalendarEvent, ViewType } from "@brkroutnxdle/shared";
+import { ViewType } from "@brkroutnxdle/shared";
+import type { CalendarEvent } from "@brkroutnxdle/shared";
 import { storage } from "../services/localStorage";
+import { useAuth } from "./AuthContext";
+import { activeRemoteAccount, remoteIdentityVersion } from "../services/remoteConfirmation";
 
-const STORAGE_KEY = "brkroutnxdle:events";
+const storageKey = (id: string) => `brkroutnxdle:events:${encodeURIComponent(id)}`;
 
-function loadEvents(): CalendarEvent[] {
-  return storage.get<CalendarEvent[]>(STORAGE_KEY, []);
+function loadEvents(id: string): CalendarEvent[] {
+  const value = storage.get<unknown>(storageKey(id), []);
+  return Array.isArray(value) ? value.filter((event): event is CalendarEvent =>
+    !!event && typeof event === "object" && typeof event.id === "string" &&
+    typeof event.start === "string" && typeof event.end === "string" &&
+    Number.isFinite(Date.parse(event.start)) && Number.isFinite(Date.parse(event.end)) &&
+    Date.parse(event.end) > Date.parse(event.start) &&
+    (event.source === "google" || event.source === "brkroutnxdle")) : [];
 }
 
 interface CalendarContextValue {
@@ -23,7 +32,14 @@ interface CalendarContextValue {
 const CalendarContext = createContext<CalendarContextValue | null>(null);
 
 export function CalendarProvider({ children }: { children: React.ReactNode }) {
-  const [events, setEvents] = useState<CalendarEvent[]>(loadEvents);
+  const { user, loading } = useAuth();
+  const id = !loading && user ? user.id : null;
+  return <ScopedCalendarProvider key={id ?? "anonymous"} accountId={id}>{children}</ScopedCalendarProvider>;
+}
+
+function ScopedCalendarProvider({ children, accountId }: { children: React.ReactNode; accountId: string | null }) {
+  const mountedEpoch = React.useRef(remoteIdentityVersion());
+  const [events, setEvents] = useState<CalendarEvent[]>(() => accountId ? loadEvents(accountId) : []);
   const [previewEvents, setPreviewEvents] = useState<CalendarEvent[]>([]);
   const [currentView, setCurrentView] = useState<ViewType>(ViewType.Week);
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
@@ -31,20 +47,21 @@ export function CalendarProvider({ children }: { children: React.ReactNode }) {
 
   const persistEvents: React.Dispatch<React.SetStateAction<CalendarEvent[]>> = useCallback(
     (action) => {
+      if (!accountId || activeRemoteAccount() !== accountId || remoteIdentityVersion() !== mountedEpoch.current) return;
       setEvents((prev) => {
         const next =
           typeof action === "function"
             ? (action as (prev: CalendarEvent[]) => CalendarEvent[])(prev)
             : action;
         try {
-          storage.set(STORAGE_KEY, next);
+          storage.set(storageKey(accountId), next);
         } catch (e) {
           console.warn("Failed to persist events to localStorage:", e);
         }
         return next;
       });
     },
-    [setEvents],
+    [setEvents, accountId],
   );
 
   const refreshCalendar = useCallback(() => {

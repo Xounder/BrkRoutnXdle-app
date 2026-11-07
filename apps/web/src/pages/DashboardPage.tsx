@@ -27,16 +27,10 @@ import { useDashboardModals } from "./dashboard/useDashboardModals";
 import { useExternalDrop } from "./dashboard/useExternalDrop";
 import { previewOverlay, viewedWeek } from "./dashboard/previewSchedule";
 import type { DashboardConflictState } from "./dashboard/dashboardTypes";
-
-/**
- * DashboardPage — the ONE and ONLY owner of this file for the entire delivery (`M9`, `P-8`).
- *
- * Later phases and TASK-07 MUST extend `pages/dashboard/dashboardTypes.ts` and the
- * extracted hooks (`useCalendarNavigation`, `useDashboardModals`, `useExternalDrop`,
- * `DashboardModals`) instead of re-inlining logic here. Keep this file a pure
- * orchestrator: context/hook wiring -> MainLayout -> action row -> StatusBar ->
- * CalendarToolbar -> calendar scroll container + CalendarView -> DashboardModals.
- */
+import { useDashboardInsights } from "./dashboard/useDashboardInsights";
+import { WeeklyReview } from "./dashboard/WeeklyReview";
+import { FirstUseGuide } from "./dashboard/FirstUseGuide";
+import { ProposedPlan } from "./dashboard/ProposedPlan";
 
 export function DashboardPage() {
   const { settings } = useSettings();
@@ -53,9 +47,8 @@ export function DashboardPage() {
       settings.timezone, settings.weekStartDay);
     return { timeMin: first.timeMin, timeMax: last.timeMax };
   }, [nav.currentView, nav.currentDate, previewRange, settings.timezone, settings.weekStartDay]);
-  const { generateWeek, generateAgain, discard, isGenerating } = useScheduleGeneration(previewRange);
-  const { isPreviewActive: active, previewEvents, allocationFailures, result, message, replacementBaseline } = usePreview();
-  const isPreviewActive = active && result?.weekStart === previewRange.timeMin && result?.weekEnd === previewRange.timeMax;
+  const { generateWeek, generateAgain, discard, isGenerating, inputKey } = useScheduleGeneration(previewRange);
+  const { isPreviewActive: active, previewEvents, allocationFailures, result, message, replacementBaseline, inputKey: generatedKey } = usePreview();
   const { events, setEvents } = useCalendar();
 
   const [failurePanelOpen, setFailurePanelOpen] = useState(true);
@@ -75,6 +68,7 @@ export function DashboardPage() {
   const {
     setSelectedSlot,
     setEditingTask,
+    setReviewOccurrence,
     setEditingBlock,
     setCreatingBlockPrefill,
     setTokenModalOpen,
@@ -93,6 +87,11 @@ export function DashboardPage() {
 
   const editing = useScheduleEditing(handleExternalEventChange);
   const { saveState, save, resetSaveState } = useSaveSchedule({ range: previewRange });
+  // A partial write retains the original proposal and journal for explicit retry.
+  const isPreviewActive = active && result?.weekStart === previewRange.timeMin &&
+    result?.weekEnd === previewRange.timeMax && (generatedKey === inputKey || !!saveState.partial);
+  const insights = useDashboardInsights(previewRange, tasks, isPreviewActive, previewEvents.length,
+    saveState.status === "saving" || saveState.partial === true);
   const calendarRefresh = useCalendarRefresh();
   useUnsavedChanges(isPreviewActive);
 
@@ -102,7 +101,6 @@ export function DashboardPage() {
     }
   }, [saveState.status]);
 
-  // Handle empty slot selection — show CreateActionModal
   const handleSelect = useCallback(
     (info: { start: string; end: string }) => {
       setSelectedSlot(info);
@@ -110,32 +108,31 @@ export function DashboardPage() {
     [setSelectedSlot],
   );
 
-  // Handle click on existing event — open edit modal
   const handleEventClick = useCallback(
     (event: CalendarEvent) => {
       if (event.isBlock) {
-        // Block event: extract block id from "block-{id}" prefix
         const blockId = event.id.replace(/^block-/, "");
         const block = blocks.find((b) => b.id === blockId);
         if (block) {
           setEditingBlock(block);
         }
       } else if (event.isGenerated) {
-        // Task event: find task by id
+        if (insights.summary?.occurrences.some(occurrence => occurrence.id === event.id)) {
+          setReviewOccurrence(event);
+          return;
+        }
         const task = tasks.find((t) => t.id === event.taskId);
         if (task) {
           setEditingTask(task);
         }
       }
     },
-    [blocks, tasks, setEditingBlock, setEditingTask],
+    [blocks, tasks, insights.summary, setEditingBlock, setEditingTask, setReviewOccurrence],
   );
 
-  // CreateActionModal: user chose to create a Block
   const handleCreateBlockFromSlot = useCallback(
     (start: string, end: string) => {
       setSelectedSlot(null);
-      // Extract date and time portions from ISO strings
       const startDate = start.substring(0, 10);
       const endDate = end.substring(0, 10);
       const startTime = start.slice(11, 16);
@@ -145,7 +142,6 @@ export function DashboardPage() {
     [setSelectedSlot, setCreatingBlockPrefill],
   );
 
-  // CreateActionModal: inline task creation from slot
   const handleCreateTaskInline = useCallback(
     (name: string, duration: number, start: string, end: string) => {
       const task = createTask({
@@ -205,12 +201,6 @@ export function DashboardPage() {
     setConflictState({ hasConflicts: false, changedEvents: [] });
   }, [discard]);
 
-  const handleDiscardPreview = useCallback(() => {
-    discard();
-    setConflictState({ hasConflicts: false, changedEvents: [] });
-  }, [discard]);
-
-  // Fetch events (will run on mount and when date changes)
   const calendarQuery = useCalendarEvents(calendarRange.timeMin, calendarRange.timeMax);
 
   useEffect(() => {
@@ -234,7 +224,6 @@ export function DashboardPage() {
     }
   }, [calendarQuery.isError, calendarQuery.error, refreshStatus, setTokenModalOpen]);
 
-  // Map GeneratedEvent[] to CalendarEvent[] for the CalendarView
   const overlay = useMemo(() => isPreviewActive
     ? previewOverlay(events, previewEvents, previewRange, Date.now(), replacementBaseline)
     : { base: events, proposals: [] }, [events, previewEvents, previewRange, isPreviewActive, replacementBaseline]);
@@ -270,6 +259,8 @@ export function DashboardPage() {
     }
     save();
   };
+  const availableTaskIds = useMemo(() => new Set(tasks.map(task => task.id)), [tasks]);
+  const reviewBlocks = () => modals.setReviewingBlocks(true);
 
   return (
     <>
@@ -313,6 +304,13 @@ export function DashboardPage() {
 
           {message && <div role="alert" style={{ margin: "8px 16px 0" }}>{message}</div>}
 
+          <FirstUseGuide step={insights.step} dismissed={insights.dismissed} onDismiss={insights.dismiss}
+            onCreate={() => modals.setCreatingTask(true)} onCalculate={generateWeek}
+            onPreview={() => document.getElementById("proposed-plan")?.scrollIntoView()} />
+          <WeeklyReview range={previewRange} timezone={settings.timezone} snapshot={insights.snapshot} summary={insights.summary} />
+          {isPreviewActive && <ProposedPlan proposals={previewEvents.length} failures={allocationFailures}
+            reviewBlocks={reviewBlocks} />}
+
           <StatusBar
             saveStatus={saveState.status}
             saveError={saveState.error}
@@ -332,6 +330,9 @@ export function DashboardPage() {
                 : handleCalendarRetry
             }
             onDismissFailures={() => setFailurePanelOpen(false)}
+            editTask={id => { const task = tasks.find(item => item.id === id); if (task) setEditingTask(task); }}
+            reviewBlocks={reviewBlocks} settings={openSettings} regenerate={generateAgain}
+            availableTaskIds={availableTaskIds}
           />
 
           <CalendarToolbar
@@ -383,7 +384,9 @@ export function DashboardPage() {
         onCreateTaskInline={handleCreateTaskInline}
         onCalendarRetry={handleCalendarRetry}
         onReload={handleReload}
-        onDiscardPreview={handleDiscardPreview}
+        onDiscardPreview={handleReload}
+        range={previewRange}
+        confirmedOccurrence={insights.summary?.occurrences.find(event => event.id === modals.reviewOccurrence?.id) ?? null}
       />
     </>
   );

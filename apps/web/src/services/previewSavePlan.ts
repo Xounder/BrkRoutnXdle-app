@@ -20,13 +20,16 @@ export function assertPreviewBaseline(
   for (const original of snapshot) {
     const current = fresh.find((event) => event.id === original.id);
     if (journal.deletedIds.has(original.id)) {
-      if (current) throw conflict();
+      // A successful DELETE response can lag the authoritative GET. Retain
+      // the proposal and permit only the unchanged original for a safe retry.
+      if (current && !sameReplacementBaseline([original], [current])) throw conflict();
       continue;
     }
     if (!current) throw conflict();
     const updated = journal.updated.get(original.id);
     const expected = updated ? { ...original, ...updated } : original;
-    if (!sameReplacementBaseline([expected], [current])) throw conflict();
+    if (!sameReplacementBaseline([expected], [current]) &&
+      !(updated && sameReplacementBaseline([original], [current]))) throw conflict();
   }
   const additions = replacementCandidates(fresh, range, now).some((event) =>
     !originalIds.has(event.id) && !journal.createdIds.has(event.id));

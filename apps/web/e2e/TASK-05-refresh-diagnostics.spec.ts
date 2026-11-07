@@ -23,7 +23,8 @@ test("Refresh without preview fetches viewed week, prunes deleted remote and ret
     return route.fulfill({ status: 200, contentType: "application/json",
       body: JSON.stringify({ data: gets === 1 ? [remote("Deleted remotely")] : [] }) });
   });
-  await page.addInitScript(event => localStorage.setItem("brkroutnxdle:events", JSON.stringify([event])), pending);
+  // This fixture belongs to the authenticated user; unknown-owner legacy storage must not be adopted.
+  await page.addInitScript(event => localStorage.setItem("brkroutnxdle:events:user", JSON.stringify([event])), pending);
   await page.goto("/");
   await expect(page.locator(".fc-event:has-text('Deleted remotely')")).toHaveCount(1);
   await expect(page.locator(".fc-event:has-text('Pending placement')")).toHaveCount(1);
@@ -49,7 +50,7 @@ test("preview conflict compares the original baseline; discard keeps pending man
     return route.fulfill({ status: 200, contentType: "application/json",
       body: JSON.stringify({ data: [gets === 1 ? remote("Changed remotely") : changed] }) });
   });
-  await page.addInitScript(event => localStorage.setItem("brkroutnxdle:events", JSON.stringify([event])), pending);
+  await page.addInitScript(event => localStorage.setItem("brkroutnxdle:events:user", JSON.stringify([event])), pending);
   await page.goto("/");
   await expect(page.locator(".fc-event:has-text('Changed remotely')")).toHaveCount(1);
   await page.getByRole("button", { name: "Calculate Week" }).click();

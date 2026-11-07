@@ -1,5 +1,6 @@
 import type { Task, BlockedSlot, ViewType, CalendarEvent } from "@brkroutnxdle/shared";
 import type { AllocationFailure } from "@brkroutnxdle/domain";
+import type { PreviewRange } from "./previewSchedule";
 
 /**
  * Shared prop/state contracts for the Dashboard decomposition.
@@ -50,6 +51,12 @@ export interface DashboardModalState {
   setSelectedSlot: (slot: DashboardSlotSelection | null) => void;
   editingTask: Task | null;
   setEditingTask: (task: Task | null) => void;
+  reviewOccurrence: CalendarEvent | null;
+  setReviewOccurrence: (event: CalendarEvent | null) => void;
+  creatingTask: boolean;
+  setCreatingTask: (creating: boolean) => void;
+  reviewingBlocks: boolean;
+  setReviewingBlocks: (open: boolean) => void;
   editingBlock: BlockedSlot | null;
   setEditingBlock: (block: BlockedSlot | null) => void;
   creatingBlockPrefill: DashboardBlockPrefill | null;
@@ -77,6 +84,8 @@ export interface DashboardModalsProps {
   onCalendarRetry: () => void;
   onReload: () => void;
   onDiscardPreview: () => void;
+  range: PreviewRange;
+  confirmedOccurrence: CalendarEvent | null;
 }
 
 /** Raw status inputs consumed by `StatusBar`. */
@@ -99,6 +108,11 @@ export interface DashboardStatusBarProps extends DashboardStatusState {
   onSaveRetry: () => void;
   onCalendarRetry: () => void;
   onDismissFailures: () => void;
+  editTask?: (id: string) => void;
+  reviewBlocks?: () => void;
+  settings?: () => void;
+  regenerate?: () => void;
+  availableTaskIds?: ReadonlySet<string>;
 }
 
 /** Drag payload dropped from the task/block panels onto the calendar. */

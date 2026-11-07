@@ -1,7 +1,18 @@
-import type { CalendarEvent, Task } from "@brkroutnxdle/shared";
+import type { CalendarEvent, Task, BlockedSlot, Settings } from "@brkroutnxdle/shared";
 import type { GeneratedEvent } from "@brkroutnxdle/domain";
 
 export interface PreviewRange { timeMin: string; timeMax: string }
+
+/** Capture inputs at calculation time, not merely the displayed week. */
+export function previewInputKey(tasks: Task[], blocks: BlockedSlot[], settings: Settings,
+  events: CalendarEvent[], range: PreviewRange): string {
+  const { workStartHour, workEndHour, workDays, maxTasksPerDay, timezone, shuffleEnabled, weekStartDay } = settings;
+  return JSON.stringify([range.timeMin, range.timeMax, tasks, blocks,
+    [workStartHour, workEndHour, workDays, maxTasksPerDay, timezone, shuffleEnabled, weekStartDay],
+    events.filter(event => overlaps(event, range))
+      .map(({ id, start, end, isCompleted, isPinned, isGenerated, taskId, source }) =>
+      [id, start, end, isCompleted, isPinned, isGenerated, taskId, source])]);
+}
 
 /** Calendar navigation is a civil date; interpret that date in the selected settings timezone. */
 export function viewedWeek(date: Date, timezone: string, weekStartDay: number): PreviewRange {

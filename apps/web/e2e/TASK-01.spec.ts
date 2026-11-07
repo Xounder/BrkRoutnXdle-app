@@ -44,6 +44,7 @@ test.describe("TASK-01: Save flow pending event filtering", () => {
     // Track all API calls to /events
     const patchCalls: Array<{ id: string; url: string }> = [];
     const postCalls: string[] = [];
+    const confirmedPosts: Array<Record<string, unknown>> = [];
 
     // Track all requests for debugging
     page.on("request", (request) => {
@@ -78,7 +79,7 @@ test.describe("TASK-01: Save flow pending event filtering", () => {
           await route.fulfill({
             status: 200,
             contentType: "application/json",
-            body: JSON.stringify({ data: [googleEvent] }),
+            body: JSON.stringify({ data: [googleEvent, ...confirmedPosts] }),
           });
           return;
         }
@@ -100,10 +101,16 @@ test.describe("TASK-01: Save flow pending event filtering", () => {
         if (method === "POST") {
           postCalls.push(url);
           console.log(`[TEST1 POST] Recorded POST to: ${url}`);
+          const payload = route.request().postDataJSON();
+          const saved = { ...payload, id: `google-created-new-event-${postCalls.length}`,
+            start: payload.start.dateTime, end: payload.end.dateTime,
+            isGenerated: true, source: "google" };
+          // The authoritative GET reflects acknowledged writes before the UI may claim success.
+          confirmedPosts.push(saved);
           await route.fulfill({
             status: 200,
             contentType: "application/json",
-            body: JSON.stringify({ data: { id: "google-created-new-event-456", ...route.request().postDataJSON() } }),
+            body: JSON.stringify({ data: saved }),
           });
           return;
         }
@@ -190,6 +197,8 @@ test.describe("TASK-01: Save flow pending event filtering", () => {
 
     // 2. At least one POST was made to create the new event
     expect(postCalls.length).toBeGreaterThanOrEqual(1);
+    expect(confirmedPosts).toHaveLength(postCalls.length);
+    await expect(page.getByLabel("Saved weekly review")).toContainText(`${confirmedPosts.length} saved generated occurrences`);
 
     // 3. Error banner "Failed to sync calendar events" never appears
     await expect(page.locator("text=Failed to sync calendar events")).not.toBeVisible();

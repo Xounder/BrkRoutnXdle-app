@@ -32,6 +32,7 @@ export function StatusBar({
   onSaveRetry,
   onCalendarRetry,
   onDismissFailures,
+  editTask, reviewBlocks, settings, regenerate, availableTaskIds,
 }: DashboardStatusBarProps) {
   let content: React.ReactNode = null;
 
@@ -106,20 +107,17 @@ export function StatusBar({
         <Text size="sm">Loading calendar events...</Text>
       </div>
     );
-  } else if (isPreviewActive && failurePanelOpen) {
-    content = (
-      <Paper withBorder style={{ margin: "8px 16px 0" }}>
-        <AllocationFailurePanel
-          failures={allocationFailures}
-          onDismiss={onDismissFailures}
-        />
-      </Paper>
-    );
   }
 
   return (
     <div role="status" aria-live="polite">
       {content}
+      {isPreviewActive && failurePanelOpen && allocationFailures.length > 0 &&
+        <Paper withBorder style={{ margin: "8px 16px 0" }}>
+          <AllocationFailurePanel failures={allocationFailures} onDismiss={onDismissFailures}
+            editTask={editTask} reviewBlocks={reviewBlocks} settings={settings}
+            regenerate={regenerate} availableTaskIds={availableTaskIds} />
+        </Paper>}
     </div>
   );
 }

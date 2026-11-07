@@ -50,8 +50,21 @@ test("saved pinned remote survives refresh, occupies its slot, and consumes one 
   const inputs = generationInputs([task], refreshed, range, Date.parse("2026-10-01"));
   expect(inputs.base.map(item => item.id)).toEqual(["server-pinned"]);
   expect(inputs.tasks.map(item => item.frequency)).toEqual([1]);
-  const generated = generateSchedule(inputs.tasks, [], inputs.base,
-    { ...DEFAULT_SETTINGS, timezone: "UTC" }, undefined, { targetWeekStart: range.timeMin });
+  const realDate = globalThis.Date;
+  const beforeTargetWeek = realDate.parse("2026-10-30T12:00:00.000Z");
+  globalThis.Date = new Proxy(realDate, {
+    construct(target, args) { return Reflect.construct(target, args.length ? args : [beforeTargetWeek]); },
+    get(target, property, receiver) {
+      return property === "now" ? () => beforeTargetWeek : Reflect.get(target, property, receiver);
+    },
+  });
+  let generated: ReturnType<typeof generateSchedule>;
+  try {
+    generated = generateSchedule(inputs.tasks, [], inputs.base,
+      { ...DEFAULT_SETTINGS, timezone: "UTC" }, undefined, { targetWeekStart: range.timeMin });
+  } finally {
+    globalThis.Date = realDate;
+  }
   expect(generated.generatedEvents).toHaveLength(1);
   expect(generated.generatedEvents[0].start).not.toBe(saved.start);
   const view = previewOverlay(refreshed, generated.generatedEvents, range, Date.parse("2026-10-01"));
