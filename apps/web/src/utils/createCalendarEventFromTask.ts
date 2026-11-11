@@ -1,4 +1,5 @@
 import type { CalendarEvent, Task, Settings } from "@brkroutnxdle/shared";
+import { placementInterval } from "./placementInterval";
 
 interface ExplicitPlacement {
   start: string;
@@ -18,12 +19,13 @@ export function buildCalendarEventFromTask(
   if (!options.start || !options.end) {
     throw new Error("Explicit start and end are required to place a task");
   }
+  const interval = placementInterval(options.start, options.end);
 
   return {
     id: crypto.randomUUID(),
     title: task.title,
-    start: options.start,
-    end: options.end,
+    start: interval.start,
+    end: interval.end,
     isAllDay: false,
     isGenerated: true,
     isPinned: true,

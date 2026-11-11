@@ -3,6 +3,8 @@ import type { Dispatch, SetStateAction } from "react";
 import { BlockType as BlockTypeEnum } from "@brkroutnxdle/shared";
 import type { BlockedSlot, CalendarEvent, Settings } from "@brkroutnxdle/shared";
 import type { DashboardExternalDropHandler } from "./dashboardTypes";
+import { dropInterval } from "../../utils/placementInterval";
+import { useTasks } from "../../hooks/useTasks";
 
 /** Minimal editing surface `handleExternalDrop` depends on. */
 interface EditingDropGuard {
@@ -20,10 +22,7 @@ interface UseExternalDropArgs {
 /**
  * Builds the calendar external-drop handler.
  *
- * Moved verbatim from `DashboardPage`, including the manual local
- * `YYYY-MM-DDTHH:mm:00` string building and the `editing.canDropAt` guard. The
- * `crypto.randomUUID()` on dropped task events is preserved because the save
- * flow filters pending events by local UUID.
+ * Both endpoints use the same UTC instant policy before overlap checks or storage.
  */
 export function useExternalDrop({
   settings,
@@ -32,39 +31,24 @@ export function useExternalDrop({
   createBlock,
   setHasUnsavedChanges,
 }: UseExternalDropArgs): DashboardExternalDropHandler {
+  const { tasks } = useTasks();
   return useCallback(
     (info) => {
       const { dateStr, allDay, dragData } = info;
-      const workStartHour = settings.workStartHour;
-      const start =
-        allDay || !dateStr.includes("T")
-          ? `${dateStr.slice(0, 10)}T${String(workStartHour).padStart(2, "0")}:00:00`
-          : dateStr;
-      const startDate = new Date(start);
-      let end: string;
-
-      if (dragData.type === "task") {
-        const duration = dragData.duration || 30;
-        const endDate = new Date(startDate.getTime() + duration * 60000);
-        const endYear = endDate.getFullYear();
-        const endMonth = String(endDate.getMonth() + 1).padStart(2, "0");
-        const endDay = String(endDate.getDate()).padStart(2, "0");
-        const endHours = String(endDate.getHours()).padStart(2, "0");
-        const endMinutes = String(endDate.getMinutes()).padStart(2, "0");
-        end = `${endYear}-${endMonth}-${endDay}T${endHours}:${endMinutes}:00`;
-      } else if (dragData.type === "block") {
-        const endDate = new Date(startDate.getTime() + 60 * 60000);
-        const endYear = endDate.getFullYear();
-        const endMonth = String(endDate.getMonth() + 1).padStart(2, "0");
-        const endDay = String(endDate.getDate()).padStart(2, "0");
-        const endHours = String(endDate.getHours()).padStart(2, "0");
-        const endMinutes = String(endDate.getMinutes()).padStart(2, "0");
-        end = `${endYear}-${endMonth}-${endDay}T${endHours}:${endMinutes}:00`;
-      } else {
-        return;
+      if (dragData.type !== "task" && dragData.type !== "block") return "This item cannot be placed on the calendar.";
+      if (dragData.type === "task" && (!dragData.title?.trim() || !dragData.taskId ||
+        !tasks.some(task => task.id === dragData.taskId && task.title === dragData.title && task.duration === dragData.duration)))
+        return "This task has changed. Reopen Tasks and drag its current card.";
+      let interval: { start: string; end: string };
+      try {
+        interval = dropInterval(dateStr, allDay, settings.workStartHour,
+          dragData.type === "task" ? dragData.duration as number : 60);
+      } catch {
+        return "Invalid task duration or calendar date.";
       }
+      const { start, end } = interval;
 
-      if (!editing.canDropAt(start, end)) return;
+      if (!editing.canDropAt(start, end)) return "This time is unavailable. Choose a future, free working-hours slot.";
 
       if (dragData.type === "task") {
         setEvents((prev) => [
@@ -76,6 +60,7 @@ export function useExternalDrop({
             end,
             isAllDay: false,
             isGenerated: true,
+            isPinned: true,
             taskId: dragData.taskId,
             isCompleted: false,
             source: "brkroutnxdle",
@@ -91,7 +76,8 @@ export function useExternalDrop({
         });
         setHasUnsavedChanges(true);
       }
+      return null;
     },
-    [editing.canDropAt, setEvents, createBlock, settings, setHasUnsavedChanges],
+    [editing.canDropAt, setEvents, createBlock, settings, setHasUnsavedChanges, tasks],
   );
 }

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Draggable } from "@fullcalendar/interaction";
 import { Button, Group, Paper, ScrollArea, Stack, Text, Title } from "@mantine/core";
 import { useTasks } from "../../hooks/useTasks";
@@ -7,19 +7,23 @@ import { TaskModal } from "./TaskModal";
 import type { Task } from "@brkroutnxdle/shared";
 
 export function TaskPanel() {
-  const dragContainer = useRef<HTMLDivElement>(null);
+  const [dragContainer, setDragContainer] = useState<HTMLDivElement | null>(null);
   const { tasks, deleteTask } = useTasks();
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [isCreating, setIsCreating] = useState(false);
 
+  const bindDragContainer = useCallback((node: HTMLDivElement | null) => setDragContainer(node), []);
+
+  // The container only exists while tasks are present. Bind to the actual mounted node,
+  // not to task-count changes (which can run before the conditional container exists).
   useEffect(() => {
-    if (!dragContainer.current) return;
-    const draggable = new Draggable(dragContainer.current, {
+    if (!dragContainer) return;
+    const draggable = new Draggable(dragContainer, {
       itemSelector: '[data-task-drag="true"]',
       eventData: (element) => ({ title: element.dataset.taskTitle, create: false }),
     });
     return () => draggable.destroy();
-  }, [tasks.length]);
+  }, [dragContainer]);
 
   return (
     <Paper p="sm" radius="md">
@@ -38,7 +42,7 @@ export function TaskPanel() {
 
       {tasks.length > 0 && (
         <ScrollArea.Autosize mah={300}>
-          <Stack gap="xs" ref={dragContainer}>
+          <Stack gap="xs" ref={bindDragContainer}>
             {tasks.map((task) => (
               <TaskCard
                 key={task.id}

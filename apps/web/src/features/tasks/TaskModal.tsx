@@ -126,22 +126,27 @@ export function TaskModal({ task, onClose, defaultDuration }: TaskModalProps) {
       allowSameDay,
     };
 
-    if (isEditing) {
-      const updatedTask = { ...task!, ...baseTaskData, restrictions: buildRestrictions(task!.restrictions) };
-      updateTask(task!.id, {
-        ...baseTaskData,
-        restrictions: updatedTask.restrictions,
-      });
+    try {
+      if (isEditing) {
+        const updatedTask = { ...task!, ...baseTaskData, restrictions: buildRestrictions(task!.restrictions) };
+        updateTask(task!.id, {
+          ...baseTaskData,
+          restrictions: updatedTask.restrictions,
+        });
 
-      // Reflect definition metadata on all existing placements, without scheduling another.
-      setEvents((prev) => updateCalendarEventForTask(prev, updatedTask));
-    } else {
-      createTask({
-        ...baseTaskData,
-        description: undefined,
-        isActive: true,
-        restrictions: buildRestrictions([]),
-      });
+        // Reflect definition metadata on all existing placements, without scheduling another.
+        setEvents((prev) => updateCalendarEventForTask(prev, updatedTask));
+      } else {
+        createTask({
+          ...baseTaskData,
+          description: undefined,
+          isActive: true,
+          restrictions: buildRestrictions([]),
+        });
+      }
+    } catch {
+      setError("Could not save task to this browser. Check available storage or browser permissions, then try again.");
+      return;
     }
 
     onClose();

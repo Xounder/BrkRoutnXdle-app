@@ -35,50 +35,49 @@ export async function apiFetch<T>(
   const controller = new AbortController();
   const onAbort = () => controller.abort();
   fetchOptions.signal?.addEventListener("abort", onAbort, { once: true });
+  if (fetchOptions.signal?.aborted) controller.abort();
   const timeout = setTimeout(() => controller.abort(), 15_000);
-  let response: Response;
   try {
-    response = await fetch(url, {
-      ...fetchOptions,
-      headers,
-      signal: controller.signal,
-      credentials: "include", // sends HttpOnly cookies
-    });
-  } catch {
-    throw new ApiError("NETWORK_ERROR", "Cannot reach the calendar API. Check the server and your connection, then retry.", 0);
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        ...fetchOptions,
+        headers,
+        signal: controller.signal,
+        credentials: "include", // sends HttpOnly cookies
+      });
+    } catch {
+      throw new ApiError("NETWORK_ERROR", "Cannot reach the calendar API. Check the server and your connection, then retry.", 0);
+    }
+
+    let json: unknown;
+    try {
+      json = await response.json();
+    } catch {
+      if (controller.signal.aborted) {
+        throw new ApiError("NETWORK_ERROR", "Calendar API response timed out or was interrupted. Retry the calendar read.", 0);
+      }
+      if (!response.ok) {
+        throw new ApiError("HTTP_ERROR", `Request failed with status ${response.status} (no response body)`, response.status);
+      }
+      throw new ApiError("PARSE_ERROR", "Failed to parse response as JSON", response.status);
+    }
+
+    if (!response.ok) {
+      const envelope = json as { error?: { code?: string; message?: string; details?: Record<string, unknown> } } | null;
+      throw new ApiError(envelope?.error?.code ?? "HTTP_ERROR",
+        envelope?.error?.message ?? `Request failed with status ${response.status}`,
+        response.status, envelope?.error?.details);
+    }
+
+    if (typeof json !== "object" || json === null || !Object.prototype.hasOwnProperty.call(json, "data")) {
+      throw new ApiError("PARSE_ERROR", "Calendar API returned an invalid response. Retry after checking the server.", response.status);
+    }
+    return (json as { data: T }).data;
   } finally {
     clearTimeout(timeout);
     fetchOptions.signal?.removeEventListener("abort", onAbort);
   }
-
-  let json: unknown;
-  try {
-    json = await response.json();
-  } catch {
-    if (!response.ok) {
-      throw new ApiError(
-        "HTTP_ERROR",
-        `Request failed with status ${response.status} (no response body)`,
-        response.status,
-      );
-    }
-    throw new ApiError("PARSE_ERROR", "Failed to parse response as JSON", response.status);
-  }
-
-  if (!response.ok) {
-    const envelope = json as { error?: { code?: string; message?: string; details?: Record<string, unknown> } } | null;
-    throw new ApiError(
-      envelope?.error?.code ?? "HTTP_ERROR",
-      envelope?.error?.message ?? `Request failed with status ${response.status}`,
-      response.status,
-      envelope?.error?.details,
-    );
-  }
-
-  if (typeof json !== "object" || json === null || !Object.prototype.hasOwnProperty.call(json, "data")) {
-    throw new ApiError("PARSE_ERROR", "Calendar API returned an invalid response. Retry after checking the server.", response.status);
-  }
-  return (json as { data: T }).data;
 }
 
 export class ApiError extends Error {

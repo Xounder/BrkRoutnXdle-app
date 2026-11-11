@@ -16,6 +16,7 @@ import { activeRemoteAccount, beginRemoteMutation, invalidateRemoteConfirmation,
   remoteEpoch, remoteIdentityVersion } from "../services/remoteConfirmation";
 import { calendarEventsKey } from "./useCalendarRefresh";
 import { verifySavedWrites } from "../services/verifySavedWrites";
+import { acknowledgeManualWrite, changeManualEdit, manualEdits, overlayManualEdits } from "../services/manualEditJournal";
 
 interface SaveState {
   status: "idle" | "saving" | "success" | "error";
@@ -81,6 +82,34 @@ export function useSaveSchedule(options?: { range?: CalendarRange }) {
         return response;
       };
       const baseline = await fetchRemote();
+      const edits = mode === "manual" ? new Map([...manualEdits(accountId)].filter(([, edit]) =>
+        isInRange(edit.original, range))) : new Map();
+      const editsAtStart = new Map([...edits].map(([id, edit]) => [id, { ...edit,
+        desired: edit.desired ? { ...edit.desired } : null }]));
+      const unchanged = (id: string) => {
+        const before = editsAtStart.get(id);
+        const now = manualEdits(accountId).get(id);
+        return !!before && !!now && before.desired?.start === now.desired?.start &&
+          before.desired?.end === now.desired?.end && before.written === now.written &&
+          !!before.attempted === !!now.attempted;
+      };
+      if (mode === "manual") {
+        for (const [id, edit] of edits) {
+          if (edit.desired && !isInRange({ ...edit.original, ...edit.desired }, range))
+            throw new Error("Manual edit belongs to another week. Return to that week before saving.");
+          const remote = baseline.find(event => event.id === id);
+          if (!remote && !edit.attempted && !edit.written)
+            throw new Error(`Calendar occurrence ${id} disappeared remotely. Refresh and resolve the conflict before saving.`);
+          if (!remote && edit.desired)
+            throw new Error(`Calendar occurrence ${id} is missing remotely. Refresh before retrying.`);
+          if (remote && (remote.start !== edit.original.start || remote.end !== edit.original.end ||
+            remote.taskId !== edit.original.taskId || remote.isCompleted || !remote.isGenerated) &&
+            !((edit.written || edit.attempted) && edit.desired &&
+              remote.start === edit.desired.start && remote.end === edit.desired.end)) {
+            throw new Error(`Calendar occurrence ${id} changed remotely. Refresh and resolve the conflict before saving.`);
+          }
+        }
+      }
       if (mode === "preview") {
         if (!journal.current || journal.current.snapshot !== replacementBaseline || journal.current.key !== key) {
           journal.current = { snapshot: replacementBaseline, key,
@@ -96,12 +125,15 @@ export function useSaveSchedule(options?: { range?: CalendarRange }) {
       let completed = 0;
 
       const desired: GeneratedEvent[] = plan ? plan.desired : events
-        .filter((event) => event.source === "brkroutnxdle" || baselineIds.has(event.id))
+        .filter((event) => event.source === "brkroutnxdle" || (baselineIds.has(event.id) && !edits.has(event.id)))
         .filter((event) => isInRange(event, range))
         .map((event) => ({
           id: event.id, taskId: event.taskId ?? "", start: event.start, end: event.end,
           completed: event.isCompleted, createdAt: "", updatedAt: "",
-        }));
+        })).concat([...edits].filter(([, edit]) => edit.desired !== null && isInRange({
+          ...edit.original, ...edit.desired!,
+        }, range)).map(([id, edit]) => ({ id, taskId: edit.original.taskId ?? "",
+          start: edit.desired!.start, end: edit.desired!.end, completed: false, createdAt: "", updatedAt: "" })));
 
       const candidates = plan ? plan.candidates : baseline;
       // GET membership, not the source label, establishes persistence.
@@ -120,9 +152,18 @@ export function useSaveSchedule(options?: { range?: CalendarRange }) {
         return created ? { ...event, id: created.id } : event;
       });
       const diff = computeDiff(translated, persisted, tasks, {
-        noDelete: mode === "manual", replaceableIds: plan?.replaceableIds,
+        noDelete: false, explicitDeleteIds: mode === "manual" ? new Set([...edits]
+          .filter(([, edit]) => edit.desired === null).map(([id]) => id)) : undefined,
+        replaceableIds: plan?.replaceableIds,
         matchableIds: plan?.matchableIds,
       });
+      if (mode === "manual" && diff.toUpdate.some(update => !edits.has(update.id)))
+        throw new Error("Calendar changed during manual editing. Refresh before retrying.");
+      if (mode === "manual") {
+        // A prior write may be visible already; never repeat it solely because the UI is stale.
+        diff.toUpdate = diff.toUpdate.filter(update => !edits.get(update.id)?.attempted && !edits.get(update.id)?.written);
+        diff.toDelete = diff.toDelete.filter(id => !edits.get(id)?.attempted && !edits.get(id)?.written);
+      }
       // An exact-ID collision must not turn a protected pinned occurrence into
       // a PATCH target. Only the preview snapshot and our own POSTs authorize it.
       if (plan && diff.toUpdate.some((update) =>
@@ -140,7 +181,7 @@ export function useSaveSchedule(options?: { range?: CalendarRange }) {
       const reconcile = async () => {
         const fresh = await fetchRemote();
         if (!stillOwned()) throw new Error("Account or calendar changed during save.");
-        const visible = [...fresh];
+        const visible = mode === "manual" ? overlayManualEdits(accountId, events, fresh) : [...fresh];
         for (const [localId, created] of posted.current) {
           if (!visible.some((event) => event.id === created.id)) {
             const local = events.find((event) => event.id === localId);
@@ -184,9 +225,27 @@ export function useSaveSchedule(options?: { range?: CalendarRange }) {
         }
         for (const update of diff.toUpdate) {
           if (!stillOwned()) throw new Error("Account changed during save.");
+          if (mode === "manual") {
+            if (!unchanged(update.id)) throw new Error("Manual edit changed during save. Retry with the latest placement.");
+            changeManualEdit(accountId, update.id, { ...edits.get(update.id)!, attempted: true });
+            editsAtStart.set(update.id, { ...editsAtStart.get(update.id)!, attempted: true });
+          }
           attempted = true;
-          await api.patch(`/events/${encodeURIComponent(update.id)}`, { start: update.start, end: update.end });
+          try {
+            await api.patch(`/events/${encodeURIComponent(update.id)}`, { start: update.start, end: update.end });
+          } catch (error) {
+            if (mode === "manual" && error instanceof ApiError && stillOwned() && unchanged(update.id)) {
+              changeManualEdit(accountId, update.id, { ...edits.get(update.id)!, attempted: false });
+            }
+            throw error;
+          }
           if (!stillOwned()) throw new Error("Account changed during save.");
+          if (mode === "manual" && update.start && update.end) {
+            if (!unchanged(update.id)) throw new Error("Manual edit changed during save. Retry with the latest placement.");
+            writtenUpdates.current.set(update.id, { start: update.start, end: update.end });
+            acknowledgeManualWrite(accountId, update.id, edits.get(update.id)!);
+            editsAtStart.set(update.id, { ...editsAtStart.get(update.id)!, written: true });
+          }
           if (mode === "preview" && update.start && update.end) {
             journal.current?.updated.set(update.id, { start: update.start, end: update.end });
             writtenUpdates.current.set(update.id, { start: update.start, end: update.end });
@@ -198,10 +257,28 @@ export function useSaveSchedule(options?: { range?: CalendarRange }) {
         }
         for (const id of diff.toDelete) {
           if (!stillOwned()) throw new Error("Account changed during save.");
+          if (mode === "manual") {
+            if (!unchanged(id)) throw new Error("Manual deletion changed during save. Retry with the latest selection.");
+            changeManualEdit(accountId, id, { ...edits.get(id)!, attempted: true });
+            editsAtStart.set(id, { ...editsAtStart.get(id)!, attempted: true });
+          }
           attempted = true;
-          await api.delete(`/events/${encodeURIComponent(id)}`);
+          try {
+            await api.delete(`/events/${encodeURIComponent(id)}`);
+          } catch (error) {
+            if (mode === "manual" && error instanceof ApiError && stillOwned() && unchanged(id)) {
+              changeManualEdit(accountId, id, { ...edits.get(id)!, attempted: false });
+            }
+            throw error;
+          }
           if (!stillOwned()) throw new Error("Account changed during save.");
           if (mode === "preview") journal.current?.deletedIds.add(id);
+          if (mode === "manual") {
+            if (!unchanged(id)) throw new Error("Manual deletion changed during save. Retry with the latest selection.");
+            writtenDeletes.current.add(id);
+            acknowledgeManualWrite(accountId, id, edits.get(id)!);
+            editsAtStart.set(id, { ...editsAtStart.get(id)!, written: true });
+          }
           writtenDeletes.current.add(id);
           completed++;
           setSaveState((prev) => ({ ...prev, completed, progress: Math.round(completed / total * 100) }));
@@ -216,6 +293,18 @@ export function useSaveSchedule(options?: { range?: CalendarRange }) {
         // Release by the original journal key only after verifying that remote
         // occurrence in the authoritative GET, regardless of the current desired IDs.
         if (!stillOwned()) throw new Error("Account or calendar changed during save.");
+        if (mode === "manual") {
+          for (const [id, edit] of edits) {
+            if (!unchanged(id)) throw new Error("Manual edits changed during save. Retry with the latest placement.");
+            const remote = fresh.find(event => event.id === id);
+            if (edit.desired === null ? !remote : !!remote && remote.start === edit.desired.start && remote.end === edit.desired.end) {
+              changeManualEdit(accountId, id, null);
+            } else {
+              throw Object.assign(new Error("Calendar write is pending remote confirmation. Retry to check the calendar without repeating successful writes."),
+                { completed: Math.max(1, completed), pendingConfirmation: true });
+            }
+          }
+        }
         for (const [localId, created] of posted.current) {
           if (fresh.some(remote => remote.id === created.id && remote.start === created.start &&
             remote.end === created.end && remote.isGenerated)) posted.current.delete(localId);

@@ -6,10 +6,12 @@ import interactionPlugin from "@fullcalendar/interaction";
 import { ViewType, BlockType } from "@brkroutnxdle/shared";
 import type { CalendarEvent, BlockedSlot } from "@brkroutnxdle/shared";
 import { EventContent } from "./calendar/EventContent";
+import { useExternalDragFeedback } from "./calendar/useExternalDragFeedback";
 
 interface CalendarViewProps {
   events: CalendarEvent[];
   previewEvents: CalendarEvent[];
+  previewActive?: boolean;
   blocks?: BlockedSlot[];
   use12h?: boolean;
   weekStartDay?: number;
@@ -24,7 +26,7 @@ interface CalendarViewProps {
   onDeleteRequest?: (id: string, title: string) => void;
   onEventDragStart?: (info: any) => void;
   onEventDragStop?: (info: any) => void;
-  onExternalDrop?: (info: { dateStr: string; allDay: boolean; dragData: any }) => void;
+  onExternalDrop?: (info: { dateStr: string; allDay: boolean; dragData: any }) => string | null;
   validateDrop?: (startStr: string, endStr: string, draggedEventId?: string) => boolean;
   scrollTime?: string;
   slotMinTime?: string;
@@ -46,6 +48,7 @@ const REVERSE_VIEW_MAP: Record<string, ViewType> = {
 export function CalendarView({
   events,
   previewEvents,
+  previewActive = false,
   blocks,
   use12h = false,
   weekStartDay = 1,
@@ -68,6 +71,7 @@ export function CalendarView({
 }: CalendarViewProps) {
   const calendarRef = useRef<FullCalendar>(null);
   const isSyncingRef = useRef(false);
+  const { calendarRoot, dropError, setDropError, clearExternalRejection } = useExternalDragFeedback(previewActive);
 
   // Sync currentView changes to FullCalendar API (controlled prop)
   useEffect(() => {
@@ -157,7 +161,9 @@ export function CalendarView({
       const eventEnd = e.end
         ? new Date(e.end).getTime()
         : new Date(e.start).getTime() + 30 * 60000;
-      const isPast = eventEnd < now;
+      const isPast = new Date(e.start).getTime() < now || !Number.isFinite(eventEnd);
+      const editable = !previewActive && !isPast && e.isGenerated === true && !e.isCompleted &&
+        (e.source === "google" || e.source === "brkroutnxdle") && eventEnd > Date.parse(e.start);
       const classNames = [
         e.isGenerated ? "brk-generated" : "brk-external",
         e.isCompleted ? "brk-completed" : null,
@@ -174,9 +180,12 @@ export function CalendarView({
           taskId: e.taskId,
           isCompleted: e.isCompleted,
           isPast,
+          isEditable: editable,
+          isPinned: e.isPinned,
+          source: e.source,
         },
-        eventStartEditable: !isPast,
-        eventDurationEditable: !isPast,
+        eventStartEditable: editable,
+        eventDurationEditable: editable,
       };
     });
 
@@ -184,7 +193,7 @@ export function CalendarView({
       const eventEnd = e.end
         ? new Date(e.end).getTime()
         : new Date(e.start).getTime() + 30 * 60000;
-      const isPast = eventEnd < now;
+      const isPast = Date.parse(e.start) < now || !Number.isFinite(eventEnd);
       const classNames = ["brk-preview", isPast ? "is-past" : null].filter(
         Boolean
       ) as string[];
@@ -200,9 +209,10 @@ export function CalendarView({
           isGenerated: true,
           taskId: e.taskId,
           isPast,
+          isEditable: !isPast && !e.isCompleted && eventEnd > Date.parse(e.start),
         },
-        eventStartEditable: !isPast,
-        eventDurationEditable: !isPast,
+        eventStartEditable: !isPast && !e.isCompleted,
+        eventDurationEditable: !isPast && !e.isCompleted,
       };
     });
 
@@ -241,7 +251,7 @@ export function CalendarView({
     });
 
     return [...taskEvents, ...previewMapped, ...blockMapped];
-  }, [events, previewEvents, fcBlockEvents]);
+  }, [events, previewEvents, fcBlockEvents, previewActive]);
 
   const handleEventClick = (info: any) => {
     if (onEventClick) {
@@ -255,8 +265,9 @@ export function CalendarView({
         isGenerated: props.isGenerated ?? false,
         taskId: props.taskId as string | undefined,
         isCompleted: props.isCompleted ?? false,
+        isPinned: props.isPinned ?? false,
         isBlock: props.isBlock ?? false,
-        source: props.isGenerated ? "brkroutnxdle" : "google",
+        source: props.source ?? (props.isGenerated ? "brkroutnxdle" : "google"),
       });
     }
   };
@@ -293,17 +304,21 @@ export function CalendarView({
   };
 
   const handleExternalDrop = (info: any) => {
+    clearExternalRejection();
     const jsEvent = info.jsEvent as DragEvent;
     const rawData = jsEvent.dataTransfer?.getData("application/json");
     const dragged = info.draggedEl as HTMLElement | undefined;
-    const dragData = dragged?.dataset.taskId ? {
+    let dragData = dragged?.dataset.taskId ? {
       type: "task",
       taskId: dragged.dataset.taskId,
       title: dragged.dataset.taskTitle,
       duration: Number(dragged.dataset.taskDuration),
-    } : rawData ? JSON.parse(rawData) : null;
-    if (!dragData) return;
-    onExternalDrop?.({ dateStr: info.dateStr, allDay: info.allDay, dragData });
+    } : null;
+    if (!dragData && rawData) {
+      try { dragData = JSON.parse(rawData); } catch { setDropError("Invalid dragged item."); return; }
+    }
+    setDropError(!dragData ? "This item cannot be placed here." : !onExternalDrop ? "Discard the preview before placing tasks." :
+      onExternalDrop({ dateStr: info.dateStr, allDay: info.allDay, dragData }));
   };
 
   const handleEventAllow = (dropInfo: any, draggedEvent: any): boolean => {
@@ -311,7 +326,8 @@ export function CalendarView({
   };
 
   return (
-    <div className="brk-calendar-google" style={{ padding: "8px", height: "100%" }}>
+    <div ref={calendarRoot} className="brk-calendar-google" style={{ padding: "8px", height: "100%" }}>
+      {dropError && <div role="alert">{dropError}</div>}
       <FullCalendar
         ref={calendarRef}
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
@@ -366,7 +382,7 @@ export function CalendarView({
               }
             }
           }
-          const showDelete = Boolean(props.isGenerated || props.isBlock || props.isPreview) && !computedIsPast;
+          const showDelete = Boolean(props.isEditable || (props.isBlock && !computedIsPast));
           return (
             <EventContent
               arg={arg}

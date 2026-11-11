@@ -31,6 +31,8 @@ import { useDashboardInsights } from "./dashboard/useDashboardInsights";
 import { WeeklyReview } from "./dashboard/WeeklyReview";
 import { FirstUseGuide } from "./dashboard/FirstUseGuide";
 import { ProposedPlan } from "./dashboard/ProposedPlan";
+import { useManualCalendarEdits } from "./dashboard/useManualCalendarEdits";
+import { ElapsedWeekNotice } from "./dashboard/ElapsedWeekNotice";
 
 export function DashboardPage() {
   const { settings } = useSettings();
@@ -62,7 +64,9 @@ export function DashboardPage() {
     hasConflicts: false,
     changedEvents: [],
   });
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const { saveState, save, resetSaveState } = useSaveSchedule({ range: previewRange });
+  const { hasUnsavedChanges, setHasUnsavedChanges, manualError, setManualError,
+    handleExternalEventChange, retryManualStorage } = useManualCalendarEdits(events, setEvents, saveState.status);
 
   const modals = useDashboardModals();
   const {
@@ -75,18 +79,7 @@ export function DashboardPage() {
     openSettings,
   } = modals;
 
-  const handleExternalEventChange = useCallback(
-    (id: string, startStr: string, endStr: string) => {
-      setEvents((prev) =>
-        prev.map((e) => (e.id === id ? { ...e, start: startStr, end: endStr } : e)),
-      );
-      setHasUnsavedChanges(true);
-    },
-    [setEvents],
-  );
-
-  const editing = useScheduleEditing(handleExternalEventChange);
-  const { saveState, save, resetSaveState } = useSaveSchedule({ range: previewRange });
+  const editing = useScheduleEditing(handleExternalEventChange, () => setHasUnsavedChanges(true), setManualError);
   // A partial write retains the original proposal and journal for explicit retry.
   const isPreviewActive = active && result?.weekStart === previewRange.timeMin &&
     result?.weekEnd === previewRange.timeMax && (generatedKey === inputKey || !!saveState.partial);
@@ -95,11 +88,6 @@ export function DashboardPage() {
   const calendarRefresh = useCalendarRefresh();
   useUnsavedChanges(isPreviewActive);
 
-  useEffect(() => {
-    if (saveState.status === "success") {
-      setHasUnsavedChanges(false);
-    }
-  }, [saveState.status]);
 
   const handleSelect = useCallback(
     (info: { start: string; end: string }) => {
@@ -284,7 +272,7 @@ export function DashboardPage() {
                 />
                 <SaveButton
                   onClick={handleSave}
-                  disabled={!hasUnsavedChanges}
+                  disabled={!hasUnsavedChanges || !!manualError}
                   isSaving={saveState.status === "saving"}
                   progress={saveState.progress}
                 />
@@ -303,6 +291,8 @@ export function DashboardPage() {
           </div>
 
           {message && <div role="alert" style={{ margin: "8px 16px 0" }}>{message}</div>}
+          <ElapsedWeekNotice range={previewRange} settings={settings} onNext={nav.onNext} onSettings={openSettings} />
+          {manualError && <div role="alert">{manualError} <button type="button" onClick={retryManualStorage}>Retry storage</button></div>}
 
           <FirstUseGuide step={insights.step} dismissed={insights.dismissed} onDismiss={insights.dismiss}
             onCreate={() => modals.setCreatingTask(true)} onCalculate={generateWeek}
@@ -350,6 +340,7 @@ export function DashboardPage() {
             <CalendarView
               events={overlay.base}
               previewEvents={mappedPreviewEvents}
+              previewActive={active}
               blocks={blocks}
               use12h={settings.use12h}
               currentView={nav.currentView}

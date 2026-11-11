@@ -6,6 +6,7 @@ import { reconcileCalendarEvents } from "../services/calendarReconciliation";
 import { calendarEventsKey } from "./useCalendarRefresh";
 import { useAuth } from "../contexts/AuthContext";
 import { activeRemoteAccount, getRemoteConfirmation, readRemoteCalendar } from "../services/remoteConfirmation";
+import { overlayManualEdits } from "../services/manualEditJournal";
 
 export { confirmRemoteEvents, reconcileCalendarEvents } from "../services/calendarReconciliation";
 export type { CalendarRange } from "../services/calendarReconciliation";
@@ -41,7 +42,8 @@ export function useCalendarEvents(timeMin?: string, timeMax?: string) {
       const previousIds = previous.current?.key === key ? previous.current.ids : new Set<string>();
       setEvents((prev) => activeRemoteAccount() === accountId &&
         getRemoteConfirmation({ timeMin: min, timeMax: max }).events === remote ?
-        reconcileCalendarEvents(prev, remote, { timeMin: min, timeMax: max }, previousIds) : prev);
+        reconcileCalendarEvents(prev, overlayManualEdits(accountId, prev, remote, { timeMin: min, timeMax: max }),
+          { timeMin: min, timeMax: max }, previousIds) : prev);
       previous.current = { key, ids: new Set(remote.map((event) => event.id)) };
     }
   }, [query.data, setEvents, key, min, max, accountId]);

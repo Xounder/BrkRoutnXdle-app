@@ -131,7 +131,7 @@ export interface DashboardExternalDropInfo {
 }
 
 /** Contract returned by `useExternalDrop()`. */
-export type DashboardExternalDropHandler = (info: DashboardExternalDropInfo) => void;
+export type DashboardExternalDropHandler = (info: DashboardExternalDropInfo) => string | null;
 
 /** Props accepted by the `CalendarView` event list (kept for consumers). */
 export type DashboardCalendarEvent = CalendarEvent;

@@ -4,6 +4,7 @@ import { requireAuth } from "../middleware/auth.js";
 import type { AuthenticatedRequest } from "../middleware/auth.js";
 import { AppError } from "../middleware/errorHandler.js";
 import * as calendarClient from "../services/calendar-client.js";
+import { normalizeEventInterval } from "./event-interval.js";
 
 export const eventsRouter: ExpressRouter = Router();
 
@@ -82,61 +83,67 @@ eventsRouter.get("/generated", requireAuth, asyncHandler(async (req: Request, re
 }));
 
 /** POST /events — Create a new event in the BrkRoutnXdle calendar. */
-eventsRouter.post("/", requireAuth, asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  const authReq = req as AuthenticatedRequest;
-  const parsed = createEventSchema.safeParse(authReq.body);
-  if (!parsed.success) {
-    return next(new AppError(400, "VALIDATION_ERROR", "Invalid event data", parsed.error.flatten()));
-  }
+export function createEventHandler(client: Pick<typeof calendarClient, "createEvent"> = calendarClient) {
+  return asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+    const authReq = req as AuthenticatedRequest;
+    const parsed = createEventSchema.safeParse(authReq.body);
+    if (!parsed.success) {
+      return next(new AppError(400, "VALIDATION_ERROR", "Invalid event data", parsed.error.flatten()));
+    }
 
-  const summary = parsed.data.title ?? parsed.data.summary!;
-  const start = typeof parsed.data.start === "string"
-    ? { dateTime: parsed.data.start }
-    : parsed.data.start;
-  const end = typeof parsed.data.end === "string"
-    ? { dateTime: parsed.data.end }
-    : parsed.data.end;
+    const summary = parsed.data.title ?? parsed.data.summary!;
+    const { start, end } = normalizeEventInterval(parsed.data.start, parsed.data.end);
 
-  const event = await calendarClient.createEvent(authReq.accessToken!, {
-    summary,
-    description: parsed.data.description,
-    start,
-    end,
-    isPinned: parsed.data.isPinned ?? false,
-    extendedProperties: {
-      private: {
-        taskId: parsed.data.taskId ?? "",
+    const event = await client.createEvent(authReq.accessToken!, {
+      summary,
+      description: parsed.data.description,
+      start,
+      end,
+      isPinned: parsed.data.isPinned ?? false,
+      extendedProperties: {
+        private: {
+          taskId: parsed.data.taskId ?? "",
+        },
       },
-    },
-  });
+    });
 
-  res.status(201).json({ success: true, data: event });
-}));
+    res.status(201).json({ success: true, data: event });
+  });
+}
+eventsRouter.post("/", requireAuth, createEventHandler());
 
 /** PATCH /events/:id — Update an existing event. */
-eventsRouter.patch("/:id", requireAuth, asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  const authReq = req as AuthenticatedRequest;
-  const { id } = authReq.params;
-  const parsed = updateEventSchema.safeParse(authReq.body);
-  if (!parsed.success) {
-    return next(new AppError(400, "VALIDATION_ERROR", "Invalid event data", parsed.error.flatten()));
-  }
+export function updateEventHandler(client: Pick<typeof calendarClient, "updateEvent"> = calendarClient) {
+  return asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+    const authReq = req as AuthenticatedRequest;
+    const { id } = authReq.params;
+    const parsed = updateEventSchema.safeParse(authReq.body);
+    if (!parsed.success) {
+      return next(new AppError(400, "VALIDATION_ERROR", "Invalid event data", parsed.error.flatten()));
+    }
 
-  const d = parsed.data;
-  const updateData: Record<string, unknown> = {};
-  if (d.title || d.summary) updateData.summary = d.title ?? d.summary;
-  if (d.description !== undefined) updateData.description = d.description;
-  if (d.start) {
-    updateData.start = typeof d.start === "string" ? { dateTime: d.start } : d.start;
-  }
-  if (d.end) {
-    updateData.end = typeof d.end === "string" ? { dateTime: d.end } : d.end;
-  }
-  if (d.isPinned !== undefined) updateData.isPinned = d.isPinned;
+    const d = parsed.data;
+    // The calendar update operation performs its own remote GET before writing.
+    // Without an atomic remote interval check, a one-sided time edit could be
+    // checked against a different interval than the one ultimately overwritten.
+    if ((d.start === undefined) !== (d.end === undefined)) {
+      return next(new AppError(400, "VALIDATION_ERROR", "Supply both start and end when changing event time"));
+    }
+    const updateData: Record<string, unknown> = {};
+    if (d.title || d.summary) updateData.summary = d.title ?? d.summary;
+    if (d.description !== undefined) updateData.description = d.description;
+    if (d.start !== undefined && d.end !== undefined) {
+      const interval = normalizeEventInterval(d.start, d.end);
+      updateData.start = interval.start;
+      updateData.end = interval.end;
+    }
+    if (d.isPinned !== undefined) updateData.isPinned = d.isPinned;
 
-  const event = await calendarClient.updateEvent(authReq.accessToken!, id, updateData);
-  res.json({ success: true, data: event });
-}));
+    const event = await client.updateEvent(authReq.accessToken!, id, updateData);
+    res.json({ success: true, data: event });
+  });
+}
+eventsRouter.patch("/:id", requireAuth, updateEventHandler());
 
 /** DELETE /events/:id — Delete an event. */
 eventsRouter.delete("/:id", requireAuth, asyncHandler(async (req: Request, res: Response) => {

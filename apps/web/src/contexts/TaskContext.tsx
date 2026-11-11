@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback, useRef } from "react";
 import type { Task, Priority } from "@brkroutnxdle/shared";
 import { Priority as PriorityEnum } from "@brkroutnxdle/shared";
 import { storage } from "../services/localStorage";
@@ -10,7 +10,12 @@ function generateId(): string {
 }
 
 function loadTasks(): Task[] {
-  const tasks = storage.get<Task[]>(STORAGE_KEY, []);
+  const stored: unknown = storage.get<unknown>(STORAGE_KEY, []);
+  // A parseable value is not necessarily a list of task definitions.
+  const tasks = Array.isArray(stored) ? stored.filter((item): item is Task =>
+    item !== null && typeof item === "object" && !Array.isArray(item) &&
+    typeof item.id === "string" && typeof item.title === "string",
+  ) : [];
   // Migrate: default priority to "medium" if missing
   return tasks.map((t) => ({
     ...t,
@@ -30,10 +35,14 @@ const TaskContext = createContext<TaskContextValue | null>(null);
 
 export function TaskProvider({ children }: { children: React.ReactNode }) {
   const [tasks, setTasks] = useState<Task[]>(loadTasks);
+  const currentTasks = useRef(tasks);
 
   const persist = useCallback((next: Task[]) => {
-    setTasks(next);
+    // Never publish an unpersisted definition. Keep the latest committed value
+    // available to callbacks invoked before React has rendered again.
     storage.set(STORAGE_KEY, next);
+    currentTasks.current = next;
+    setTasks(next);
   }, []);
 
   const createTask = useCallback(
@@ -45,27 +54,27 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
         createdAt: now,
         updatedAt: now,
       };
-      persist([...tasks, task]);
+      persist([...currentTasks.current, task]);
       return task;
     },
-    [tasks, persist],
+    [persist],
   );
 
   const updateTask = useCallback(
     (id: string, partial: Partial<Task>) => {
-      const next = tasks.map((t) =>
+      const next = currentTasks.current.map((t) =>
         t.id === id ? { ...t, ...partial, updatedAt: new Date().toISOString() } : t,
       );
       persist(next);
     },
-    [tasks, persist],
+    [persist],
   );
 
   const deleteTask = useCallback(
     (id: string) => {
-      persist(tasks.filter((t) => t.id !== id));
+      persist(currentTasks.current.filter((t) => t.id !== id));
     },
-    [tasks, persist],
+    [persist],
   );
 
   const getTask = useCallback(

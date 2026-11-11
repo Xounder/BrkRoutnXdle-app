@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import type { WeekSlot } from "../internal/types.js";
 import { buildWeekSlots } from "../internal/slotBuilder.js";
 import { calculateAvailability } from "../internal/availabilityCalculator.js";
@@ -225,40 +225,46 @@ describe("calculateAvailability with past events", () => {
 
 describe("generateSchedule regression", () => {
   it("does not report 0/1 allocation for all tasks when valid free time exists", () => {
-    // Build a target week dynamically from the CURRENT date so the past event
-    // actually falls inside generateSchedule's internally-computed target week.
-    const now = new Date();
-    const monday = getCurrentMonday(now);
-    const pastEvent = makeEvent({
-      start: isoAt(monday, 10),
-      end: isoAt(monday, 11),
-    });
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-01-05T12:00:00.000Z"));
+    try {
+      // Build a target week dynamically from the CURRENT date so the past event
+      // actually falls inside generateSchedule's internally-computed target week.
+      const now = new Date();
+      const monday = getCurrentMonday(now);
+      const pastEvent = makeEvent({
+        start: isoAt(monday, 10),
+        end: isoAt(monday, 11),
+      });
 
-    const tasks: Task[] = [
-      {
-        id: "task-1",
-        title: "Read",
-        duration: 60,
-        priority: Priority.Medium,
-        restrictions: [],
-        isActive: true,
-        createdAt: "2026-01-01T00:00:00.000Z",
-        updatedAt: "2026-01-01T00:00:00.000Z",
-      },
-    ];
+      const tasks: Task[] = [
+        {
+          id: "task-1",
+          title: "Read",
+          duration: 60,
+          priority: Priority.Medium,
+          restrictions: [],
+          isActive: true,
+          createdAt: "2026-01-01T00:00:00.000Z",
+          updatedAt: "2026-01-01T00:00:00.000Z",
+        },
+      ];
 
-    const result = generateSchedule(tasks, [], [pastEvent], SETTINGS);
+      const result = generateSchedule(tasks, [], [pastEvent], SETTINGS);
 
-    // The task must be allocated (at least one generated event) because plenty of
-    // free time remains in the week outside the single past event. The buggy
-    // behavior froze the whole week and reported 0 allocated.
-    const allocatedTask = result.generatedEvents.filter((e) => e.taskId === "task-1");
-    expect(allocatedTask.length).toBeGreaterThan(0);
+      // The task must be allocated (at least one generated event) because plenty of
+      // free time remains in the week outside the single past event. The buggy
+      // behavior froze the whole week and reported 0 allocated.
+      const allocatedTask = result.generatedEvents.filter((e) => e.taskId === "task-1");
+      expect(allocatedTask.length).toBeGreaterThan(0);
 
-    // A fully-allocated task carries no failure entry; a partial one must have
-    // allocated > 0. In either case the task must NOT be stuck at 0 allocated.
-    const failure = result.failures.find((f) => f.taskId === "task-1");
-    expect(failure === undefined || failure.allocated > 0).toBe(true);
+      // A fully-allocated task carries no failure entry; a partial one must have
+      // allocated > 0. In either case the task must NOT be stuck at 0 allocated.
+      const failure = result.failures.find((f) => f.taskId === "task-1");
+      expect(failure === undefined || failure.allocated > 0).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
 

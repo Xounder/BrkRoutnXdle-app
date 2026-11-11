@@ -102,9 +102,9 @@ test.describe("TASK-02: Definitions require explicit placement", () => {
 
     // Trigger a re-render by changing view and back
     // View buttons are in Header with text "Day", "Week", "Month"
-    await page.click('button:has-text("Day")');
+    await page.getByRole("group", { name: "Calendar view" }).getByRole("button", { name: "Day", exact: true }).click();
     await page.waitForTimeout(500);
-    await page.click('button:has-text("Week")');
+    await page.getByRole("group", { name: "Calendar view" }).getByRole("button", { name: "Week", exact: true }).click();
     await page.waitForTimeout(500);
 
     // Verify no implicit event appears on re-render.

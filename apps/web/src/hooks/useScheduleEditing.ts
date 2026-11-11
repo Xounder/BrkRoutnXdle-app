@@ -5,6 +5,9 @@ import { useSettings } from "../contexts/SettingsContext";
 import { useBlockContext } from "../contexts/BlockContext";
 import { BlockType as BlockTypeEnum } from "@brkroutnxdle/shared";
 import { isReplaceable } from "../pages/dashboard/previewSchedule";
+import { useAuth } from "../contexts/AuthContext";
+import { changeManualEdit, manualEdits } from "../services/manualEditJournal";
+import type { CalendarEvent } from "@brkroutnxdle/shared";
 
 interface FcEventInfo {
   event: {
@@ -24,11 +27,15 @@ interface EditingState {
 
 /** Check if a FullCalendar event is in the past (ended before now). */
 function isEventPast(info: FcEventInfo): boolean {
-  const endMs = info.event.endStr
-    ? new Date(info.event.endStr).getTime()
-    : new Date(info.event.startStr).getTime() + 30 * 60000;
-  if (isNaN(endMs)) return false;
-  return endMs < Date.now();
+  const startMs = Date.parse(info.event.startStr);
+  return !Number.isFinite(startMs) || startMs < Date.now();
+}
+
+export function canEditOccurrence(event: CalendarEvent | undefined, previewActive: boolean): boolean {
+  return !!event && !previewActive && event.isGenerated === true && !event.isCompleted &&
+    (event.source === "google" || event.source === "brkroutnxdle") &&
+    Number.isFinite(Date.parse(event.start)) && Date.parse(event.start) >= Date.now() &&
+    Number.isFinite(Date.parse(event.end)) && Date.parse(event.end) > Date.parse(event.start);
 }
 
 /** Extract "HH:mm" from an ISO-8601 string. */
@@ -43,8 +50,11 @@ function timeToMinutes(time: string): number {
 }
 
 export function useScheduleEditing(
-  onExternalEventChange?: (id: string, startStr: string, endStr: string) => void,
+  onExternalEventChange?: (id: string, startStr: string, endStr: string) => boolean,
+  onManualDelete?: () => void,
+  onEditError?: (message: string) => void,
 ) {
+  const { user } = useAuth();
   const { previewEvents, allocationFailures, setPreview, isPreviewActive, result } = usePreview();
   const { events, setEvents } = useCalendar();
   const { settings } = useSettings();
@@ -58,6 +68,9 @@ export function useScheduleEditing(
   /** Validate drop position. */
   const canDropAt = useCallback(
     (startStr: string, endStr: string, excludeEventId?: string): boolean => {
+      const newStart = Date.parse(startStr);
+      const newEnd = Date.parse(endStr);
+      if (!Number.isFinite(newStart) || !Number.isFinite(newEnd) || newEnd <= newStart || newStart < Date.now()) return false;
       const startHour = new Date(startStr).getHours();
       const endHour = new Date(endStr).getHours();
 
@@ -68,9 +81,6 @@ export function useScheduleEditing(
       if (startHour < settings.workStartHour || endHour > settings.workEndHour + 1) {
         return false;
       }
-
-      const newStart = new Date(startStr).getTime();
-      const newEnd = new Date(endStr).getTime();
 
       // Must not overlap existing events
       for (const ev of events) {
@@ -141,6 +151,8 @@ export function useScheduleEditing(
 
       const extProps = info.event.extendedProps ?? {};
       if (isPreviewActive && !extProps.isPreview) { info.revert?.(); return; }
+      if (!extProps.isBlock && !extProps.isPreview &&
+        !canEditOccurrence(events.find(e => e.id === info.event.id), isPreviewActive)) { info.revert?.(); return; }
 
       // Validate drop position
       if (!canDropAt(info.event.startStr, info.event.endStr, info.event.id)) {
@@ -187,9 +199,9 @@ export function useScheduleEditing(
       }
 
       // --- External task event ---
-      onExternalEventChange?.(info.event.id, info.event.startStr, info.event.endStr);
+      if (!onExternalEventChange?.(info.event.id, info.event.startStr, info.event.endStr)) info.revert?.();
     },
-    [previewEvents, allocationFailures, setPreview, blocks, updateBlock, getBlock, onExternalEventChange, canDropAt, isPreviewActive],
+    [previewEvents, allocationFailures, setPreview, blocks, updateBlock, getBlock, onExternalEventChange, canDropAt, isPreviewActive, events],
   );
 
   /** Handle event resize. */
@@ -203,6 +215,8 @@ export function useScheduleEditing(
 
       const extProps = info.event.extendedProps ?? {};
       if (isPreviewActive && !extProps.isPreview) { info.revert?.(); return; }
+      if (!extProps.isBlock && !extProps.isPreview &&
+        !canEditOccurrence(events.find(e => e.id === info.event.id), isPreviewActive)) { info.revert?.(); return; }
 
       const newDuration =
         (new Date(info.event.endStr).getTime() - new Date(info.event.startStr).getTime()) /
@@ -252,15 +266,22 @@ export function useScheduleEditing(
       }
 
       // --- External task event ---
-      onExternalEventChange?.(info.event.id, info.event.startStr, info.event.endStr);
+      if (!onExternalEventChange?.(info.event.id, info.event.startStr, info.event.endStr)) info.revert?.();
     },
-    [previewEvents, allocationFailures, setPreview, blocks, updateBlock, getBlock, onExternalEventChange, canDropAt, isPreviewActive],
+    [previewEvents, allocationFailures, setPreview, blocks, updateBlock, getBlock, onExternalEventChange, canDropAt, isPreviewActive, events],
   );
 
   /** Handle event delete. */
   const requestDelete = useCallback((id: string, title: string) => {
+    const preview = previewEvents.find(e => e.id === id);
+    if (preview && (preview.completed || !Number.isFinite(Date.parse(preview.start)) ||
+      Date.parse(preview.start) < Date.now() || !Number.isFinite(Date.parse(preview.end)) ||
+      Date.parse(preview.end) <= Date.parse(preview.start))) return;
+    if (!id.startsWith("block-") && !preview &&
+      !canEditOccurrence(events.find(e => e.id === id), isPreviewActive)) return;
+    if (isPreviewActive && !preview) return;
     setEditing((prev) => ({ ...prev, deleteTarget: { id, title } }));
-  }, []);
+  }, [events, previewEvents, isPreviewActive]);
 
   const confirmDelete = useCallback(() => {
     if (!editing.deleteTarget) return;
@@ -272,14 +293,26 @@ export function useScheduleEditing(
     if (id.startsWith("block-")) {
       const blockId = id.slice(6);
       deleteBlock(blockId);
-    } else if (events.some((e) => e.id === id)) {
+    } else if (events.some((e) => e.id === id && canEditOccurrence(e, isPreviewActive))) {
+      const event = events.find(e => e.id === id)!;
+      if (event.source === "google") {
+        if (!user?.id) { setEditing(prev => ({ ...prev, deleteTarget: null })); return; }
+        try {
+          changeManualEdit(user.id, id, { original: manualEdits(user.id).get(id)?.original ?? event,
+            desired: null, written: false });
+        } catch {
+          onEditError?.("Could not persist deletion. Check browser storage and retry.");
+          setEditing(prev => ({ ...prev, deleteTarget: null })); return;
+        }
+      }
       setEvents((prev) => prev.filter((e) => e.id !== id));
-    } else {
+      onManualDelete?.();
+    } else if (previewEvents.some(e => e.id === id)) {
       const updatedEvents = previewEvents.filter((e) => e.id !== id);
       setPreview(updatedEvents, allocationFailures);
     }
     setEditing((prev) => ({ ...prev, deleteTarget: null }));
-  }, [editing.deleteTarget, events, setEvents, previewEvents, allocationFailures, setPreview, deleteBlock, isPreviewActive]);
+  }, [editing.deleteTarget, events, setEvents, previewEvents, allocationFailures, setPreview, deleteBlock, isPreviewActive, user?.id, onManualDelete, onEditError]);
 
   const cancelDelete = useCallback(() => {
     setEditing((prev) => ({ ...prev, deleteTarget: null }));

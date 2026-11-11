@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { Button, Modal, Stack, Text } from "@mantine/core";
+import { placementInterval } from "../../utils/placementInterval";
 
 const DURATIONS = [30, 60, 90, 120, 150, 180];
 
@@ -50,7 +51,23 @@ export function CreateActionModal({ start, end, onCreateBlock, onCreateTaskInlin
       setError("Duration must be 30, 60, 90, 120, 150, or 180 minutes");
       return;
     }
+    try {
+      placementInterval(start, end);
+    } catch {
+      setError("Select a valid time interval before placing a task");
+      return;
+    }
     onCreateTaskInline?.(name.trim(), duration, start, end);
+  };
+
+  const handleCreateBlock = () => {
+    try {
+      placementInterval(start, end);
+    } catch {
+      setError("Select a valid time interval before placing a block");
+      return;
+    }
+    onCreateBlock(start, end);
   };
 
   return (
@@ -58,7 +75,8 @@ export function CreateActionModal({ start, end, onCreateBlock, onCreateTaskInlin
       <Text size="sm" c="dimmed" mb="lg">{timeLabel} ({durationMin} min)</Text>
       {mode === "menu" ? (
         <Stack gap="sm">
-          <Button color="orange" radius="xl" onClick={() => onCreateBlock(start, end)}>Create Block</Button>
+          <Button color="orange" radius="xl" onClick={handleCreateBlock}>Create Block</Button>
+          {error && <Text c="red" size="sm" role="alert">{error}</Text>}
           <Button color="teal" radius="xl" onClick={() => setMode("form")}>Create Task</Button>
           <Button variant="outline" color="teal" radius="xl" onClick={onClose}>Cancel</Button>
         </Stack>

@@ -9,6 +9,8 @@ export interface DiffResult {
 
 export interface DiffOptions {
   noDelete?: boolean;
+  /** In manual mode only these explicitly selected occurrence IDs may be deleted. */
+  explicitDeleteIds?: ReadonlySet<string>;
   /** Explicit set of remote occurrence IDs eligible for replacement. */
   replaceableIds?: ReadonlySet<string>;
   /** Confirmed remote slots eligible for exact occurrence matching, even if not replaceable. */
@@ -58,7 +60,8 @@ export function computeDiff(
 
   if (!options?.noDelete) {
     for (const event of remote) {
-      if (!matched.has(event.id) && (!options?.replaceableIds || options.replaceableIds.has(event.id))) {
+      if (!matched.has(event.id) && (!options?.replaceableIds || options.replaceableIds.has(event.id)) &&
+        (!options?.explicitDeleteIds || options.explicitDeleteIds.has(event.id))) {
         result.toDelete.push(event.id);
       }
     }

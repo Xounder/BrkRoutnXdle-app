@@ -2,11 +2,12 @@ import { useCallback, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCalendar } from "../contexts/CalendarContext";
 import { clearCalendarCache } from "../services/calendarCache";
-import { reconcileCalendarEvents } from "../services/calendarReconciliation";
+import { isInRange, reconcileCalendarEvents } from "../services/calendarReconciliation";
 import type { CalendarRange } from "../services/calendarReconciliation";
 import type { CalendarEvent } from "@brkroutnxdle/shared";
 import { useAuth } from "../contexts/AuthContext";
 import { activeRemoteAccount, getRemoteConfirmation, InvalidRemoteIntervals, readRemoteCalendar, remoteEpoch } from "../services/remoteConfirmation";
+import { overlayManualEdits } from "../services/manualEditJournal";
 
 export function calendarEventsKey(range: CalendarRange, accountId: string) {
   return ["calendar", "events", accountId, range.timeMin, range.timeMax] as const;
@@ -50,8 +51,16 @@ export function useCalendarRefresh() {
         remoteEpoch() !== version || getRemoteConfirmation(range).status !== "confirmed") return null;
       queryClient.setQueryData(key, fresh);
       const changedEvents = baseline ? remoteChanges(baseline, fresh) : [];
-      setEvents(current => isCurrent() && activeRemoteAccount() === accountId && remoteEpoch() === version ? reconcileCalendarEvents(current, fresh, range,
-        new Set(baseline?.map(event => event.id) ?? [])) : current);
+      setEvents(current => {
+        if (!isCurrent() || activeRemoteAccount() !== accountId || remoteEpoch() !== version) return current;
+        // A cold query has no previous IDs, but persisted remote events may be stale.
+        // Only remove in-range confirmed-source entries; overlayManualEdits restores
+        // unsaved moves, and pending local placements have a different source.
+        const remoteIds = new Set([...(baseline?.map(event => event.id) ?? []),
+          ...current.filter(event => event.source === "google" && isInRange(event, range))
+            .map(event => event.id)]);
+        return reconcileCalendarEvents(current, overlayManualEdits(accountId, current, fresh, range), range, remoteIds);
+      });
       clearCalendarCache();
       return { hasConflicts: previewActive && changedEvents.length > 0, changedEvents,
         baselineKnown: baseline !== undefined };
